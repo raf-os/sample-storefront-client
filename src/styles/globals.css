@@ -1,1 +1,38 @@
 @import "tailwindcss";
+
+@font-face {
+  font-family: "Roboto";
+  src: url("/fonts/Roboto.ttf");
+}
+
+@theme inline {
+    --color-base-100: var(--base-100);
+    --color-base-200: var(--base-200);
+    --color-base-300: var(--base-300);
+    --color-base-content: var(--base-content);
+    --color-primary: var(--primary);
+    --color-primary-2: var(--primary-2);
+    --color-primary-content: var(--primary-content);
+    --color-faded: var(--faded-text);
+
+    --radius-field: 1rem;
+}
+
+:root {
+    --base-100: #ffffff;
+    --base-200: oklch(96% 0.007 247.896);
+    --base-300: oklch(86% 0.022 252.894);
+    --base-content: oklch(27% 0.041 260.031);
+    --primary: var(--color-blue-500);
+    --primary-2: var(--color-blue-600);
+    --primary-content: var(--color-sky-50);
+    --faded-text: oklch(44% 0.03 256.802);
+}
+
+@layer base {
+    body {
+        font-family: "Roboto";
+        color: var(--color-base-content);
+        background-color: var(--color-base-100);
+    }
+}
