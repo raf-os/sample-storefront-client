@@ -12,7 +12,7 @@ export default function Button({
         <button
             type={type}
             className={cn(
-                "bg-primary hover:bg-primary-2 text-primary-content font-bold px-5 py-2 rounded-field",
+                "btn",
                 className
             )}
             {...rest}

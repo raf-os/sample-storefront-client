@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+@utility btn {
+    border-radius: var(--radius-field);
+    background-color: var(--color-base-300);
+    color: var(--color-base-content);
+    font-weight: var(--font-weight-medium);
+    @apply px-4 py-2;
+
+    &:hover {
+        background-color: color-mix(in oklab, var(--color-base-300) 90%, black);
+    }
+
+    &:active {
+        background-color: color-mix(in oklab, var(--color-base-300) 90%, white);
+    }
+
+    &.blue {
+        background-color: var(--color-primary);
+        color: var(--color-primary-content);
+    }
+}

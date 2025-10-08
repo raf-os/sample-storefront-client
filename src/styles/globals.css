@@ -1,38 +1,68 @@
 @import "tailwindcss";
 
+@import "./components/buttons.css";
+
 @font-face {
   font-family: "Roboto";
   src: url("/fonts/Roboto.ttf");
 }
 
+@font-face {
+    font-family: "Inter";
+    src: url("/fonts/Inter.ttf");
+}
+
 @theme inline {
-    --color-base-100: var(--base-100);
-    --color-base-200: var(--base-200);
-    --color-base-300: var(--base-300);
-    --color-base-content: var(--base-content);
-    --color-primary: var(--primary);
-    --color-primary-2: var(--primary-2);
-    --color-primary-content: var(--primary-content);
-    --color-faded: var(--faded-text);
+    --color-primary-100: var(--col-primary-100);
+    --color-primary-200: var(--col-primary-200);
+    --color-primary-300: var(--col-primary-300);
+    --color-primary-400: var(--col-primary-400);
+    --color-primary-500: var(--col-primary-500);
+
+    --color-base-100: var(--col-base-100);
+    --color-base-200: var(--col-base-200);
+    --color-base-300: var(--col-base-300);
+    --color-base-400: var(--col-base-400);
+    --color-base-500: var(--col-base-500);
+
+    --color-warning: var(--col-warning-300);
+    --color-warning-content: var(--col-warning-content);
+
+    --color-base-content: var(--col-base-content);
+    --color-muted: var(--col-muted);
 
     --radius-field: 1rem;
 }
 
 :root {
-    --base-100: #ffffff;
-    --base-200: oklch(96% 0.007 247.896);
-    --base-300: oklch(86% 0.022 252.894);
-    --base-content: oklch(27% 0.041 260.031);
-    --primary: var(--color-blue-500);
-    --primary-2: var(--color-blue-600);
-    --primary-content: var(--color-sky-50);
-    --faded-text: oklch(44% 0.03 256.802);
+    --col-primary-100: oklch(20% 0.1 230);
+    --col-primary-200: oklch(40% 0.18 245);
+    --col-primary-300: oklch(62% 0.22 252);
+    --col-primary-400: oklch(70% 0.15 256);
+    --col-primary-500: oklch(95% 0.03 258);
+    --col-primary-content: var(--col-primary-500);
+
+    --col-base-100: oklch(20% 0.01 250);
+    --col-base-200: oklch(25% 0.025 265);
+    --col-base-300: oklch(41% 0.042 268);
+    --col-base-400: oklch(59% 0.038 275);
+    --col-base-500: oklch(90% 0.02 280);
+    --col-base-content: var(--col-base-500);
+
+    --col-warning-100: oklch(40% 0.15 60);
+    --col-warning-200: oklch(70% 0.18 75);
+    --col-warning-300: oklch(85% 0.2 87);
+    --col-warning-400: oklch(90% 0.15 90);
+    --col-warning-500: oklch(95% 0.05 95);
+    --col-warning-content: var(--col-warning-100);
+
+    --col-muted: var(--col-base-400);
 }
 
 @layer base {
     body {
-        font-family: "Roboto";
-        color: var(--color-base-content);
+        font-family: "Inter";
+        color: var(--color-base-500);
         background-color: var(--color-base-100);
     }
 }
