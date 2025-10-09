@@ -25,7 +25,7 @@ export default function NavbarRoot({ className, ...rest }: NavbarRootProps) {
 
                 <div className="flex gap-2">
                     <Button className="btn-outline">Log In</Button>
-                    <Button>Sign Up</Button>
+                    <Button className="btn-primary">Sign Up</Button>
                 </div>
             </div>
         </nav>

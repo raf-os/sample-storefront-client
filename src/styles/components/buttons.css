@@ -12,18 +12,22 @@
         background-color: color-mix(in oklab, var(--color-base-300) 80%, black);
     }
 
-    &.blue {
-        background-color: var(--color-primary);
+    &.btn-primary {
+        background-color: var(--color-primary-300);
         color: var(--color-primary-content);
+
+        &:hover, &:active {
+            background-color: color-mix(in oklab, var(--color-primary-300) 80%, black);
+        }
     }
 
     &.btn-outline {
         background-color: transparent;
-        border: 1px solid var(--color-base-500);
+        outline: 1px solid var(--color-base-500);
 
         &:hover, &:active {
-            background-color: color-mix(in oklab, var(--color-base-300) 80%, black);
-            border: 1px solid transparent;
+            background-color: var(--color-base-300);
+            outline: 1px solid var(--color-base-300);
         }
     }
 }
