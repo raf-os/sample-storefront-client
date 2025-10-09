@@ -1,5 +1,3 @@
-import { cn } from "@/lib/utils";
-
 export type ShopItemCardProps = {
     itemName: string,
     itemPrice: number,
@@ -23,28 +21,22 @@ export default function ShopItemCard({
 
     return (
         <li
-            className="flex flex-col gap-2 group hover:bg-base-200/50 transition-colors border border-base-200 rounded-lg p-2 shadow-md"
+            className="flex flex-col gap-2 group bg-base-200 transition-colors rounded-box p-2 shadow-sm"
         >
-            <div className="grow-0 shrink-0 bg-base-200 h-42 w-full rounded-md" />
+            <div className="relative grow-0 shrink-0 bg-base-100 h-42 w-full rounded-box-inner" />
 
-            <div className="grow-1 shrink-1 flex flex-col justify-between px-2 py-1">
+            <div className="grow-1 shrink-1 flex flex-col px-1 py-1">
                 <div
-                    className="flex flex-nowrap gap-2 font-medium items-start justify-between overflow-x-clip"
+                    className="flex flex-nowrap gap-2 font-semibold items-start justify-between overflow-clip"
                 >
                     <p
-                        className="grow-1 shrink-1"
+                        className="grow-1 shrink-1 line-clamp-2"
                     >
                         { itemName }
                     </p>
-                    { (itemDiscount > 0) && (
-                        <div className="grow-0 shrink-0 bg-warning text-warning-content text-sm py-[1px] px-2 rounded-field">
-                            -{itemDiscount}%
-                            <span className="sr-only"> discount</span>
-                        </div>
-                    )}
                 </div>
 
-                <div className="flex gap-2 items-end justify-end">
+                <div className="flex flex-col">
                     { (itemDiscount > 0) && (
                         <>
                             <span className="sr-only">
@@ -62,13 +54,22 @@ export default function ShopItemCard({
                         Now priced at:
                     </span>
 
-                    <span
-                        className={cn(
-                            "text-xl font-semibold text-primary-300",
-                        )}
+                    <div
+                        className="flex gap-2 items-center"
                     >
-                        { discountedPrice }
-                    </span>
+                        <span
+                            className="text-xl font-semibold text-primary-300"
+                        >
+                            { discountedPrice }
+                        </span>
+
+                        { (itemDiscount > 0) && (
+                            <div className="bg-warning text-warning-content text-sm font-medium py-[1px] px-2 rounded-field">
+                                -{itemDiscount}%
+                                <span className="sr-only"> discount</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </li>

@@ -32,6 +32,9 @@
     --color-muted: var(--col-muted);
 
     --radius-field: 1rem;
+    --radius-field-inner: 0.75rem;
+    --radius-box: 0.5rem;
+    --radius-box-inner: 0.375rem;
 }
 
 :root {

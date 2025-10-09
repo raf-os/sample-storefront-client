@@ -8,20 +8,14 @@ export const Route = createFileRoute('/')({
 
 function Index() {
 	return (
+		<>
+		<HeroPresentation />
+
 		<Layout.Root>
 			<Layout.LeftSidebar className='gap-4'>
-				<h1>
-					Product list
-				</h1>
-
-				<div className="flex flex-col">
-					<input
-						className="bg-base-200 rounded-lg px-2 py-1 text-base-500 placeholder:text-base-300 outline-base-400 focus:outline-2"
-						placeholder="Search"
-					/>
-				</div>
-
-				<h1>
+				<h1
+					className="font-bold"
+				>
 					Category list
 				</h1>
 
@@ -32,7 +26,7 @@ function Index() {
 			</Layout.LeftSidebar>
 
 			<Layout.Main>
-				<div className="grid grid-cols-3 gap-4">
+				<ul className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
 					<ShopItemCard
 						itemName="Sample sale item lorem ipsum dolor sit amet"
 						itemPrice={69420}
@@ -40,15 +34,21 @@ function Index() {
 					/>
 
 					<ShopItemCard
-						itemName="Sample normal item"
+						itemName="Sample normal item with long text, larger than this container permits, thus lorem ipsum dolor sit amet"
 						itemPrice={420}
+						itemDiscount={5}
 					/>
 
 					<ShopItemCard
 						itemName="Fentanyl"
 						itemPrice={50}
 					/>
-				</div>
+
+					<ShopItemCard
+						itemName="Title T"
+						itemPrice={1234}
+					/>
+				</ul>
 
 				<div className="flex gap-2">
 					<PaletteTest colName="base" />
@@ -61,6 +61,8 @@ function Index() {
 				Right sidebar
 			</Layout.RightSidebar>
 		</Layout.Root>
+
+		</>
 	)
 }
 
@@ -81,5 +83,24 @@ function PaletteTest({colName}:{colName:string}) {
 				</li>
 			)) }
 		</ul>
+	)
+}
+
+function HeroPresentation() {
+	return (
+		<div
+			className="flex flex-col items-center justify-center text-center w-full h-120 bg-base-200"
+		>
+			<h1
+				className="font-bold text-4xl"
+			>
+				Hero Component
+			</h1>
+
+			<div className="text-muted">
+				<p>Long and pretentious subtext</p>
+				<p>Lorem Ipsum dolor sit amet yada yada</p>
+			</div>
+		</div>
 	)
 }
