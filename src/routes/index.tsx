@@ -26,7 +26,7 @@ function Index() {
 			</Layout.LeftSidebar>
 
 			<Layout.Main>
-				<ul className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+				<ul className="grid md:grid-cols-2 xl:grid-cols-4 gap-x-4 gap-y-8">
 					<ShopItemCard
 						itemName="Sample sale item lorem ipsum dolor sit amet"
 						itemPrice={69420}
@@ -89,17 +89,29 @@ function PaletteTest({colName}:{colName:string}) {
 function HeroPresentation() {
 	return (
 		<div
-			className="flex flex-col items-center justify-center text-center w-full h-120 bg-base-200"
+			className="relative flex flex-nowrap items-center justify-center w-full h-120 bg-base-200"
 		>
-			<h1
-				className="font-bold text-4xl"
-			>
-				Hero Component
-			</h1>
+			<div className='flex flex-col px-4 xl:px-0 w-full xl:w-[1024px] h-3/4 lg:justify-center z-1'>
+				<h1
+					className="font-bold text-4xl mb-1"
+				>
+					Huge savings just for you
+				</h1>
 
-			<div className="text-muted">
-				<p>Long and pretentious subtext</p>
-				<p>Lorem Ipsum dolor sit amet yada yada</p>
+				<div className="text-muted">
+					<p>Save up to 0.1% on select items!</p>
+					<p>Offer only available until the heat death of the universe.</p>
+				</div>
+			</div>
+
+			<div className='absolute flex top-0 left-0 xl:-translate-x-[240px] grow-0 shrink-0 w-full h-full items-end justify-end overflow-hidden'>
+				<img
+					src="images/products/sample.webp"
+					className='object-cover w-full lg:w-auto h-3/5 lg:h-full lg:object-contain'
+					style={{
+						maskImage: "linear-gradient(to left, transparent, white, transparent)"
+					}}
+				/>
 			</div>
 		</div>
 	)

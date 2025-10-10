@@ -21,13 +21,14 @@ export default function ShopItemCard({
 
     return (
         <li
-            className="flex flex-col gap-2 group bg-base-200 transition-colors rounded-box p-2 shadow-sm"
+            className="flex flex-col gap-2 group hover:outline hover:shadow-md outline-base-300 transition-colors rounded-box p-2"
+            role="button"
         >
-            <div className="relative grow-0 shrink-0 bg-base-100 h-42 w-full rounded-box-inner" />
+            <div className="relative grow-0 shrink-0 bg-base-200 h-42 w-full rounded-box-inner cursor-pointer" />
 
             <div className="grow-1 shrink-1 flex flex-col px-1 py-1">
                 <div
-                    className="flex flex-nowrap gap-2 font-semibold items-start justify-between overflow-clip"
+                    className="flex flex-nowrap gap-2 font-semibold items-start justify-between overflow-clip mb-1"
                 >
                     <p
                         className="grow-1 shrink-1 line-clamp-2"

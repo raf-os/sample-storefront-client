@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import Button from "@/components/button";
 import SearchBar from "@/components/forms/SearchBar";
+import { UserRound } from "lucide-react";
 
 export type NavbarRootProps = React.ComponentPropsWithRef<'nav'>;
 
@@ -23,8 +24,13 @@ export default function NavbarRoot({ className, ...rest }: NavbarRootProps) {
                     <SearchBar />
                 </div>
 
-                <div className="flex gap-2">
-                    <Button className="btn-outline">Log In</Button>
+                <div className="flex items-center gap-2">
+                    <div
+                        className="flex items-center justify-center size-10 rounded-full outline-2 outline-base-400 overflow-hidden"
+                    >
+                        <UserRound className="grow-1 shrink-1 size-3/4 stroke-2 stroke-base-400" />
+                    </div>
+                    <Button className="btn-ghost">Log In</Button>
                     <Button className="btn-primary">Sign Up</Button>
                 </div>
             </div>

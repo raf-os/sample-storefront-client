@@ -41,7 +41,7 @@ function LayoutLeftSidebar({
     return (
         <div
             className={cn(
-                "flex flex-col grow-0 shrink-0 w-[320px] p-4 border-r border-base-200",
+                "flex flex-col grow-0 shrink-0 w-[320px] p-4",
                 className
             )}
         >
