@@ -24,7 +24,7 @@ export default function ShopItemCard({
             className="flex flex-col gap-2 group hover:outline hover:shadow-md outline-base-300 transition-colors rounded-box p-2"
             role="button"
         >
-            <div className="relative grow-0 shrink-0 bg-base-200 h-42 w-full rounded-box-inner cursor-pointer" />
+            <div className="relative grow-0 shrink-0 bg-base-200 h-64 w-full rounded-box-inner cursor-pointer" />
 
             <div className="grow-1 shrink-1 flex flex-col px-1 py-1">
                 <div

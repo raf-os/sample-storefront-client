@@ -2,6 +2,8 @@ import { createFileRoute } from '@tanstack/react-router';
 import Layout from '@/components/layout';
 import ShopItemCard from '@/components/shop-item/ShopItemCard';
 
+import PriceRangeFilter from "@/components/filters/PriceRangeFilter";
+
 export const Route = createFileRoute('/')({
   component: Index,
 })
@@ -13,16 +15,7 @@ function Index() {
 
 		<Layout.Root>
 			<Layout.LeftSidebar className='gap-4'>
-				<h1
-					className="font-bold"
-				>
-					Category list
-				</h1>
-
-				<ul>
-					<li>Category 1</li>
-					<li>Category 2</li>
-				</ul>
+				<PriceRangeFilter />
 			</Layout.LeftSidebar>
 
 			<Layout.Main>
