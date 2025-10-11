@@ -3,6 +3,7 @@ import Layout from '@/components/layout';
 import ShopItemCard from '@/components/shop-item/ShopItemCard';
 
 import PriceRangeFilter from "@/components/filters/PriceRangeFilter";
+import CategoryFilter from "@/components/filters/CategoryFilter";
 
 export const Route = createFileRoute('/')({
   component: Index,
@@ -16,6 +17,7 @@ function Index() {
 		<Layout.Root>
 			<Layout.LeftSidebar className='gap-4'>
 				<PriceRangeFilter />
+				<CategoryFilter />
 			</Layout.LeftSidebar>
 
 			<Layout.Main>
