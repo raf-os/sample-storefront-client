@@ -1,11 +1,14 @@
 export type ShopItemCardProps = {
+    itemId: string,
     itemName: string,
+    itemLabel: string,
     itemPrice: number,
     itemDiscount?: number,
 };
 
 export default function ShopItemCard({
     itemName,
+    itemLabel,
     itemPrice,
     itemDiscount=0
 }: ShopItemCardProps) {
@@ -33,7 +36,7 @@ export default function ShopItemCard({
                     <p
                         className="grow-1 shrink-1 line-clamp-2"
                     >
-                        { itemName }
+                        { itemLabel }
                     </p>
                 </div>
 

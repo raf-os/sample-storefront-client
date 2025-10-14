@@ -5,6 +5,8 @@ import ShopItemCard from '@/components/shop-item/ShopItemCard';
 import PriceRangeFilter from "@/components/filters/PriceRangeFilter";
 import CategoryFilter from "@/components/filters/CategoryFilter";
 
+import fakeProductList from "@/lib/fakes/products";
+
 export const Route = createFileRoute('/')({
   component: Index,
 })
@@ -22,27 +24,16 @@ function Index() {
 
 			<Layout.Main>
 				<ul className="grid md:grid-cols-2 xl:grid-cols-4 gap-x-4 gap-y-8">
-					<ShopItemCard
-						itemName="Sample sale item lorem ipsum dolor sit amet"
-						itemPrice={69420}
-						itemDiscount={25}
-					/>
-
-					<ShopItemCard
-						itemName="Sample normal item with long text, larger than this container permits, thus lorem ipsum dolor sit amet"
-						itemPrice={420}
-						itemDiscount={5}
-					/>
-
-					<ShopItemCard
-						itemName="Fentanyl"
-						itemPrice={50}
-					/>
-
-					<ShopItemCard
-						itemName="Title T"
-						itemPrice={1234}
-					/>
+					{ fakeProductList.map((product) => (
+						<ShopItemCard
+							key={product.id}
+							itemId={product.id}
+							itemName={product.name}
+							itemLabel={product.label}
+							itemPrice={product.price}
+							itemDiscount={product.discount}
+						/>
+					)) }
 				</ul>
 
 				<div className="flex gap-2">
