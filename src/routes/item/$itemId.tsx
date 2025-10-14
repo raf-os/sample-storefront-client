@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import fakeProductList, { type ProductProps } from "@/lib/fakes/products";
 import PageSetup from "@/components/layout/PageSetup";
 import Button from "@/components/button";
+import ExpandableImage from "@/components/images/ExpandableImage";
+import { cn } from "@/lib/utils";
 
 // Todo: fetch from back end
 // Todo: back end
@@ -52,8 +55,12 @@ function PageContent() {
             className="flex gap-4"
         >
             <div
-                className="w-2/3 h-full bg-base-200 rounded-box"
+                className="flex flex-col w-2/3 h-full p-4 bg-base-200 rounded-box"
             >
+                <ProductImageViewer
+                    displayImage={product.displayImage}
+                    imageList={product.imageList}
+                />
             </div>
 
             <div
@@ -102,5 +109,52 @@ function PageContent() {
                 </div>
             </div>
         </div>
+    )
+}
+
+function ProductImageViewer({
+    displayImage,
+    imageList = []
+}: {
+    displayImage?: string,
+    imageList?: string[]
+}) {
+    const [ selectedImg, setSelectedImg ] = useState<number>(0);
+
+    let productImages = [];
+    if (displayImage) productImages.push(displayImage);
+    if (imageList.length > 0) {
+        productImages = [ ...productImages, ...imageList ];
+    }
+
+    const handleImageSelection = (index: number) => {
+        setSelectedImg(index);
+    }
+
+    return (
+        <>
+            <div className="flex justify-center max-h-128 object-contain">
+                <ExpandableImage
+                    imgSrc={`/images/products/${productImages[selectedImg]}`}
+                    className="cursor-pointer"
+                />
+            </div>
+
+            <div
+                className="flex h-24 object-scale-down"
+            >
+                { productImages.map((i, idx) => (
+                    <img
+                        src={`/images/products/${i}`}
+                        key={`product-image-${idx}`}
+                        className={cn(
+                            "cursor-pointer",
+                            (selectedImg === idx) && "outline-2 outline-offset-2 outline-base-500"
+                        )}
+                        onClick={() => handleImageSelection(idx)}
+                    />
+                )) }
+            </div>
+        </>
     )
 }

@@ -29,6 +29,7 @@ function Index() {
 							key={product.id}
 							itemId={product.id}
 							itemName={product.name}
+							itemImage={product.displayImage}
 							itemLabel={product.label}
 							itemPrice={product.price}
 							itemDiscount={product.discount}

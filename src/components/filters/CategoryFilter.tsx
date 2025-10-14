@@ -15,6 +15,9 @@ const Categories: TCategoryItem[] = [{
 }, {
     label: "Propane and propane accessories",
     name: "hank-hill"
+}, {
+    label: "Bootlegs",
+    name: "bootlegs"
 }];
 
 const totalCategories = Categories.length;
@@ -114,13 +117,16 @@ function CategoryItem({ children, value, categoryId }: CategoryItemProps) {
         >
             <span
                 className={cn(
-                    "inline-block mr-2 size-3 bg-base-500 text-base-100 font-bold text-[12px] leading-none text-center align-middle rounded-[2px]",
+                    "inline-block mr-2 size-3 bg-base-300 text-base-100 font-bold text-[12px] leading-none text-center align-middle rounded-[2px]",
+                    isItemSelected && "bg-base-500"
                 )}
             >
                 { isItemSelected && `✓` }
             </span>
 
-            { children }
+            <span>
+                { children }
+            </span>
         </Command.Item>
     )
 }

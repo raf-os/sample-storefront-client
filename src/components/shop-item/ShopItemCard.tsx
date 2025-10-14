@@ -6,7 +6,7 @@ export type ShopItemCardProps = {
     itemLabel: string,
     itemPrice: number,
     itemDiscount?: number,
-    itemImage?: number,
+    itemImage?: string,
 };
 
 export default function ShopItemCard({
@@ -14,6 +14,7 @@ export default function ShopItemCard({
     itemName,
     itemLabel,
     itemPrice,
+    itemImage,
     itemDiscount=0
 }: ShopItemCardProps) {
 
@@ -37,7 +38,9 @@ export default function ShopItemCard({
             className="flex flex-col gap-2 group hover:outline hover:shadow-md outline-base-300 transition-colors rounded-box p-2"
             role="button"
         >
-            <div className="relative grow-0 shrink-0 bg-base-200 h-64 w-full rounded-box-inner cursor-pointer" />
+            <div className="relative grow-0 shrink-0 bg-base-200 h-64 w-full rounded-box-inner cursor-pointer overflow-hidden">
+                { itemImage && <img src={`/images/products/${itemImage}`} className="object-cover object-center w-full h-full" /> }
+            </div>
 
             <div className="grow-1 shrink-1 flex flex-col px-1 py-1">
                 <div

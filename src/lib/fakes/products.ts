@@ -11,13 +11,15 @@ export type ProductProps = {
 }
 
 export class FakeProduct {
-    private _internalId: number;
+    readonly _internalId: number;
     id: string = uuid();
     name: string;
     label: string;
     description?: string;
     price: number;
     discount: number;
+    displayImage?: string;
+    imageList: string[];
     private static _staticIdIncrement: number = 1;
 
     private static _autoIncrement() {
@@ -32,6 +34,9 @@ export class FakeProduct {
         this.description = props.description;
         this.price = props.price;
         this.discount = props.discount || 0;
+
+        this.displayImage = props.displayImage;
+        this.imageList = props.imageList || [];
 
         this._internalId = FakeProduct._autoIncrement();
     }
@@ -48,6 +53,7 @@ const fakeProductList: FakeProduct[] = [
         label: "Sonic (tm) Original (tm) plushie (tm) (tm)",
         price: 99.99,
         discount: 10,
+        displayImage: "sonic-plush.jpg"
     }),
     new FakeProduct({
         name: "cum-jar",
