@@ -17,7 +17,7 @@ export class FakeProduct {
     label: string;
     description?: string;
     price: number;
-    discount?: number;
+    discount: number;
     private static _staticIdIncrement: number = 1;
 
     private static _autoIncrement() {

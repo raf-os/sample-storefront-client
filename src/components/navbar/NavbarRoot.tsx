@@ -20,7 +20,7 @@ export default function NavbarRoot({ className, ...rest }: NavbarRootProps) {
                     to="/"
                 >
                 <div className="flex items-center gap-4">
-                    <img src="images/fake-logo.svg" alt="Fake company logo" className="size-[32px]" />
+                    <img src="/images/fake-logo.svg" alt="Fake company logo" className="size-[32px]" />
                     <div className="font-bold text-lg">Fake Company (tm)</div>
                 </div>
                 </Link>

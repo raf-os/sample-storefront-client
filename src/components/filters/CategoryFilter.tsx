@@ -54,16 +54,16 @@ export default function CategoryFilter() {
     }
 
     return (
-        <Card.Root>
-            <Card.Header>
-                Category
+        <Card.Root className="p-0 gap-0">
+            <Card.Header className="p-4">
+                Categories
             </Card.Header>
 
             <CategoryFilterContext value={ctx}>
             <Card.Body>
-                <Command className="flex flex-col border border-base-100 h-64 rounded-box shadow-md overflow-hidden">
+                <Command className="flex flex-col h-64 overflow-hidden">
                     <div className="flex relative items-center">
-                        <div className="absolute top-1/2 -translate-y-1/2 left-1.5 text-base-400">
+                        <div className="absolute top-1/2 -translate-y-1/2 left-2 text-base-400">
                             <Search size={20} />
                         </div>
                     
