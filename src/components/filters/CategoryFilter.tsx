@@ -42,8 +42,9 @@ export default function CategoryFilter() {
 
     const onCategorySelected = (index: number) => {
         setCategoryMask(prev => {
-            prev[index] ^= 1; // XOR, toggles this item
-            return prev;
+            const newMask = new Uint8Array(prev);
+            newMask[index] ^= 1; // XOR, toggles this item
+            return newMask;
         });
     }
 
@@ -93,13 +94,13 @@ export default function CategoryFilter() {
 }
 
 type CategoryItemProps = React.ComponentPropsWithRef<typeof Command.Item> & {
-    categoryId: number
+    categoryId: number,
 };
 
 function CategoryItem({ children, value, categoryId }: CategoryItemProps) {
     const { categoryMask, toggleCategorySelection } = useContext(CategoryFilterContext);
 
-    const isItemSelected = categoryMask[categoryId] == 1;
+    const isItemSelected = categoryMask[categoryId] === 1;
 
     const handleSelection = () => {
         toggleCategorySelection(categoryId);
@@ -107,13 +108,13 @@ function CategoryItem({ children, value, categoryId }: CategoryItemProps) {
 
     return (
         <Command.Item
-            className="gap-2 px-2 py-1 group cursor-pointer"
+            className="gap-2 px-2 py-1 group cursor-pointer select-none"
             value={value}
             onSelect={handleSelection}
         >
             <span
                 className={cn(
-                    "inline-block mr-2 size-3 bg-base-500 rounded-[2px] overflow-hidden",
+                    "inline-block mr-2 size-3 bg-base-500 text-base-100 font-bold text-[12px] leading-none text-center align-middle rounded-[2px]",
                 )}
             >
                 { isItemSelected && `✓` }
