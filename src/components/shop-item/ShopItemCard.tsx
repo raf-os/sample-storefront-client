@@ -1,12 +1,16 @@
+import { Link } from "@tanstack/react-router";
+
 export type ShopItemCardProps = {
     itemId: string,
     itemName: string,
     itemLabel: string,
     itemPrice: number,
     itemDiscount?: number,
+    itemImage?: number,
 };
 
 export default function ShopItemCard({
+    itemId,
     itemName,
     itemLabel,
     itemPrice,
@@ -23,6 +27,12 @@ export default function ShopItemCard({
     const discountedPrice = formatter.format(itemPrice * (100 - itemDiscount) / 100);
 
     return (
+        <Link
+            to="/item/$itemId"
+            params={{
+                itemId: itemId
+            }}
+        >
         <li
             className="flex flex-col gap-2 group hover:outline hover:shadow-md outline-base-300 transition-colors rounded-box p-2"
             role="button"
@@ -77,5 +87,6 @@ export default function ShopItemCard({
                 </div>
             </div>
         </li>
+        </Link>
     )
 }
