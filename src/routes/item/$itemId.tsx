@@ -55,7 +55,7 @@ function PageContent() {
             className="flex gap-4"
         >
             <div
-                className="flex flex-col w-2/3 h-full p-4 bg-base-200 rounded-box"
+                className="flex flex-col gap-4 w-2/3 h-full p-4 bg-base-200 rounded-box"
             >
                 <ProductImageViewer
                     displayImage={product.displayImage}
@@ -141,15 +141,15 @@ function ProductImageViewer({
             </div>
 
             <div
-                className="flex h-24 object-scale-down"
+                className="flex gap-4 h-28 bg-base-100 p-4 rounded-box"
             >
                 { productImages.map((i, idx) => (
                     <img
                         src={`/images/products/${i}`}
                         key={`product-image-${idx}`}
                         className={cn(
-                            "cursor-pointer",
-                            (selectedImg === idx) && "outline-2 outline-offset-2 outline-base-500"
+                            "cursor-pointer w-24 object-scale-down",
+                            (selectedImg === idx) ? "outline-2 outline-offset-2 outline-base-500" : "opacity-50"
                         )}
                         onClick={() => handleImageSelection(idx)}
                     />

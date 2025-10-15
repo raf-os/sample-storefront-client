@@ -53,7 +53,8 @@ const fakeProductList: FakeProduct[] = [
         label: "Sonic (tm) Original (tm) plushie (tm) (tm)",
         price: 99.99,
         discount: 10,
-        displayImage: "sonic-plush.jpg"
+        displayImage: "sonic-plush.jpg",
+        imageList: [ "sonic-plush-1.jpg" ]
     }),
     new FakeProduct({
         name: "cum-jar",
