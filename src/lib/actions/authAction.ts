@@ -18,7 +18,10 @@ export async function AuthRefresh(): Promise<TJwtToken | null> {
     try {
         const res = await fetch(GlobalConfig.ServerAuthEndpoint + "/refresh", {
             method: "POST",
-            credentials: "include"
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json"
+            }
         });
 
         if (!res.ok) {
