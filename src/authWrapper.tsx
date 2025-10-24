@@ -1,58 +1,64 @@
 import { useState, useEffect } from "react";
-import { AuthContext, DefaultAuthContext, type IAuthContext, type TAuthData } from "@/authContext";
+import { AuthContext, type IAuthContext, type TAuthData } from "@/authContext";
 import { AuthLogin, AuthRefresh, AuthRegister, type TJwtToken } from "@/lib/actions/authAction";
 
-export function AuthWrapper({ children }: { children?: React.ReactNode }) {
-    const [ authData, setAuthData ] = useState<TAuthData | undefined>(undefined);
+import TokenRefreshHandler from "@/handlers/TokenRefreshHandler";
 
-    const _updateAuth = (token?: TJwtToken) => {
-        if (token === undefined) {
-            setAuthData(undefined);
+export function AuthWrapper({ children }: { children?: React.ReactNode }) {
+    const [ authData, setAuthData ] = useState<TAuthData | null>(null);
+
+    const _updateAuth = (token?: TJwtToken | null) => {
+        if (token === undefined || token === null) {
+            setAuthData(null);
+            TokenRefreshHandler.updateExpireDate(0);
         } else {
             setAuthData({
                 userName: token.unique_name,
                 userId: token.sub,
-                exp: token.exp,
+                exp: token.exp * 1000,
                 role: token.role
             });
+            TokenRefreshHandler.updateExpireDate(token.exp * 1000);
         }
     }
 
-    const logIn = async (username: string, password: string) => {
+    const login = async (username: string, password: string) => {
         const res = await AuthLogin({ username, password });
 
         if (res.success) {
             _updateAuth(res.data);
-            return true;
-        } else {
-            return false;
         }
+
+        return res;
     }
 
     const register = async (username: string, password: string, email: string) => {
         const res = await AuthRegister({ username, password, email });
+
+        return res;
     }
 
     useEffect(() => {
-        const fetchAuthData = async () => {
-            const authData = await AuthRefresh();
-
-            if (authData) {
-                setAuthData({
-                    userId: authData.sub,
-                    userName: authData.unique_name,
-                    exp: authData.exp * 1000,
-                    role: authData.role
-                });
-            }
+        const fetchAuth = async () => {
+            const token = await AuthRefresh();
+            _updateAuth(token);
         }
 
-        fetchAuthData();
-    });
+        fetchAuth();
+    }, []);
+
+    useEffect(() => {
+        const onTokenRefresh = (newToken: TJwtToken | null) => {
+            _updateAuth(newToken);
+        }
+
+        return TokenRefreshHandler.Observable.subscribe("onTokenRefreshed", onTokenRefresh);
+    }, []);
 
     const ctx: IAuthContext = {
         authData,
-        _updateAuth
+        login,
+        register
     };
 
     return (

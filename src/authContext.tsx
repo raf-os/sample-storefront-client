@@ -1,6 +1,6 @@
 import { createContext } from "react";
 
-import type { TJwtToken } from "@/lib/actions/authAction";
+import type { StandardJsonResponse } from "@/types/StandardJsonResponse";
 
 export type TUserRoles = "User" | "Operator" | "Admin";
 
@@ -12,12 +12,14 @@ export type TAuthData = {
 }
 
 export interface IAuthContext {
-    _updateAuth: (token: TJwtToken) => void,
-    authData?: TAuthData,
+    authData?: TAuthData | null,
+    login: (username: string, password: string) => Promise<StandardJsonResponse>,
+    register: (username: string, password: string, email: string) => Promise<StandardJsonResponse>
 }
 
 export const DefaultAuthContext: IAuthContext = {
-    _updateAuth: () => {}
+    login: async () => { return { success: false } },
+    register: async () => { return { success: false } }
 }
 
 export const AuthContext = createContext<IAuthContext>(DefaultAuthContext);
