@@ -44,31 +44,39 @@ export type AuthLoginProps = {
 }
 
 export async function AuthLogin(props: AuthLoginProps): Promise<StandardJsonResponse<TJwtToken>> {
-    const res = await fetch(GlobalConfig.ServerAuthEndpoint + "/login", {
-        method: "POST",
-        body: JSON.stringify({
-            username: props.username,
-            password: props.password
-        })
-    });
+    try {
+        const res = await fetch(GlobalConfig.ServerAuthEndpoint + "/login", {
+            method: "POST",
+            body: JSON.stringify({
+                username: props.username,
+                password: props.password
+            })
+        });
 
-    const data = await requestToJson<string | null>(res);
+        const data = await requestToJson<string | null>(res);
 
-    if (!res.ok) {
-        if (res.status >= 500 && res.status <= 599) return { success: false, message: "Unknown server error occurred." }
-        else if (res.status === 401) return { success: false, message: "Invalid credentials." }
+        if (!res.ok) {
+            if (res.status >= 500 && res.status <= 599) return { success: false, message: "Unknown server error occurred." }
+            else if (res.status === 401) return { success: false, message: "Invalid credentials." }
+            return {
+                success: false,
+            }
+        }
+
+        if (!data) { throw new Error("ERROR - Invalid login fetch response.") }
+
+        const token = jwtDecode<TJwtToken>(data);
+
+        return {
+            success: true,
+            data: token
+        }
+    } catch(err) {
+        console.log(err);
         return {
             success: false,
+            message: "Error contacting server."
         }
-    }
-
-    if (!data) { throw new Error("ERROR - Invalid login fetch response.") }
-
-    const token = jwtDecode<TJwtToken>(data);
-
-    return {
-        success: true,
-        data: token
     }
 }
 

@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@import "./animations.css";
+
 @import "./components/buttons.css";
 
 @font-face {
@@ -27,6 +29,9 @@
 
     --color-warning: var(--col-warning-300);
     --color-warning-content: var(--col-warning-content);
+
+    --color-error: var(--col-error);
+    --color-error-content: var(--col-error-content);
 
     --color-base-content: var(--col-base-content);
     --color-muted: var(--col-muted);
@@ -58,6 +63,9 @@
     --col-warning-400: oklch(90% 0.15 90);
     --col-warning-500: oklch(95% 0.05 95);
     --col-warning-content: var(--col-warning-100);
+
+    --col-error: oklch(80% 0.18 25);
+    --col-error-content: oklch(44% 0.23 25);
 
     --col-muted: var(--col-base-400);
 }

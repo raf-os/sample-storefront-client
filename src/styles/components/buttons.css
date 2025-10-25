@@ -8,6 +8,10 @@
     cursor: pointer;
     @apply px-3 py-1 transition-colors;
 
+    &:focus {
+        outline: 2px solid var(--color-base-500);
+    }
+
     &:hover, &:active {
         background-color: color-mix(in oklab, var(--color-base-300) 80%, black);
     }

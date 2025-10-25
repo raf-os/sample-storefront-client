@@ -1,3 +1,5 @@
+// Just some experimentation
+
 // Helpers for endpoint mapping
 
 import GlobalConfig from "@/lib/globalConfig";

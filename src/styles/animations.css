@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+    --animate-slideUpAndFade: slideUpAndFade 0.4s ease;
+
+    @keyframes slideUpAndFade {
+        from {
+            opacity: 0;
+            transform: translateY(4px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}
+
