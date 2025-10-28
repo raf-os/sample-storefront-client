@@ -17,15 +17,29 @@ const LoginRequestSchema = z.object({
 });
 
 export default function NavbarAuth() {
-    const { checkIsAuthorized } = useAuth();
+    const { checkIsAuthorized, authData } = useAuth();
+    const isLoggedIn = checkIsAuthorized();
 
     return (
         <div className="flex items-center gap-2 relative">
-            <LoginComponent />
+            { isLoggedIn ? (
+                <>
+                    <div className="flex gap-4 items-center">
+                        <p className="text-primary-300 font-bold">
+                            { authData?.userName }
+                        </p>
+                        <img src="/images/defaultProfileIcon.webp" className="size-8 outline-2 outline-primary-300 outline-offset-2 rounded-full" />
+                    </div>
+                </>
+            ) : (
+                <>
+                <LoginComponent />
 
-            <Link to="/sign-up"><Button className="btn-primary">
-                Sign up
-            </Button></Link>
+                <Link to="/sign-up"><Button className="btn-primary">
+                    Sign up
+                </Button></Link>
+                </>
+            ) }
         </div>
     )
 }

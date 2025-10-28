@@ -31,6 +31,7 @@ export default function useAuth() {
     return {
         checkIsAuthorized,
         isAuthModerator,
-        isAuthAdmin
+        isAuthAdmin,
+        authData
     }
 }
