@@ -28,7 +28,7 @@ export async function AuthRefresh(): Promise<TJwtToken | null> {
             return null;
         }
 
-        const data = await res.json();
+        const data = await res.text();
         const token = jwtDecode<TJwtToken>(data);
 
         return token;
@@ -47,13 +47,16 @@ export async function AuthLogin(props: AuthLoginProps): Promise<StandardJsonResp
     try {
         const res = await fetch(GlobalConfig.ServerAuthEndpoint + "/login", {
             method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify({
                 username: props.username,
                 password: props.password
             })
         });
 
-        const data = await requestToJson<string | null>(res);
+        const data = await res.text();
 
         if (!res.ok) {
             if (res.status >= 500 && res.status <= 599) return { success: false, message: "Unknown server error occurred." }
@@ -91,26 +94,40 @@ type RegisterFetchResponse = {
 }
 
 export async function AuthRegister(props: AuthRegisterProps): Promise<StandardJsonResponse> {
-    const res = await fetch(GlobalConfig.ServerAuthEndpoint + "/login", {
-        method: "POST",
-        body: JSON.stringify({
-            username: props.username,
-            password: props.password,
-            email: props.email
-        })
-    });
+    try {
+        const res = await fetch(GlobalConfig.ServerAuthEndpoint + "/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: props.username,
+                password: props.password,
+                email: props.email
+            })
+        });
 
-    const data = await requestToJson<RegisterFetchResponse>(res);
+        const data = await requestToJson<RegisterFetchResponse>(res);
 
-    if (!res.ok) {
+        console.log(data)
+
+        if (!res.ok) {
+            return {
+                success: false,
+                message: data?.message || "Unknown server error occurred.",
+            }
+        }
+
+        return {
+            success: true,
+            message: data?.message,
+        }
+    } catch(err) {
+        console.log("Server error: ", err);
+
         return {
             success: false,
-            message: data?.message || "Unknown server error occurred.",
-        }
-    }
-
-    return {
-        success: true,
-        message: data?.message,
+            message: "Error connecting to server."
+        };
     }
 }

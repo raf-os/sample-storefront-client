@@ -6,6 +6,8 @@ import * as z from "zod";
 import { useForm, FormProvider, useFormContext } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { Link } from "@tanstack/react-router";
+
 import Button from "@/components/button";
 import { Input } from "@/components/forms";
 
@@ -21,9 +23,9 @@ export default function NavbarAuth() {
         <div className="flex items-center gap-2 relative">
             <LoginComponent />
 
-            <Button className="btn-primary">
+            <Link to="/sign-up"><Button className="btn-primary">
                 Sign up
-            </Button>
+            </Button></Link>
         </div>
     )
 }
