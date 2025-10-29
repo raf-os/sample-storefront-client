@@ -1,13 +1,14 @@
 import type { StandardJsonResponse } from "@/types/StandardJsonResponse";
 
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useTransition, useState, useContext, useEffect, useRef } from "react";
+import { createFileRoute } from '@tanstack/react-router';
+import { useTransition, useState, useContext } from "react";
 
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, FormProvider } from "react-hook-form";
 
 import { AuthContext } from "@/authContext";
+import { useDelayedNavigate } from "@/hooks";
 
 import PageSetup from "@/components/layout/PageSetup";
 import Card from "@/components/card";
@@ -42,8 +43,7 @@ function RouteComponent() {
 function MainComponent() {
 	const [ isPending, startTransition ] = useTransition();
 	const [ fetchResult, setFetchResult ] = useState<StandardJsonResponse | null>(null);
-	const navigate = useNavigate({ from: "/sign-up" });
-	const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const delayedNavigate = useDelayedNavigate();
 
 	const { register } = useContext(AuthContext);
 
@@ -61,7 +61,7 @@ function MainComponent() {
 				setFetchResult({
 					success: true,
 				});
-				timeoutRef.current = setTimeout(() => navigate({ to: '/' }), 4000);
+				delayedNavigate(4000, { to: "/" });
 			} else {
 				setFetchResult({
 					success: false,
@@ -74,14 +74,6 @@ function MainComponent() {
 	const onInvalidSubmit = () => {
 		setFetchResult(null);
 	}
-
-	useEffect(() => {
-		return () => {
-			if (timeoutRef.current) {
-				clearTimeout(timeoutRef.current);
-			}
-		}
-	});
 
 	return (
 		<FormProvider {...formMethods}>

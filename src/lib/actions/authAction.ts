@@ -50,6 +50,7 @@ export async function AuthLogin(props: AuthLoginProps): Promise<StandardJsonResp
             headers: {
                 "Content-Type": "application/json"
             },
+            credentials: "include",
             body: JSON.stringify({
                 username: props.username,
                 password: props.password
