@@ -1,7 +1,7 @@
 import type { StandardJsonResponse } from "@/types/StandardJsonResponse";
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useTransition, useState, useContext } from "react";
+import { useTransition, useState, useContext, useEffect, useRef } from "react";
 
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,6 +43,7 @@ function MainComponent() {
 	const [ isPending, startTransition ] = useTransition();
 	const [ fetchResult, setFetchResult ] = useState<StandardJsonResponse | null>(null);
 	const navigate = useNavigate({ from: "/sign-up" });
+	const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	const { register } = useContext(AuthContext);
 
@@ -60,7 +61,7 @@ function MainComponent() {
 				setFetchResult({
 					success: true,
 				});
-				setTimeout(() => navigate({ to: '/' }), 4000);
+				timeoutRef.current = setTimeout(() => navigate({ to: '/' }), 4000);
 			} else {
 				setFetchResult({
 					success: false,
@@ -73,6 +74,14 @@ function MainComponent() {
 	const onInvalidSubmit = () => {
 		setFetchResult(null);
 	}
+
+	useEffect(() => {
+		return () => {
+			if (timeoutRef.current) {
+				clearTimeout(timeoutRef.current);
+			}
+		}
+	});
 
 	return (
 		<FormProvider {...formMethods}>

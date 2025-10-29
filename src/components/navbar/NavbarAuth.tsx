@@ -11,6 +11,8 @@ import { Link } from "@tanstack/react-router";
 import Button from "@/components/button";
 import { Input } from "@/components/forms";
 
+import { ShoppingBasket } from "lucide-react";
+
 const LoginRequestSchema = z.object({
     username: z.string().min(3, "Username must be at least 3 characters long.").max(30, "Username is too long!"),
     password: z.string().min(4, "Password must be at least 4 characters long.").max(40, "Password is too long!")
@@ -29,6 +31,9 @@ export default function NavbarAuth() {
                             { authData?.userName }
                         </p>
                         <img src="/images/defaultProfileIcon.webp" className="size-8 outline-2 outline-primary-300 outline-offset-2 rounded-full" />
+                        <div className="relative flex size-8 items-center justify-center rounded-full outline-2 outline-base-500 bg-base-300 outline-offset-2">
+                            <ShoppingBasket className="grow-0 shrink-0 text-base-500" />
+                        </div>
                     </div>
                 </>
             ) : (
