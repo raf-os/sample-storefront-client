@@ -2,12 +2,15 @@ import { useState, useEffect } from "react";
 import { AuthContext, type IAuthContext, type TAuthData } from "@/authContext";
 import { AuthLogin, AuthRefresh, AuthRegister, type TJwtToken } from "@/lib/actions/authAction";
 
+import AuthSingleton from "@/classes/AuthSingleton";
+
 import TokenRefreshHandler from "@/handlers/TokenRefreshHandler";
 
 export function AuthWrapper({ children }: { children?: React.ReactNode }) {
     const [ authData, setAuthData ] = useState<TAuthData | null>(null);
 
     const _updateAuth = (token?: TJwtToken | null) => {
+        AuthSingleton.updateToken(token);
         if (token === undefined || token === null) {
             setAuthData(null);
             TokenRefreshHandler.updateExpireDate(0);

@@ -11,7 +11,7 @@ import { Link } from "@tanstack/react-router";
 import Button from "@/components/button";
 import { Input } from "@/components/forms";
 
-import { ShoppingBasket } from "lucide-react";
+import NavbarUserControls from "@/components/navbar/NavbarUserControls";
 
 const LoginRequestSchema = z.object({
     username: z.string().min(3, "Username must be at least 3 characters long.").max(30, "Username is too long!"),
@@ -19,23 +19,13 @@ const LoginRequestSchema = z.object({
 });
 
 export default function NavbarAuth() {
-    const { checkIsAuthorized, authData } = useAuth();
+    const { checkIsAuthorized } = useAuth();
     const isLoggedIn = checkIsAuthorized();
 
     return (
         <div className="flex items-center gap-2 relative">
             { isLoggedIn ? (
-                <>
-                    <div className="flex gap-4 items-center">
-                        <p className="text-primary-300 font-bold">
-                            { authData?.userName }
-                        </p>
-                        <img src="/images/defaultProfileIcon.webp" className="size-8 outline-2 outline-primary-300 outline-offset-2 rounded-full" />
-                        <div className="relative flex size-8 items-center justify-center rounded-full outline-2 outline-base-500 bg-base-300 outline-offset-2">
-                            <ShoppingBasket className="grow-0 shrink-0 text-base-500" />
-                        </div>
-                    </div>
-                </>
+                <NavbarUserControls />
             ) : (
                 <>
                 <LoginComponent />

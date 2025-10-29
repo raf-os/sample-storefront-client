@@ -1,7 +1,5 @@
 import { cn } from "@/lib/utils";
-import Button from "@/components/button";
 import SearchBar from "@/components/forms/SearchBar";
-import { UserRound } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 import NavbarAuth from "@/components/navbar/NavbarAuth";
