@@ -1,6 +1,6 @@
 // TODO: This
 
-import { useState, useTransition, useContext } from "react";
+import { useState, useTransition, useContext, createContext, type ComponentPropsWithRef } from "react";
 import { Link } from "@tanstack/react-router";
 
 import { useAuth } from "@/hooks";
@@ -9,12 +9,18 @@ import { cn } from "@/lib/utils";
 
 import * as Popover from "@radix-ui/react-popover";
 
-import { ShoppingBasket } from "lucide-react";
+import { ShoppingBasket, Shield } from "lucide-react";
+
+type TMenuContext = {
+    handleClose?: () => void,
+}
+
+const MenuContext = createContext<TMenuContext>({});
 
 export default function NavbarUserControls() {
     const [ isOpen, setIsOpen ] = useState<boolean>(false);
     const [ isLogoutPending, startLogoutTransition ] = useTransition();
-    const { authData } = useAuth();
+    const { authData, isAuthModerator, isAuthAdmin } = useAuth();
     const { logout } = useContext(AuthContext);
 
     const onLogoutRequest = () => {
@@ -29,11 +35,25 @@ export default function NavbarUserControls() {
         });
     }
 
+    const handleClose = () => {
+        setIsOpen(false);
+    }
+
+    const ctx = { handleClose };
+
     return (
         <div className="flex gap-4 items-center">
-            <p className="text-primary-300 font-bold">
-                { authData?.userName }
-            </p>
+            <div className="flex gap-1 items-center">
+                { isAuthModerator() && (
+                    <Shield
+                        className={cn(
+                            "fill-primary-300 stroke-0 size-5",
+                            isAuthAdmin() && "fill-amber-400"
+                        )}
+                    />
+                ) }
+                <p className="text-primary-300 font-bold">{ authData?.userName }</p>
+            </div>
 
             <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
                 <Popover.Trigger asChild>
@@ -44,16 +64,18 @@ export default function NavbarUserControls() {
 
                 <Popover.Portal>
                     <Popover.Content
-                        className="bg-base-200 rounded-box px-4 py-4 shadow-md"
+                        className="bg-base-200 rounded-box shadow-md"
+                        sideOffset={6}
                     >
-                        <ul className="flex flex-col gap-2 leading-none">
-                            <li>
+                        <MenuContext.Provider value={ctx}>
+                        <ul className="flex flex-col px-2">
+                            <MenuItem>
                                 <Link to="/app/user">Account settings</Link>
-                            </li>
+                            </MenuItem>
 
-                            <div className="h-px bg-base-500" />
+                            <div className="h-px bg-base-400" />
 
-                            <li>
+                            <MenuItem>
                                 <button
                                     onClick={onLogoutRequest}
                                     className={cn(
@@ -64,8 +86,9 @@ export default function NavbarUserControls() {
                                 >
                                     Log out
                                 </button>
-                            </li>
+                            </MenuItem>
                         </ul>
+                        </MenuContext.Provider>
 
                         <Popover.Arrow />
                     </Popover.Content>
@@ -76,5 +99,32 @@ export default function NavbarUserControls() {
                 <ShoppingBasket className="grow-0 shrink-0 text-base-500" />
             </div>
         </div>
+    )
+}
+
+function MenuItem({
+    children,
+    onClick,
+    className,
+    ...rest
+}: ComponentPropsWithRef<'li'>) {
+    const { handleClose } = useContext(MenuContext);
+
+    const handleItemClick = (e: React.MouseEvent<HTMLLIElement>) => {
+        handleClose?.();
+        onClick?.(e);
+    }
+
+    return (
+        <li
+            onClick={handleItemClick}
+            className={cn(
+                "p-2",
+                className
+            )}
+            {...rest}
+        >
+            { children }
+        </li>
     )
 }

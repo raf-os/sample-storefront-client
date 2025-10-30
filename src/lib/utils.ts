@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import type { StandardJsonResponse } from "@/types/StandardJsonResponse";
+import GlobalConfig from "@/lib/globalConfig";
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
@@ -18,4 +19,8 @@ export async function requestToJson<T = StandardJsonResponse>(res: Response): Pr
 	const text = await res.text();
 	if (!text) return null;
 	return JSON.parse(text) as T;
+}
+
+export function composeTitle(newTitle?: string) {
+	return newTitle === undefined ? GlobalConfig.AppTitle : `${newTitle} | ${GlobalConfig.AppTitle}`
 }

@@ -19,13 +19,13 @@ export default function useAuth() {
     const isAuthModerator = () => {
         if (!checkIsAuthorized()) return false;
 
-        return (authData?.role === GlobalConfig.UserRoles.Operator || authData?.role === GlobalConfig.UserRoles.Operator);
+        return (authData?.role === GlobalConfig.UserRoles.Operator || authData?.role === GlobalConfig.UserRoles.Admin);
     }
 
     const isAuthAdmin = () => {
         if (!checkIsAuthorized()) return false;
 
-        return (authData?.role === GlobalConfig.UserRoles.Operator || authData?.role === GlobalConfig.UserRoles.Operator);
+        return (authData?.role === GlobalConfig.UserRoles.Admin);
     }
 
     return {

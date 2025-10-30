@@ -1,6 +1,7 @@
 const SERVER_ADDRESS = "https://localhost:7244";
 
 const GlobalConfig = {
+    AppTitle: "Storefront Sample",
     ServerAddr: SERVER_ADDRESS,
     ServerAuthEndpoint: SERVER_ADDRESS + "/auth",
     ServerProductEntpoint: SERVER_ADDRESS + "/api/product",
