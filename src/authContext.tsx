@@ -14,12 +14,16 @@ export type TAuthData = {
 export interface IAuthContext {
     authData?: TAuthData | null,
     login: (username: string, password: string) => Promise<StandardJsonResponse>,
+    logout: () => Promise<StandardJsonResponse>,
     register: (username: string, password: string, email: string) => Promise<StandardJsonResponse>
 }
 
+const defaultResponse = async () => { return { success: false } };
+
 export const DefaultAuthContext: IAuthContext = {
-    login: async () => { return { success: false } },
-    register: async () => { return { success: false } }
+    login: defaultResponse,
+    logout: defaultResponse,
+    register: defaultResponse
 }
 
 export const AuthContext = createContext<IAuthContext>(DefaultAuthContext);

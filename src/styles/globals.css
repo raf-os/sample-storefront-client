@@ -65,7 +65,7 @@
     --col-warning-content: var(--col-warning-100);
 
     --col-error: oklch(80% 0.18 25);
-    --col-error-content: oklch(44% 0.23 25);
+    --col-error-content: oklch(63% 0.23 25);
 
     --col-muted: var(--col-base-400);
 }

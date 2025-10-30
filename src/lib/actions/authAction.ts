@@ -132,3 +132,31 @@ export async function AuthRegister(props: AuthRegisterProps): Promise<StandardJs
         };
     }
 }
+
+export async function AuthLogout(): Promise<StandardJsonResponse> {
+    try {
+        const res = await fetch(GlobalConfig.ServerAuthEndpoint+ "/logout", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "include"
+        });
+
+        if (!res.ok) {
+            return {
+                success: false,
+                message: "Error logging out. Wait, how is this possible?"
+            }
+        }
+
+        return { success: true }
+    } catch (err) {
+        console.log(err);
+
+        return {
+            success: false,
+            message: "Error contacting server."
+        }
+    }
+}

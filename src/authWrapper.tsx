@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { AuthContext, type IAuthContext, type TAuthData } from "@/authContext";
-import { AuthLogin, AuthRefresh, AuthRegister, type TJwtToken } from "@/lib/actions/authAction";
+import { AuthLogin, AuthRefresh, AuthRegister, AuthLogout, type TJwtToken } from "@/lib/actions/authAction";
 
 import AuthSingleton from "@/classes/AuthSingleton";
 
@@ -35,6 +35,16 @@ export function AuthWrapper({ children }: { children?: React.ReactNode }) {
         return res;
     }
 
+    const logout = async () => {
+        const res = await AuthLogout();
+
+        // if (res.success) {
+        //     _updateAuth(null);
+        // }
+
+        return res;
+    }
+
     const register = async (username: string, password: string, email: string) => {
         const res = await AuthRegister({ username, password, email });
 
@@ -61,6 +71,7 @@ export function AuthWrapper({ children }: { children?: React.ReactNode }) {
     const ctx: IAuthContext = {
         authData,
         login,
+        logout,
         register
     };
 
