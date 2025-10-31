@@ -3,6 +3,7 @@
 @import "./animations.css";
 
 @import "./components/buttons.css";
+@import "./components/table.css";
 
 @font-face {
   font-family: "Roboto";
@@ -50,11 +51,11 @@
     --col-primary-500: oklch(95% 0.03 258);
     --col-primary-content: var(--col-primary-500);
 
-    --col-base-100: oklch(20% 0.01 250);
-    --col-base-200: oklch(25% 0.025 265);
-    --col-base-300: oklch(41% 0.042 268);
-    --col-base-400: oklch(59% 0.038 275);
-    --col-base-500: oklch(90% 0.02 280);
+    --col-base-100: oklch(93% 0.005 245);
+    --col-base-200: oklch(98% 0.0055 210);
+    --col-base-300: oklch(85% 0.01 230);
+    --col-base-400: oklch(65% 0.038 275);
+    --col-base-500: oklch(25% 0.01 290);
     --col-base-content: var(--col-base-500);
 
     --col-warning-100: oklch(40% 0.15 60);

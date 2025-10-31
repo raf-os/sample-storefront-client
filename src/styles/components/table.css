@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@utility tbl {
+    width: 100%;
+    overflow: hidden;
+
+    thead {
+        background-color: var(--color-base-100);
+    }
+
+    th, td {
+        text-align: left;
+        @apply px-2 py-1;
+    }
+
+    tbody {
+        tr:not(:last-child) {
+            border-bottom: 1px solid var(--color-base-300);
+        }
+    }
+}

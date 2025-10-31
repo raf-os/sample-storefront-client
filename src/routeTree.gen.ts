@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ItemItemIdRouteImport } from './routes/item/$itemId'
 import { Route as AppUserRouteRouteImport } from './routes/app/user/route'
 import { Route as AppUserIndexRouteImport } from './routes/app/user/index'
+import { Route as AppUserProductsIndexRouteImport } from './routes/app/user/products/index'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
   id: '/unauthorized',
@@ -46,6 +47,11 @@ const AppUserIndexRoute = AppUserIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppUserRouteRoute,
 } as any)
+const AppUserProductsIndexRoute = AppUserProductsIndexRouteImport.update({
+  id: '/products/',
+  path: '/products/',
+  getParentRoute: () => AppUserRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/app/user': typeof AppUserRouteRouteWithChildren
   '/item/$itemId': typeof ItemItemIdRoute
   '/app/user/': typeof AppUserIndexRoute
+  '/app/user/products': typeof AppUserProductsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/unauthorized': typeof UnauthorizedRoute
   '/item/$itemId': typeof ItemItemIdRoute
   '/app/user': typeof AppUserIndexRoute
+  '/app/user/products': typeof AppUserProductsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -70,6 +78,7 @@ export interface FileRoutesById {
   '/app/user': typeof AppUserRouteRouteWithChildren
   '/item/$itemId': typeof ItemItemIdRoute
   '/app/user/': typeof AppUserIndexRoute
+  '/app/user/products/': typeof AppUserProductsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -80,8 +89,15 @@ export interface FileRouteTypes {
     | '/app/user'
     | '/item/$itemId'
     | '/app/user/'
+    | '/app/user/products'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/sign-up' | '/unauthorized' | '/item/$itemId' | '/app/user'
+  to:
+    | '/'
+    | '/sign-up'
+    | '/unauthorized'
+    | '/item/$itemId'
+    | '/app/user'
+    | '/app/user/products'
   id:
     | '__root__'
     | '/'
@@ -90,6 +106,7 @@ export interface FileRouteTypes {
     | '/app/user'
     | '/item/$itemId'
     | '/app/user/'
+    | '/app/user/products/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -144,15 +161,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppUserIndexRouteImport
       parentRoute: typeof AppUserRouteRoute
     }
+    '/app/user/products/': {
+      id: '/app/user/products/'
+      path: '/products'
+      fullPath: '/app/user/products'
+      preLoaderRoute: typeof AppUserProductsIndexRouteImport
+      parentRoute: typeof AppUserRouteRoute
+    }
   }
 }
 
 interface AppUserRouteRouteChildren {
   AppUserIndexRoute: typeof AppUserIndexRoute
+  AppUserProductsIndexRoute: typeof AppUserProductsIndexRoute
 }
 
 const AppUserRouteRouteChildren: AppUserRouteRouteChildren = {
   AppUserIndexRoute: AppUserIndexRoute,
+  AppUserProductsIndexRoute: AppUserProductsIndexRoute,
 }
 
 const AppUserRouteRouteWithChildren = AppUserRouteRoute._addFileChildren(

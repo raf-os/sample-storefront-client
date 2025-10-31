@@ -1,7 +1,6 @@
 import { createFileRoute, Navigate, Outlet, Link, type ValidateToPath } from '@tanstack/react-router';
 import TokenRefreshHandler from "@/handlers/TokenRefreshHandler";
 
-import { useAuth } from "@/hooks";
 import { composeTitle } from "@/lib/utils";
 
 import PageSetup from "@/components/layout/PageSetup";
@@ -65,6 +64,7 @@ const Menu: TMenu = {
 			href: "/app/user",
 			label: "Account settings"
 		}, {
+			href: "/app/user/products",
 			label: "My products"
 		}
 	]
@@ -73,13 +73,13 @@ const Menu: TMenu = {
 function SubSideBar() {
 	const MenuMapping = Object.entries(Menu).map(([k, v]) => (
 			<MenuHeader label={k} items={v} />
-		));
+		))
 
 	return (
 		<>
 			{ ...MenuMapping }
 		</>
-	);
+	)
 }
 
 function MenuHeader({ label, items }: { label: string, items: TMenuItem[] }) {

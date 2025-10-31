@@ -57,23 +57,23 @@ export default function NavbarUserControls() {
 
             <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
                 <Popover.Trigger asChild>
-                    <button>
+                    <button className="cursor-pointer">
                         <img src="/images/defaultProfileIcon.webp" className="size-8 outline-2 outline-primary-300 outline-offset-2 rounded-full" />
                     </button>
                 </Popover.Trigger>
 
                 <Popover.Portal>
                     <Popover.Content
-                        className="bg-base-200 rounded-box shadow-md"
+                        className="bg-base-200 border border-base-300 rounded-box shadow-sm"
                         sideOffset={6}
                     >
                         <MenuContext.Provider value={ctx}>
-                        <ul className="flex flex-col px-2">
+                        <ul className="flex flex-col">
                             <MenuItem>
                                 <Link to="/app/user">Account settings</Link>
                             </MenuItem>
 
-                            <div className="h-px bg-base-400" />
+                            <div className="h-px bg-base-300" />
 
                             <MenuItem>
                                 <button
