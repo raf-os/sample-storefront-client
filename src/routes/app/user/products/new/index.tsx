@@ -1,7 +1,10 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { useTransition, useState } from "react";
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, FormProvider } from "react-hook-form";
+
+import { AddProductAction } from "@/lib/actions/productActions";
 
 import { Input, TextArea, FieldSet } from "@/components/forms";
 import Button from "@/components/button";
@@ -24,12 +27,31 @@ export const Route = createFileRoute('/app/user/products/new/')({
 })
 
 function RouteComponent() {
+	// TODO: maybe extract this transition + error message into a custom hook
+	const [ isPending, startTransition ] = useTransition();
+	const [ formError, setFormError ] = useState<string | null>(null);
+	const navigate = useNavigate();
+
 	const formMethods = useForm<z.infer<typeof NewProductSchema>>({
 		resolver: zodResolver(NewProductSchema)
 	});
 	const { handleSubmit } = formMethods;
 
-	const onSubmit = (data: z.infer<typeof NewProductSchema>) => {}
+	const onSubmit = (data: z.infer<typeof NewProductSchema>) => {
+		if (isPending) return;
+
+		startTransition(async () => {
+			const res = await AddProductAction(data);
+
+			if (res.success) {
+				if (res.data) {
+					navigate({ to: `/item/${res.data}` });
+				}
+			} else {
+				setFormError(res.message || "Unknown error occurred.");
+			}
+		});
+	}
 
 	return (
 		<div
@@ -38,6 +60,12 @@ function RouteComponent() {
 			<h1 className="text-lg font-bold">
 				New product listing
 			</h1>
+
+			{ formError && (
+				<p className="text-destructive-content">
+					{formError}
+				</p>
+			)}
 
 			<FormProvider {...formMethods}>
 				<form onSubmit={handleSubmit(onSubmit)}>
@@ -67,6 +95,7 @@ function RouteComponent() {
 
 						<Button
 							type="submit"
+							disabled={isPending}
 						>
 							Submit
 						</Button>

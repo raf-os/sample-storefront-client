@@ -131,7 +131,7 @@ function MenuItem({props, depth = 0}: MenuItemProps) {
 			
 			{ (props.children !== undefined && matchRoute({ to: props.href, fuzzy: true, includeSearch: true })) && (
 				<ul style={{ paddingLeft: (depth + 1) * 16 }}>
-					{ props.children.map((child, idx) => (
+					{ props.children.map((child) => (
 						<MenuItem props={child} depth={depth + 1} key={child.label} />
 					)) }
 				</ul>
