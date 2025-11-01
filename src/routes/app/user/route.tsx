@@ -1,7 +1,7 @@
-import { createFileRoute, Navigate, Outlet, Link, type ValidateToPath } from '@tanstack/react-router';
+import { createFileRoute, Navigate, Outlet, Link, useMatchRoute, type ValidateToPath } from '@tanstack/react-router';
 import TokenRefreshHandler from "@/handlers/TokenRefreshHandler";
 
-import { composeTitle } from "@/lib/utils";
+import { composeTitle, cn } from "@/lib/utils";
 
 import PageSetup from "@/components/layout/PageSetup";
 
@@ -52,7 +52,8 @@ function MainContent() {
 type TMenuItem = {
 	href?: ValidateToPath,
 	exactPath?: boolean,
-	label: string
+	label: string,
+	children?: TMenuItem[]
 }
 
 type TMenu = {
@@ -67,7 +68,13 @@ const Menu: TMenu = {
 			label: "Account settings"
 		}, {
 			href: "/app/user/products",
-			label: "My products"
+			label: "My products",
+			children: [
+				{
+					href: "/app/user/products/new",
+					label: "New product"
+				}
+			]
 		}
 	]
 }
@@ -85,7 +92,7 @@ function SubSideBar() {
 }
 
 function MenuHeader({ label, items }: { label: string, items: TMenuItem[] }) {
-	const ItemsMapping = items.map(item => <MenuItem {...item} />);
+	const ItemsMapping = items.map(item => <MenuItem props={item} />);
 
 	return (
 		<ul>
@@ -100,7 +107,14 @@ function MenuHeader({ label, items }: { label: string, items: TMenuItem[] }) {
 	)
 }
 
-function MenuItem(props: TMenuItem) {
+type MenuItemProps = {
+	props: TMenuItem,
+	depth?: number,
+}
+
+function MenuItem({props, depth = 0}: MenuItemProps) {
+	const matchRoute = useMatchRoute();
+
 	return (
 		<li className="text-base-400">
 			{ props.href
@@ -108,12 +122,20 @@ function MenuItem(props: TMenuItem) {
 					<Link
 						to={props.href}
 						activeOptions={{ exact: props.exactPath || false }}
-						activeProps={{ className: "text-base-500 font-bold" }}
+						activeProps={{ className: cn( depth===0 ? "text-base-500 font-bold" : "text-base-500 font-medium") }}
 					>
 						{ props.label }
 					</Link>
 				)
 				: props.label }
+			
+			{ (props.children !== undefined && matchRoute({ to: props.href, fuzzy: true, includeSearch: true })) && (
+				<ul style={{ paddingLeft: (depth + 1) * 16 }}>
+					{ props.children.map((child, idx) => (
+						<MenuItem props={child} depth={depth + 1} key={child.label} />
+					)) }
+				</ul>
+			)}
 		</li>
 	)
 }
