@@ -51,6 +51,7 @@ function MainContent() {
 
 type TMenuItem = {
 	href?: ValidateToPath,
+	exactPath?: boolean,
 	label: string
 }
 
@@ -62,6 +63,7 @@ const Menu: TMenu = {
 	"User panel": [
 		{
 			href: "/app/user",
+			exactPath: true,
 			label: "Account settings"
 		}, {
 			href: "/app/user/products",
@@ -105,6 +107,7 @@ function MenuItem(props: TMenuItem) {
 				? (
 					<Link
 						to={props.href}
+						activeOptions={{ exact: props.exactPath || false }}
 						activeProps={{ className: "text-base-500 font-bold" }}
 					>
 						{ props.label }
