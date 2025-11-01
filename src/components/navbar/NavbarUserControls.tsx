@@ -79,7 +79,7 @@ export default function NavbarUserControls() {
                                 <button
                                     onClick={onLogoutRequest}
                                     className={cn(
-                                        "text-error-content",
+                                        "text-destructive-content",
                                         isLogoutPending ? "opacity-50 cursor-progress" : "cursor-pointer"
                                     )}
                                     disabled={isLogoutPending}

@@ -6,6 +6,8 @@ import Button from "@/components/button";
 import ExpandableImage from "@/components/images/ExpandableImage";
 import { cn } from "@/lib/utils";
 
+import { ShoppingCart, Wallet } from "lucide-react";
+
 // Todo: fetch from back end
 // Todo: back end
 const fetchItem = (itemId: string) => {
@@ -98,12 +100,14 @@ function PageContent() {
 
                 <div className="flex flex-col gap-4 mt-2">
                     <Button>
+                        <ShoppingCart />
                         Add to cart
                     </Button>
 
                     <Button
                         className="btn-primary"
                     >
+                        <Wallet />
                         Buy now
                     </Button>
                 </div>

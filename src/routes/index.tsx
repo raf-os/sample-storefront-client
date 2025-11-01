@@ -41,6 +41,7 @@ function Index() {
 					<PaletteTest colName="base" />
 					<PaletteTest colName="primary" />
 					<PaletteTest colName="warning" />
+					<PaletteTest colName="destructive" />
 				</div>
 			</Layout.Main>
 

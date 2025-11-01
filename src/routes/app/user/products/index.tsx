@@ -1,10 +1,13 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { useState } from "react";
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { createColumnHelper, useReactTable, getCoreRowModel, flexRender } from '@tanstack/react-table';
 import { z } from "zod";
 
 import { formatCurrency } from "@/lib/utils";
 
-import { Ellipsis } from "lucide-react";
+import { Checkbox } from "@/components/forms";
+import Button from "@/components/button";
+import { Ellipsis, Plus as PlusIcon } from "lucide-react";
 
 const RouteSearchParamsSchema = z.object({
     page: z.number().catch(1),
@@ -29,8 +32,22 @@ const columnHelper = createColumnHelper<TProductItem>();
 const columns = [
     columnHelper.display({
         id: "select",
-        cell: ({row}) => (
-            <span>[ ]</span>
+        header: props => (
+            <Checkbox
+                checked={
+                    props.table.getIsAllPageRowsSelected() ||
+                    (props.table.getIsSomePageRowsSelected() && 'indeterminate')
+                }
+                onCheckedChange={value => props.table.toggleAllPageRowsSelected(!!value)}
+                aria-label="Select all"
+            />
+        ),
+        cell: props => (
+            <Checkbox
+                checked={props.row.getIsSelected()}
+                onCheckedChange={value => props.row.toggleSelected(!!value)}
+                aria-label="Select product"
+            />
         )
     }),
     columnHelper.accessor('name', {
@@ -76,7 +93,7 @@ function RouteComponent() {
         <div
             className="flex flex-col gap-4 bg-base-200 p-4 rounded-box"
         >
-            <DebouncedSearchBar />
+            <HeaderControls />
 
             <ProductTable listings={FakeProductList} />
         </div>
@@ -85,7 +102,16 @@ function RouteComponent() {
 
 function ProductTable({ listings } : { listings: TProductItem[] }) {
     const data = listings;
-    const table = useReactTable({ columns , data, getCoreRowModel: getCoreRowModel() });
+    const [ rowSelection, setRowSelection ] = useState({});
+    const table = useReactTable({
+        columns,
+        data,
+        getCoreRowModel: getCoreRowModel(),
+        onRowSelectionChange: setRowSelection,
+        state: {
+            rowSelection
+        }
+    });
 
     return (
         <table className="tbl">
@@ -127,10 +153,26 @@ function ProductTable({ listings } : { listings: TProductItem[] }) {
     )
 }
 
+function HeaderControls() {
+    return (
+        <div
+            className="flex items-center gap-2 w-full"
+        >
+            <DebouncedSearchBar />
+
+            <Button asChild>
+                <Link to="/app/user/products/new">
+                    <PlusIcon /> New listing
+                </Link>
+            </Button>
+        </div>
+    )
+}
+
 function DebouncedSearchBar() {
     return (
         <input
-            className="rounded-field px-3 py-1 bg-base-100 placeholder:text-base-300 focus:outline-2"
+            className="rounded-field h-9 px-3 py-1 bg-base-100 placeholder:text-base-300 outline-none focus:ring-base-500 focus:ring-2 grow-1 shrink-1"
             placeholder="Search..."
         />
     )

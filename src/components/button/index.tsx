@@ -1,15 +1,18 @@
 import { cn } from "@/lib/utils";
+import { Slot } from "@radix-ui/react-slot";
 
-export type ButtonProps = React.ComponentPropsWithRef<'button'>;
+export type ButtonProps = React.ComponentPropsWithRef<'button'> & { asChild?: boolean };
 
 export default function Button({
     className,
     type="button",
     children,
+    asChild,
     ...rest
 }: ButtonProps) {
+    const Comp = asChild ? Slot : "button";
     return (
-        <button
+        <Comp
             type={type}
             className={cn(
                 "btn",
@@ -18,6 +21,6 @@ export default function Button({
             {...rest}
         >
             {children}
-        </button>
+        </Comp>
     )
 }

@@ -1,27 +1,44 @@
 @import "tailwindcss";
 
 @utility btn {
+    display: inline-flex;
+    height: calc(var(--spacing) * 9);
+    flex-shrink: 0;
+    outline: none;
+    align-items: center;
+    justify-content: center;
     border-radius: var(--radius-field);
-    background-color: var(--color-base-300);
+    background-color: var(--color-base-100);
     color: var(--color-base-content);
     font-weight: var(--font-weight-medium);
     cursor: pointer;
-    @apply px-3 py-1 transition-colors;
+    white-space: nowrap;
+    @apply text-sm px-4 py-2 gap-2 transition-colors;
+
+    svg {
+        flex-shrink: 0;
+        pointer-events: none;
+
+        &:not([class*='size-']) {
+            @apply size-4;
+        }
+    }
 
     &:focus {
         outline: 2px solid var(--color-base-500);
     }
 
     &:hover, &:active {
-        background-color: color-mix(in oklab, var(--color-base-300) 80%, black);
+        background-color: var(--color-base-300);
     }
 
     &.btn-primary {
         background-color: var(--color-primary-300);
-        color: var(--color-primary-content);
+        color: var(--color-primary-500);
+        outline: none;
 
         &:hover, &:active {
-            background-color: color-mix(in oklab, var(--color-primary-300) 80%, black);
+            background-color: var(--color-primary-200);
         }
     }
 
