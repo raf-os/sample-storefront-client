@@ -1,4 +1,4 @@
-import { useTransition, useState, useEffect } from "react";
+import { useTransition, useState, useEffect, useContext, useRef } from "react";
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,10 +9,12 @@ import { type CategoryTree, type CategoryTreeNode } from "@/lib/actions/category
 import { Command, useCommandState } from "cmdk";
 
 import useCategoryTree from "@/hooks/useCategoryTree";
+import CustomCommandContext, { type ICustomCommandContext } from "@/components/context/CustomCommandContext";
 
 import { Input, TextArea, FieldSet } from "@/components/forms";
 import Button from "@/components/button";
 import { ChevronDown } from "lucide-react";
+import useDebounce from "@/hooks/useDebouce";
 
 const NewProductSchema = z.object({
 	name: z
@@ -120,27 +122,60 @@ function RouteComponent() {
 
 function CategorySelector({ ...rest }: React.ComponentPropsWithRef<'input'>) {
 	const { isRequestPending, categoryTree } = useCategoryTree();
+	const [ validCategoryIds, setValidCategoryIds ] = useState<Set<number>>(new Set<number>());
 	const [ selectedCategories, setSelectedCategories ] = useState<number[]>([]);
+	const [ inputValue, setInputValue ] = useState<string>("");
+	const debouncedSearch = useDebounce(inputValue);
+
+	const onValidItem = (id: number) => {
+		if (validCategoryIds.has(id)) return false;
+
+		setValidCategoryIds(prev => {
+			const newSet = new Set(prev);
+			newSet.add(id);
+			return newSet;
+		});
+
+		return true;
+	}
+
+	const onInvalidItem = (id: number) => {
+		if (!validCategoryIds.has(id)) return false;
+
+		setValidCategoryIds(prev => {
+			const newSet = new Set(prev);
+			newSet.delete(id);
+			return newSet;
+		});
+
+		return true;
+	}
+
+	const ctx: ICustomCommandContext = {
+		searchValue: debouncedSearch,
+		validCategoryIds,
+		onItemValid: onValidItem,
+		onItemInvalid: onInvalidItem
+	}
 
 	return (
 		<>
-		<input {...rest} type="hidden" />
-		<Command className="w-full border border-base-300 rounded-box" shouldFilter={false}>
-			<Command.Input
-				asChild
-			>
-				<input
-					disabled={isRequestPending}
-					className="w-full border-b border-base-300 px-2 py-1 outline-none"
+			<input {...rest} type="hidden" />
+			<Command className="w-full border border-base-300 rounded-box" shouldFilter={false}>
+				<CustomCommandContext value={ctx}>
+					<Command.Input
+						disabled={isRequestPending}
+						className="w-full border-b border-base-300 px-2 py-1 outline-none"
+						value={inputValue}
+						onValueChange={setInputValue}
+					/>
+					<Command.List className="h-48 overflow-y-scroll p-2">
+						<Command.Empty>No results found.</Command.Empty>
 
-				/>
-			</Command.Input>
-			<Command.List className="h-48 overflow-y-scroll p-2">
-				<Command.Empty>No results found.</Command.Empty>
-
-				{ categoryTree && <CategoryTreeNode id={-1} name="%ROOT%" children={categoryTree} /> }
-			</Command.List>
-		</Command>
+						{ categoryTree && <CategoryTreeNode id={-1} name="%ROOT%" children={categoryTree} /> }
+					</Command.List>
+				</CustomCommandContext>
+			</Command>
 		</>
 	)
 }
@@ -153,12 +188,47 @@ function CategoryTreeNode({
 	id,
 	name,
 	children,
-	keywords,
+	relationships,
 	depth = 0
 }: CategoryTreeNodeProps) {
+	const { searchValue, onItemValid, onItemInvalid, validCategoryIds } = useContext(CustomCommandContext);
+	const validToggle = useRef<boolean>(false);
+	const [ isSearchValid, setIsSearchValid ] = useState<boolean>(true);
 	const ChildNodes: React.ReactElement<CategoryTreeNode>[] = [];
 
 	const hasChildren = children && children.length > 0;
+
+	useEffect(() => {
+		if (id == -1) return;
+		if (searchValue.toLocaleLowerCase().includes(name.toLocaleLowerCase())) {
+			if (validToggle.current === true) { return; }
+			validToggle.current = onItemValid?.(id) || false;
+		} else {
+			if (validToggle.current === false) { return; }
+			validToggle.current = onItemInvalid?.(id) || false;
+		}
+	}, [searchValue, id, name, onItemValid, onItemInvalid]);
+
+	useEffect(() => {
+		if (!relationships || relationships.length === 0) return;
+
+		let isValid = false;
+
+		if (searchValue === "") isValid = true;
+
+		if (validCategoryIds.has(id)) isValid = true;
+
+		if (!isValid) {
+			for (const id of validCategoryIds) {
+				if (relationships.includes(id)) {
+					isValid = true;
+					break;
+				}
+			}
+		}
+
+		setIsSearchValid(isValid);
+	}, [validCategoryIds, searchValue, relationships, id]);
 
 	if (hasChildren) {
 		children.map(child => {
@@ -172,7 +242,6 @@ function CategoryTreeNode({
 	const Component = () => (
 		<Command.Item
 			value={name}
-			keywords={keywords}
 		>
 			<div className="flex justify-between">
 				<div style={{ paddingLeft: (depth - 1) * 16 }}>
@@ -199,9 +268,9 @@ function CategoryTreeNode({
 		)
 	}
 
-	return (
+	return isSearchValid ? (
 		<>
 			<WrappedComponent />
 		</>
-	)
+	) : null;
 }
