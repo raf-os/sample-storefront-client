@@ -5,7 +5,8 @@ import type { StandardJsonResponse } from "@/types/StandardJsonResponse";
 export type CategoryTreeNode = {
     id: number,
     name: string,
-    children?: CategoryTreeNode[]
+    children?: CategoryTreeNode[],
+    keywords?: string[]
 }
 
 export type CategoryTree = CategoryTreeNode[];

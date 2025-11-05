@@ -6,7 +6,7 @@ import { useForm, FormProvider } from "react-hook-form";
 
 import { AddProductAction } from "@/lib/actions/productActions";
 import { type CategoryTree, type CategoryTreeNode } from "@/lib/actions/categoryAction";
-import { Command } from "cmdk";
+import { Command, useCommandState } from "cmdk";
 
 import useCategoryTree from "@/hooks/useCategoryTree";
 
@@ -125,7 +125,7 @@ function CategorySelector({ ...rest }: React.ComponentPropsWithRef<'input'>) {
 	return (
 		<>
 		<input {...rest} type="hidden" />
-		<Command className="w-full border border-base-300 rounded-box">
+		<Command className="w-full border border-base-300 rounded-box" shouldFilter={false}>
 			<Command.Input
 				asChild
 			>
@@ -153,6 +153,7 @@ function CategoryTreeNode({
 	id,
 	name,
 	children,
+	keywords,
 	depth = 0
 }: CategoryTreeNodeProps) {
 	const ChildNodes: React.ReactElement<CategoryTreeNode>[] = [];
@@ -162,7 +163,7 @@ function CategoryTreeNode({
 	if (hasChildren) {
 		children.map(child => {
 			if (!child) return;
-			ChildNodes.push(<CategoryTreeNode key={child.id} id={child.id} name={child.name} children={child.children} depth={depth + 1} />);
+			ChildNodes.push(<CategoryTreeNode {...child} key={child.id} depth={depth + 1} />);
 		});
 	}
 
@@ -171,6 +172,7 @@ function CategoryTreeNode({
 	const Component = () => (
 		<Command.Item
 			value={name}
+			keywords={keywords}
 		>
 			<div className="flex justify-between">
 				<div style={{ paddingLeft: (depth - 1) * 16 }}>
