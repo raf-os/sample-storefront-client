@@ -1,13 +1,18 @@
-import { useTransition, useState } from "react";
+import { useTransition, useState, useEffect } from "react";
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, FormProvider } from "react-hook-form";
 
 import { AddProductAction } from "@/lib/actions/productActions";
+import { type CategoryTree, type CategoryTreeNode } from "@/lib/actions/categoryAction";
+import { Command } from "cmdk";
+
+import useCategoryTree from "@/hooks/useCategoryTree";
 
 import { Input, TextArea, FieldSet } from "@/components/forms";
 import Button from "@/components/button";
+import { ChevronDown } from "lucide-react";
 
 const NewProductSchema = z.object({
 	name: z
@@ -93,6 +98,13 @@ function RouteComponent() {
 							as={TextArea}
 						/>
 
+						<FieldSet
+							name="categories"
+							label="Categories"
+							errorAlignment="horizontal"
+							as={CategorySelector}
+						/>
+
 						<Button
 							type="submit"
 							disabled={isPending}
@@ -103,5 +115,91 @@ function RouteComponent() {
 				</form>
 			</FormProvider>
 		</div>
+	)
+}
+
+function CategorySelector({ ...rest }: React.ComponentPropsWithRef<'input'>) {
+	const { isRequestPending, categoryTree } = useCategoryTree();
+	const [ selectedCategories, setSelectedCategories ] = useState<number[]>([]);
+
+	return (
+		<>
+		<input {...rest} type="hidden" />
+		<Command className="w-full border border-base-300 rounded-box">
+			<Command.Input
+				asChild
+			>
+				<input
+					disabled={isRequestPending}
+					className="w-full border-b border-base-300 px-2 py-1 outline-none"
+
+				/>
+			</Command.Input>
+			<Command.List className="h-48 overflow-y-scroll p-2">
+				<Command.Empty>No results found.</Command.Empty>
+
+				{ categoryTree && <CategoryTreeNode id={-1} name="%ROOT%" children={categoryTree} /> }
+			</Command.List>
+		</Command>
+		</>
+	)
+}
+
+type CategoryTreeNodeProps = CategoryTreeNode & {
+	depth?: number,
+};
+
+function CategoryTreeNode({
+	id,
+	name,
+	children,
+	depth = 0
+}: CategoryTreeNodeProps) {
+	const ChildNodes: React.ReactElement<CategoryTreeNode>[] = [];
+
+	const hasChildren = children && children.length > 0;
+
+	if (hasChildren) {
+		children.map(child => {
+			if (!child) return;
+			ChildNodes.push(<CategoryTreeNode key={child.id} id={child.id} name={child.name} children={child.children} depth={depth + 1} />);
+		});
+	}
+
+	if (id == -1) return ChildNodes;
+
+	const Component = () => (
+		<Command.Item
+			value={name}
+		>
+			<div className="flex justify-between">
+				<div style={{ paddingLeft: (depth - 1) * 16 }}>
+					{ name }
+				</div>
+				{ hasChildren && <div><ChevronDown /></div> }
+			</div>
+		</Command.Item>
+	)
+
+	const WrappedComponent = () => {
+		return hasChildren
+		? (
+			<>
+				<Component />
+
+				{ ChildNodes }
+			</>
+		)
+		: (
+			<>
+				<Component />
+			</>
+		)
+	}
+
+	return (
+		<>
+			<WrappedComponent />
+		</>
 	)
 }

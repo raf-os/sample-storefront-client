@@ -6,6 +6,7 @@ const GlobalConfig = {
     ServerAuthEndpoint: SERVER_ADDRESS + "/auth",
     ServerProductEntpoint: SERVER_ADDRESS + "/api/product",
     ServerCommentEndpoint: SERVER_ADDRESS + "/api/comment",
+    ServerCategoryEndpoint: SERVER_ADDRESS + "/api/category",
     UserRoles: {
         User: "User",
         Operator: "Operator",
