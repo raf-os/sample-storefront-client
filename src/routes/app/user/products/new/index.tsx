@@ -11,6 +11,7 @@ import { Command, useCommandState } from "cmdk";
 import useCategoryTree from "@/hooks/useCategoryTree";
 import CustomCommandContext, { type ICustomCommandContext } from "@/components/context/CustomCommandContext";
 
+import * as Popover from "@radix-ui/react-popover";
 import { Input, TextArea, FieldSet } from "@/components/forms";
 import Button from "@/components/button";
 import { ChevronDown } from "lucide-react";
@@ -122,60 +123,51 @@ function RouteComponent() {
 
 function CategorySelector({ ...rest }: React.ComponentPropsWithRef<'input'>) {
 	const { isRequestPending, categoryTree } = useCategoryTree();
-	const [ validCategoryIds, setValidCategoryIds ] = useState<Set<number>>(new Set<number>());
 	const [ selectedCategories, setSelectedCategories ] = useState<number[]>([]);
+	const [ isSearchPopoverOpen, setIsSearchPopoverOpen ] = useState<boolean>(false);
 	const [ inputValue, setInputValue ] = useState<string>("");
+	const inputRef = useRef<HTMLInputElement>(null);
 	const debouncedSearch = useDebounce(inputValue);
 
-	const onValidItem = (id: number) => {
-		if (validCategoryIds.has(id)) return false;
+	const isSearching = debouncedSearch !== "";
 
-		setValidCategoryIds(prev => {
-			const newSet = new Set(prev);
-			newSet.add(id);
-			return newSet;
-		});
-
-		return true;
-	}
-
-	const onInvalidItem = (id: number) => {
-		if (!validCategoryIds.has(id)) return false;
-
-		setValidCategoryIds(prev => {
-			const newSet = new Set(prev);
-			newSet.delete(id);
-			return newSet;
-		});
-
-		return true;
-	}
+	useEffect(() => {
+		if (debouncedSearch !== "") setIsSearchPopoverOpen(true);
+		else setIsSearchPopoverOpen(false);
+	}, [debouncedSearch]);
 
 	const ctx: ICustomCommandContext = {
 		searchValue: debouncedSearch,
-		validCategoryIds,
-		onItemValid: onValidItem,
-		onItemInvalid: onInvalidItem
+		isSearching
+	}
+
+	const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+		if (event.key === 'Enter') {
+			event.preventDefault();
+		}
 	}
 
 	return (
 		<>
 			<input {...rest} type="hidden" />
-			<Command className="w-full border border-base-300 rounded-box" shouldFilter={false}>
+			<div className="w-full border border-base-300 rounded-box">
 				<CustomCommandContext value={ctx}>
-					<Command.Input
+					<input
+						ref={inputRef}
 						disabled={isRequestPending}
 						className="w-full border-b border-base-300 px-2 py-1 outline-none"
 						value={inputValue}
-						onValueChange={setInputValue}
+						onChange={(e) => setInputValue(e.target.value)}
+						onKeyDown={handleKeyDown}
 					/>
-					<Command.List className="h-48 overflow-y-scroll p-2">
-						<Command.Empty>No results found.</Command.Empty>
 
+					<SearchPopover open={isSearchPopoverOpen} onOpenChange={setIsSearchPopoverOpen} inputRef={inputRef.current} />
+
+					<div className="h-48 overflow-y-scroll p-2">
 						{ categoryTree && <CategoryTreeNode id={-1} name="%ROOT%" children={categoryTree} /> }
-					</Command.List>
+					</div>
 				</CustomCommandContext>
-			</Command>
+			</div>
 		</>
 	)
 }
@@ -188,47 +180,11 @@ function CategoryTreeNode({
 	id,
 	name,
 	children,
-	relationships,
 	depth = 0
 }: CategoryTreeNodeProps) {
-	const { searchValue, onItemValid, onItemInvalid, validCategoryIds } = useContext(CustomCommandContext);
-	const validToggle = useRef<boolean>(false);
-	const [ isSearchValid, setIsSearchValid ] = useState<boolean>(true);
 	const ChildNodes: React.ReactElement<CategoryTreeNode>[] = [];
 
 	const hasChildren = children && children.length > 0;
-
-	useEffect(() => {
-		if (id == -1) return;
-		if (searchValue.toLocaleLowerCase().includes(name.toLocaleLowerCase())) {
-			if (validToggle.current === true) { return; }
-			validToggle.current = onItemValid?.(id) || false;
-		} else {
-			if (validToggle.current === false) { return; }
-			validToggle.current = onItemInvalid?.(id) || false;
-		}
-	}, [searchValue, id, name, onItemValid, onItemInvalid]);
-
-	useEffect(() => {
-		if (!relationships || relationships.length === 0) return;
-
-		let isValid = false;
-
-		if (searchValue === "") isValid = true;
-
-		if (validCategoryIds.has(id)) isValid = true;
-
-		if (!isValid) {
-			for (const id of validCategoryIds) {
-				if (relationships.includes(id)) {
-					isValid = true;
-					break;
-				}
-			}
-		}
-
-		setIsSearchValid(isValid);
-	}, [validCategoryIds, searchValue, relationships, id]);
 
 	if (hasChildren) {
 		children.map(child => {
@@ -240,16 +196,12 @@ function CategoryTreeNode({
 	if (id == -1) return ChildNodes;
 
 	const Component = () => (
-		<Command.Item
-			value={name}
-		>
-			<div className="flex justify-between">
-				<div style={{ paddingLeft: (depth - 1) * 16 }}>
-					{ name }
-				</div>
-				{ hasChildren && <div><ChevronDown /></div> }
+		<div className="flex justify-between">
+			<div style={{ paddingLeft: (depth - 1) * 16 }}>
+				{ name }
 			</div>
-		</Command.Item>
+			{ (hasChildren) && <div><ChevronDown /></div> }
+		</div>
 	)
 
 	const WrappedComponent = () => {
@@ -268,9 +220,89 @@ function CategoryTreeNode({
 		)
 	}
 
-	return isSearchValid ? (
+	return (
 		<>
 			<WrappedComponent />
 		</>
-	) : null;
+	)
+}
+
+type SearchPopoverProps = {
+	open: boolean,
+	onOpenChange: (open: boolean) => void,
+	inputRef: HTMLInputElement | null
+}
+
+function SearchPopover({
+	open,
+	onOpenChange,
+	inputRef
+}: SearchPopoverProps) {
+	const { searchValue } = useContext(CustomCommandContext);
+
+	const disableEvent = (e: Event) => { e.preventDefault(); }
+
+	return (
+		<Popover.Root
+			open={open}
+			onOpenChange={onOpenChange}
+		>
+			<Popover.Anchor />
+			<Popover.Portal>
+				<Popover.Content
+					className="rounded-box border border-base-300 bg-base-200 px-2 py-1 shadow-sm"
+					align="start"
+					alignOffset={12}
+					sideOffset={6}
+					onOpenAutoFocus={disableEvent}
+					onInteractOutside={(e) => { if (e.target === inputRef) e.preventDefault() }}
+				>
+					<Command>
+						<Command.Input value={searchValue} className="hidden" disabled />
+						<Command.List>
+							<Command.Empty>No results found.</Command.Empty>
+
+							<FlatCommandList />
+						</Command.List>
+					</Command>
+				</Popover.Content>
+			</Popover.Portal>
+		</Popover.Root>
+	)
+}
+
+function traverseCategoryTree(node: CategoryTreeNode, currentTree: CategoryTree = []) {
+	if (!node.children || node.children.length === 0) return;
+
+	node.children.map(child => {
+		currentTree.push(child);
+		if (child.children && child.children.length > 0) traverseCategoryTree(child, currentTree);
+	});
+
+	return currentTree;
+}
+
+function FlatCommandList() {
+	const { categoryTree } = useCategoryTree();
+	const flatTree = traverseCategoryTree({ id: -1, name:"%ROOT%", children: categoryTree });
+
+	return (
+		<>
+			{ flatTree?.map((node) => (
+				<NodeItem node={node} />
+			))}
+		</>
+	)
+}
+
+function NodeItem({ node }: { node: CategoryTreeNode }) {
+	return (
+		<Command.Item
+			keywords={node.keywords}
+			value={node.name}
+			key={node.id}
+		>
+			{ node.name }
+		</Command.Item>
+	)
 }

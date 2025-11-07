@@ -7,7 +7,8 @@ export type CategoryTreeNode = {
     name: string,
     children?: CategoryTreeNode[],
     keywords?: string[],
-    relationships?: number[]
+    parents?: number[],
+    childIds?: number[]
 }
 
 export type CategoryTree = CategoryTreeNode[];
