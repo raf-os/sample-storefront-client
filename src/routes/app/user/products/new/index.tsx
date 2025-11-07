@@ -152,16 +152,18 @@ function CategorySelector({ ...rest }: React.ComponentPropsWithRef<'input'>) {
 			<input {...rest} type="hidden" />
 			<div className="w-full border border-base-300 rounded-box">
 				<CustomCommandContext value={ctx}>
-					<input
+					<Command loop>
+					<Command.Input
 						ref={inputRef}
 						disabled={isRequestPending}
 						className="w-full border-b border-base-300 px-2 py-1 outline-none"
 						value={inputValue}
-						onChange={(e) => setInputValue(e.target.value)}
+						onValueChange={setInputValue}
 						onKeyDown={handleKeyDown}
 					/>
 
 					<SearchPopover open={isSearchPopoverOpen} onOpenChange={setIsSearchPopoverOpen} inputRef={inputRef.current} />
+					</Command>
 
 					<div className="h-48 overflow-y-scroll p-2">
 						{ categoryTree && <CategoryTreeNode id={-1} name="%ROOT%" children={categoryTree} /> }
@@ -239,8 +241,13 @@ function SearchPopover({
 	inputRef
 }: SearchPopoverProps) {
 	const { searchValue } = useContext(CustomCommandContext);
+	const listRef = useRef<HTMLDivElement>(null);
 
 	const disableEvent = (e: Event) => { e.preventDefault(); }
+
+	const getListSelection = () => {
+		return listRef.current?.querySelector(`[cmdk-item=""][aria-selected="true"]`);
+	}
 
 	return (
 		<Popover.Root
@@ -256,15 +263,13 @@ function SearchPopover({
 					sideOffset={6}
 					onOpenAutoFocus={disableEvent}
 					onInteractOutside={(e) => { if (e.target === inputRef) e.preventDefault() }}
+					onClick={() => console.log(getListSelection())}
 				>
-					<Command>
-						<Command.Input value={searchValue} className="hidden" disabled />
-						<Command.List>
+						<Command.List ref={listRef} data-debug="DEBUG ME MATE">
 							<Command.Empty>No results found.</Command.Empty>
 
 							<FlatCommandList />
 						</Command.List>
-					</Command>
 				</Popover.Content>
 			</Popover.Portal>
 		</Popover.Root>
@@ -284,12 +289,12 @@ function traverseCategoryTree(node: CategoryTreeNode, currentTree: CategoryTree 
 
 function FlatCommandList() {
 	const { categoryTree } = useCategoryTree();
-	const flatTree = traverseCategoryTree({ id: -1, name:"%ROOT%", children: categoryTree });
+	const flatTree = traverseCategoryTree({ id: -1, name: "%ROOT%", children: categoryTree });
 
 	return (
 		<>
 			{ flatTree?.map((node) => (
-				<NodeItem node={node} />
+				<NodeItem node={node} key={node.id} />
 			))}
 		</>
 	)
@@ -298,6 +303,8 @@ function FlatCommandList() {
 function NodeItem({ node }: { node: CategoryTreeNode }) {
 	return (
 		<Command.Item
+			onSelect={val => console.log(val)}
+			className="data-[selected=true]:bg-blue-400"
 			keywords={node.keywords}
 			value={node.name}
 			key={node.id}
