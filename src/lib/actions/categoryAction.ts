@@ -13,13 +13,18 @@ export type CategoryTreeNode = {
 
 export type CategoryTree = CategoryTreeNode[];
 
-export async function RequestCategoryModel(): Promise<StandardJsonResponse<CategoryTree>> {
+export type TreeData = {
+    compiledTree: CategoryTree,
+    flatTree: CategoryTreeNode[],
+}
+
+export async function RequestCategoryModel(): Promise<StandardJsonResponse<TreeData>> {
     try {
         const res = await fetch(GlobalConfig.ServerCategoryEndpoint, {
             method: "GET"
         });
 
-        const data = await requestToJson<{ categories: CategoryTree }>(res);
+        const data = await requestToJson<{ categories: TreeData }>(res);
 
         if (!res.ok) {
             return {

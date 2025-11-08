@@ -1,11 +1,11 @@
 import { useState, useTransition, useEffect } from "react";
-import { RequestCategoryModel, type CategoryTree, type CategoryTreeNode } from "@/lib/actions/categoryAction";
+import { RequestCategoryModel, type TreeData } from "@/lib/actions/categoryAction";
 
 const CACHE_TIMER_IN_MINUTES = 10;
 let cacheInstance: CategoryTreeCache | undefined = undefined;
 
 export class CategoryTreeCache {
-    cachedValue: CategoryTree | undefined = undefined;
+    cachedValue: TreeData | undefined = undefined;
     expiry: number = 0;
 
     constructor() {
@@ -59,7 +59,7 @@ export class CategoryTreeCache {
 
 export default function useCategoryTree() {
     const [ isPending, startTransition ] = useTransition();
-    const [ categoryTree, setCategoryTree ] = useState<CategoryTree | undefined>(undefined);
+    const [ categoryTree, setCategoryTree ] = useState<TreeData | undefined>(undefined);
 
     useEffect(() => {
         startTransition(async () => {
@@ -73,6 +73,7 @@ export default function useCategoryTree() {
 
     return {
         isRequestPending: isPending,
-        categoryTree
+        categoryTree: categoryTree?.compiledTree,
+        flatTree: categoryTree?.flatTree
     }
 }

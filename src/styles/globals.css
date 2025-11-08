@@ -21,6 +21,7 @@
     --color-primary-300: var(--col-primary-300);
     --color-primary-400: var(--col-primary-400);
     --color-primary-500: var(--col-primary-500);
+    --color-primary-content: var(--col-primary-content);
 
     --color-base-100: var(--col-base-100);
     --color-base-200: var(--col-base-200);

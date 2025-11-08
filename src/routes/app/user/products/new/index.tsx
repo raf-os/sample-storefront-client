@@ -1,4 +1,4 @@
-import { useTransition, useState, useEffect, useContext, useRef } from "react";
+import { useTransition, useState, useEffect, useContext, useRef, useImperativeHandle } from "react";
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,8 +14,12 @@ import CustomCommandContext, { type ICustomCommandContext } from "@/components/c
 import * as Popover from "@radix-ui/react-popover";
 import { Input, TextArea, FieldSet } from "@/components/forms";
 import Button from "@/components/button";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, X as XIcon } from "lucide-react";
 import useDebounce from "@/hooks/useDebouce";
+
+const cmdk: Record<string, string> = {
+	SELECT_EVENT: 'cmdk-item-select'
+}
 
 const NewProductSchema = z.object({
 	name: z
@@ -123,10 +127,11 @@ function RouteComponent() {
 
 function CategorySelector({ ...rest }: React.ComponentPropsWithRef<'input'>) {
 	const { isRequestPending, categoryTree } = useCategoryTree();
-	const [ selectedCategories, setSelectedCategories ] = useState<number[]>([]);
+	const [ selectedCategories, setSelectedCategories ] = useState<Set<number>>(new Set());
 	const [ isSearchPopoverOpen, setIsSearchPopoverOpen ] = useState<boolean>(false);
 	const [ inputValue, setInputValue ] = useState<string>("");
 	const inputRef = useRef<HTMLInputElement>(null);
+	const listRef = useRef<SearchPopoverHandle>(null);
 	const debouncedSearch = useDebounce(inputValue);
 
 	const isSearching = debouncedSearch !== "";
@@ -136,14 +141,57 @@ function CategorySelector({ ...rest }: React.ComponentPropsWithRef<'input'>) {
 		else setIsSearchPopoverOpen(false);
 	}, [debouncedSearch]);
 
+	const addCategory = (id: number) => {
+		if (selectedCategories.has(id)) return false;
+
+		setSelectedCategories(prev => {
+			const n = new Set(prev);
+			n.add(id);
+			return n;
+		});
+
+		setIsSearchPopoverOpen(false);
+		setInputValue("");
+
+		return true;
+	}
+
+	const removeCategory = (id: number) => {
+		if (!selectedCategories.has(id)) return false;
+
+		setSelectedCategories(prev => {
+			const n = new Set(prev);
+			n.delete(id);
+			return n;
+		});
+
+		return true;
+	}
+
 	const ctx: ICustomCommandContext = {
 		searchValue: debouncedSearch,
-		isSearching
+		isSearching,
+		addCategory,
+		removeCategory
+	}
+
+	const triggerSelection = () => {
+		const el = listRef.current;
+		if (!el) return;
+
+		const item = el.getListSelection();
+		if (!item) return;
+
+		const event = new Event(cmdk.SELECT_EVENT);
+		item?.dispatchEvent(event);
+
+		// setIsSearchPopoverOpen(false);
 	}
 
 	const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
 		if (event.key === 'Enter') {
 			event.preventDefault();
+			triggerSelection();
 		}
 	}
 
@@ -157,12 +205,21 @@ function CategorySelector({ ...rest }: React.ComponentPropsWithRef<'input'>) {
 						ref={inputRef}
 						disabled={isRequestPending}
 						className="w-full border-b border-base-300 px-2 py-1 outline-none"
+						placeholder="Search..."
 						value={inputValue}
 						onValueChange={setInputValue}
 						onKeyDown={handleKeyDown}
 					/>
 
-					<SearchPopover open={isSearchPopoverOpen} onOpenChange={setIsSearchPopoverOpen} inputRef={inputRef.current} />
+					<SearchPopover
+						open={isSearchPopoverOpen}
+						onOpenChange={setIsSearchPopoverOpen}
+						inputRef={inputRef.current}
+						ref={listRef}
+					/>
+
+					<SelectedCategoryList selectedIds={selectedCategories} />
+
 					</Command>
 
 					<div className="h-48 overflow-y-scroll p-2">
@@ -171,6 +228,62 @@ function CategorySelector({ ...rest }: React.ComponentPropsWithRef<'input'>) {
 				</CustomCommandContext>
 			</div>
 		</>
+	)
+}
+
+type SelectedCategoryListProps = {
+	selectedIds: Set<number>
+}
+
+type SelectedCategoryListItemProps = {
+	name: string,
+	id: number
+}
+
+function SelectedCategoryListItem({
+	name,
+	id
+}: SelectedCategoryListItemProps) {
+	const { removeCategory } = useContext(CustomCommandContext);
+
+	return (
+		<div
+			className="flex shadow-xs rounded-full"
+		>
+			<span className="bg-base-300 px-2 py-0.5 text-sm font-medium rounded-l-full border border-r-0 border-base-400">
+				{ name }
+			</span>
+			<div
+				className="flex items-center justify-center w-7 pr-0.5 grow-1 shrink-1 rounded-r-full bg-destructive-content hover:bg-destructive-content/75 text-destructive cursor-pointer"
+				onClick={() => removeCategory(id)}
+			>
+				<XIcon size={20} strokeWidth={3} strokeLinecap="square" />
+			</div>
+		</div>
+	)
+}
+
+function SelectedCategoryList({
+	selectedIds
+}: SelectedCategoryListProps) {
+	const { flatTree } = useCategoryTree();
+	const isEmpty = selectedIds === undefined || selectedIds === null || selectedIds.size === 0;
+
+	return (
+		<div className="flex gap-2 border-b border-b-base-300 p-2">
+			{ isEmpty
+				? (
+					<span className="text-sm text-base-400">
+						No selections.
+					</span>
+				) : (
+					<>
+						{ [...selectedIds].map((item) => (
+							<SelectedCategoryListItem id={item} key={item} name={flatTree?.find(n => n.id === item)?.name || "ERROR"} />
+						))}
+					</>
+				)}
+		</div>
 	)
 }
 
@@ -232,15 +345,22 @@ function CategoryTreeNode({
 type SearchPopoverProps = {
 	open: boolean,
 	onOpenChange: (open: boolean) => void,
-	inputRef: HTMLInputElement | null
+	inputRef: HTMLInputElement | null,
+	ref: React.Ref<SearchPopoverHandle>
+}
+
+type SearchPopoverHandle = {
+	getListSelection: () => Element | undefined | null,
+	listElement: HTMLDivElement | null
 }
 
 function SearchPopover({
 	open,
 	onOpenChange,
-	inputRef
+	inputRef,
+	ref
 }: SearchPopoverProps) {
-	const { searchValue } = useContext(CustomCommandContext);
+	// const { searchValue } = useContext(CustomCommandContext);
 	const listRef = useRef<HTMLDivElement>(null);
 
 	const disableEvent = (e: Event) => { e.preventDefault(); }
@@ -248,6 +368,13 @@ function SearchPopover({
 	const getListSelection = () => {
 		return listRef.current?.querySelector(`[cmdk-item=""][aria-selected="true"]`);
 	}
+
+	useImperativeHandle(ref, () => {
+		return {
+			getListSelection,
+			listElement: listRef.current
+		}
+	});
 
 	return (
 		<Popover.Root
@@ -257,10 +384,10 @@ function SearchPopover({
 			<Popover.Anchor />
 			<Popover.Portal>
 				<Popover.Content
-					className="rounded-box border border-base-300 bg-base-200 px-2 py-1 shadow-sm"
+					className="rounded-box border border-base-300 bg-base-200 shadow-sm overflow-hidden"
 					align="start"
-					alignOffset={12}
-					sideOffset={6}
+					alignOffset={4}
+					sideOffset={4}
 					onOpenAutoFocus={disableEvent}
 					onInteractOutside={(e) => { if (e.target === inputRef) e.preventDefault() }}
 					onClick={() => console.log(getListSelection())}
@@ -276,20 +403,8 @@ function SearchPopover({
 	)
 }
 
-function traverseCategoryTree(node: CategoryTreeNode, currentTree: CategoryTree = []) {
-	if (!node.children || node.children.length === 0) return;
-
-	node.children.map(child => {
-		currentTree.push(child);
-		if (child.children && child.children.length > 0) traverseCategoryTree(child, currentTree);
-	});
-
-	return currentTree;
-}
-
 function FlatCommandList() {
-	const { categoryTree } = useCategoryTree();
-	const flatTree = traverseCategoryTree({ id: -1, name: "%ROOT%", children: categoryTree });
+	const { flatTree } = useCategoryTree();
 
 	return (
 		<>
@@ -301,10 +416,16 @@ function FlatCommandList() {
 }
 
 function NodeItem({ node }: { node: CategoryTreeNode }) {
+	const { addCategory } = useContext(CustomCommandContext);
+
+	const handleSelection = () => {
+		addCategory(node.id);
+	}
+
 	return (
 		<Command.Item
-			onSelect={val => console.log(val)}
-			className="data-[selected=true]:bg-blue-400"
+			onSelect={handleSelection}
+			className="px-2 py-0.5 cursor-pointer select-none data-[selected=true]:bg-primary-300 data-[selected=true]:text-primary-content"
 			keywords={node.keywords}
 			value={node.name}
 			key={node.id}

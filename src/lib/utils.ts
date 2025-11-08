@@ -24,3 +24,17 @@ export async function requestToJson<T = StandardJsonResponse>(res: Response): Pr
 export function composeTitle(newTitle?: string) {
 	return newTitle === undefined ? GlobalConfig.AppTitle : `${newTitle} | ${GlobalConfig.AppTitle}`
 }
+
+export function composeRefs<T>(...refs: (React.Ref<T> | undefined)[]): (instance: T | null) => void {
+	return (instance: T | null) => {
+		for (const ref of refs) {
+			if (!ref) continue;
+
+			if (typeof ref === 'function') {
+				ref(instance);
+			} else {
+				(ref as React.RefObject<T | null>).current = instance;
+			}
+		}
+	}
+}
