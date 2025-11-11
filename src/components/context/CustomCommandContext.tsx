@@ -5,6 +5,8 @@ export interface ICustomCommandContext {
     isSearching: boolean,
     addCategory: (id: number) => boolean,
     removeCategory: (id: number) => boolean,
+    updateSearchString: (newSearch: string) => void,
+    triggerSelection: () => boolean | undefined | void,
 }
 
 const CustomCommandContext = createContext<ICustomCommandContext>({
@@ -12,6 +14,8 @@ const CustomCommandContext = createContext<ICustomCommandContext>({
     isSearching: false,
     addCategory: () => false,
     removeCategory: () => false,
+    updateSearchString: () => {},
+    triggerSelection: () => {}
 });
 
 export default CustomCommandContext;

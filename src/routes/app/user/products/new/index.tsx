@@ -1,4 +1,4 @@
-import { useTransition, useState, useEffect, useContext, useRef, useImperativeHandle } from "react";
+import { useTransition, useState, useEffect, useContext, useRef, useImperativeHandle, useCallback } from "react";
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +16,7 @@ import { Input, TextArea, FieldSet } from "@/components/forms";
 import Button from "@/components/button";
 import { ChevronDown, X as XIcon } from "lucide-react";
 import useDebounce from "@/hooks/useDebouce";
+import { cn, composeRefs } from "@/lib/utils";
 
 const cmdk: Record<string, string> = {
 	SELECT_EVENT: 'cmdk-item-select'
@@ -132,14 +133,17 @@ function CategorySelector({ ...rest }: React.ComponentPropsWithRef<'input'>) {
 	const [ inputValue, setInputValue ] = useState<string>("");
 	const inputRef = useRef<HTMLInputElement>(null);
 	const listRef = useRef<SearchPopoverHandle>(null);
-	const debouncedSearch = useDebounce(inputValue);
+	const [ searchString, setSearchString ] = useState<string>("");
 
-	const isSearching = debouncedSearch !== "";
+	const isSearching = searchString !== "";
 
-	useEffect(() => {
-		if (debouncedSearch !== "") setIsSearchPopoverOpen(true);
+	const updateSearchString = useCallback((newSearch: string) => {
+		if (newSearch !== "") setIsSearchPopoverOpen(true);
 		else setIsSearchPopoverOpen(false);
-	}, [debouncedSearch]);
+
+		setSearchString(newSearch);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [searchString]);
 
 	const addCategory = (id: number) => {
 		if (selectedCategories.has(id)) return false;
@@ -168,13 +172,6 @@ function CategorySelector({ ...rest }: React.ComponentPropsWithRef<'input'>) {
 		return true;
 	}
 
-	const ctx: ICustomCommandContext = {
-		searchValue: debouncedSearch,
-		isSearching,
-		addCategory,
-		removeCategory
-	}
-
 	const triggerSelection = () => {
 		const el = listRef.current;
 		if (!el) return;
@@ -185,15 +182,25 @@ function CategorySelector({ ...rest }: React.ComponentPropsWithRef<'input'>) {
 		const event = new Event(cmdk.SELECT_EVENT);
 		item?.dispatchEvent(event);
 
+		return true;
+
 		// setIsSearchPopoverOpen(false);
 	}
 
-	const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-		if (event.key === 'Enter') {
-			event.preventDefault();
-			triggerSelection();
-		}
+	const ctx: ICustomCommandContext = {
+		searchValue: searchString,
+		updateSearchString: updateSearchString,
+		triggerSelection,
+		isSearching,
+		addCategory,
+		removeCategory
 	}
+	// const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+	// 	if (event.key === 'Enter') {
+	// 		event.preventDefault();
+	// 		triggerSelection();
+	// 	}
+	// }
 
 	return (
 		<>
@@ -201,25 +208,29 @@ function CategorySelector({ ...rest }: React.ComponentPropsWithRef<'input'>) {
 			<div className="w-full border border-base-300 rounded-box">
 				<CustomCommandContext value={ctx}>
 					<Command loop>
-					<Command.Input
-						ref={inputRef}
-						disabled={isRequestPending}
-						className="w-full border-b border-base-300 px-2 py-1 outline-none"
-						placeholder="Search..."
-						value={inputValue}
-						onValueChange={setInputValue}
-						onKeyDown={handleKeyDown}
-					/>
+						{/* <Command.Input
+							ref={inputRef}
+							disabled={isRequestPending}
+							className="w-full border-b border-base-300 px-2 py-1 outline-none"
+							placeholder="Search..."
+							value={inputValue}
+							onValueChange={setInputValue}
+							onKeyDown={handleKeyDown}
+						/> */}
 
-					<SearchPopover
-						open={isSearchPopoverOpen}
-						onOpenChange={setIsSearchPopoverOpen}
-						inputRef={inputRef.current}
-						ref={listRef}
-					/>
+						<CmdkInputSelect
+							ref={inputRef}
+							selectedIds={selectedCategories}
+						/>
 
-					<SelectedCategoryList selectedIds={selectedCategories} />
+						<SearchPopover
+							open={isSearchPopoverOpen}
+							onOpenChange={setIsSearchPopoverOpen}
+							inputRef={inputRef.current}
+							ref={listRef}
+						/>
 
+						{/* <SelectedCategoryList selectedIds={selectedCategories} /> */}
 					</Command>
 
 					<div className="h-48 overflow-y-scroll p-2">
@@ -231,58 +242,160 @@ function CategorySelector({ ...rest }: React.ComponentPropsWithRef<'input'>) {
 	)
 }
 
-type SelectedCategoryListProps = {
+type CmdkInputSelectProps = React.ComponentPropsWithRef<'input'> & {
 	selectedIds: Set<number>
 }
 
-type SelectedCategoryListItemProps = {
-	name: string,
-	id: number
-}
+function CmdkInputSelect({
+	ref,
+	className,
+	selectedIds,
+	...rest
+}: CmdkInputSelectProps) {
+	const { flatTree } = useCategoryTree();
+	const [ currentSelection, setCurrentSelection ] = useState<number | null>(null);
+	const [ inputValue, setInputValue ] = useState<string>("");
+	const debouncedSearch = useDebounce(inputValue);
+	const cmdkInput = useRef<HTMLInputElement>(null);
+	const inputRef = useRef<HTMLInputElement>(null);
+	const { updateSearchString, triggerSelection, removeCategory } = useContext(CustomCommandContext);
 
-function SelectedCategoryListItem({
-	name,
-	id
-}: SelectedCategoryListItemProps) {
-	const { removeCategory } = useContext(CustomCommandContext);
+	const selectionSize = Math.max(selectedIds.size - 1, 0);
+	const isSelecting = (currentSelection !== null) && selectedIds.size > 0;
+
+	useEffect(() => {
+		updateSearchString(debouncedSearch);
+	}, [debouncedSearch, updateSearchString]);
+
+	const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+		if (!inputRef.current) return;
+		switch(event.key) {
+			case 'Enter': {
+				event.preventDefault();
+				const success = triggerSelection();
+				if (success) { setInputValue(""); }
+				break;
+			}
+			case 'ArrowLeft':
+				if (inputRef.current.selectionStart === 0) {
+					setCurrentSelection(prev => {
+						if (prev === null) return selectionSize;
+						else if (prev > 0) return prev - 1;
+						else return prev;
+					});
+				}
+				break;
+			case 'ArrowRight':
+				if (currentSelection !== null) {
+					setCurrentSelection(prev => {
+						if (prev === null) return prev;
+						else if (prev < selectionSize) return prev + 1;
+						else return null;
+					});
+				}
+				break;
+			case 'Backspace':
+				if (inputRef.current.selectionStart === 0 && isSelecting) {
+					const idToRemove = [...selectedIds][selectedIds.size - 1];
+					removeCategory(idToRemove);
+				} else if (isSelecting) {
+					const idToRemove = [...selectedIds][currentSelection];
+					removeCategory(idToRemove);
+				}
+				break;
+			case 'Delete':
+				if (isSelecting) {
+					const idToRemove = [...selectedIds][currentSelection];
+					removeCategory(idToRemove);
+				}
+				break;
+			default:
+				setCurrentSelection(null);
+				break;
+		}
+	}
+
+	const handleDeselect = () => {
+		setCurrentSelection(null);
+	}
 
 	return (
 		<div
-			className="flex shadow-xs rounded-full"
+			data-role="cmdk-input-wrapper"
+			className="flex gap-2 border-base-300 border-b p-2"
 		>
-			<span className="bg-base-300 px-2 py-0.5 text-sm font-medium rounded-l-full border border-r-0 border-base-400">
-				{ name }
-			</span>
-			<div
-				className="flex items-center justify-center w-7 pr-0.5 grow-1 shrink-1 rounded-r-full bg-destructive-content hover:bg-destructive-content/75 text-destructive cursor-pointer"
-				onClick={() => removeCategory(id)}
-			>
-				<XIcon size={20} strokeWidth={3} strokeLinecap="square" />
-			</div>
+			{ selectedIds.size > 0 && (
+				<div className="flex gap-1">
+					{ [...selectedIds].map((item, idx) => (
+						<SelectedCategoryListItem
+							id={item}
+							key={item}
+							name={flatTree?.find(n => n.id === item)?.name || "ERROR"}
+							isSelected={currentSelection === idx}
+						/>
+					))}
+				</div>
+			)}
+
+			<input
+				className={cn(
+					"placeholder:text-base-300 grow-1 shrink-1 outline-0",
+					isSelecting && "caret-transparent",
+					className
+				)}
+				value={inputValue}
+				onChange={(val) => setInputValue(val.target.value)}
+				onKeyDown={handleKeyDown}
+				onClick={handleDeselect}
+				onBlur={handleDeselect}
+				ref={composeRefs(ref, inputRef)}
+				placeholder="Search..."
+				{...rest}
+			/>
+
+			<Command.Input
+				ref={cmdkInput}
+				value={debouncedSearch}
+				onValueChange={() => {}}
+				disabled={true}
+				className="hidden"
+			/>
 		</div>
 	)
 }
 
-function SelectedCategoryList({
-	selectedIds
-}: SelectedCategoryListProps) {
-	const { flatTree } = useCategoryTree();
-	const isEmpty = selectedIds === undefined || selectedIds === null || selectedIds.size === 0;
+type SelectedCategoryListItemProps = {
+	name: string,
+	id: number,
+	isSelected?: boolean
+}
+
+function SelectedCategoryListItem({
+	name,
+	id,
+	isSelected
+}: SelectedCategoryListItemProps) {
+	const { removeCategory } = useContext(CustomCommandContext);
+	const wrapperRef = useRef<HTMLDivElement>(null);
 
 	return (
-		<div className="flex gap-2 border-b border-b-base-300 p-2">
-			{ isEmpty
-				? (
-					<span className="text-sm text-base-400">
-						No selections.
-					</span>
-				) : (
-					<>
-						{ [...selectedIds].map((item) => (
-							<SelectedCategoryListItem id={item} key={item} name={flatTree?.find(n => n.id === item)?.name || "ERROR"} />
-						))}
-					</>
-				)}
+		<div
+			ref={wrapperRef}
+			className={cn(
+				"flex shadow-xs rounded-full group bg-base-400 cursor-pointer select-none overflow-hidden transition-all",
+				isSelected? "ring-3 ring-base-500/50 bg-destructive-content" : "hover:bg-destructive-content"
+			)}
+			data-selected={isSelected}
+		>
+			<span className="bg-base-100 px-1 py-0.5 text-sm font-medium rounded-r-full">
+				{ name }
+			</span>
+			<div
+				className="flex items-center justify-center overflow-hidden w-[4px] group-data-[selected=true]:w-7 group-hover:w-7 transition-all pr-0.5 grow-1 shrink-1 text-destructive"
+				onClick={() => removeCategory(id)}
+			>
+				<XIcon size={20} strokeWidth={3} strokeLinecap="square" />
+			</div>
 		</div>
 	)
 }
@@ -369,6 +482,12 @@ function SearchPopover({
 		return listRef.current?.querySelector(`[cmdk-item=""][aria-selected="true"]`);
 	}
 
+	const handleOutsideInteraction: Popover.PopoverContentProps['onInteractOutside'] = (event) => {
+		if (event.target === inputRef) {
+			event.preventDefault();
+		}
+	}
+
 	useImperativeHandle(ref, () => {
 		return {
 			getListSelection,
@@ -389,8 +508,7 @@ function SearchPopover({
 					alignOffset={4}
 					sideOffset={4}
 					onOpenAutoFocus={disableEvent}
-					onInteractOutside={(e) => { if (e.target === inputRef) e.preventDefault() }}
-					onClick={() => console.log(getListSelection())}
+					onInteractOutside={handleOutsideInteraction}
 				>
 						<Command.List ref={listRef} data-debug="DEBUG ME MATE">
 							<Command.Empty>No results found.</Command.Empty>
