@@ -1,22 +1,24 @@
-import { useTransition, useState, useEffect, useContext, useRef, useImperativeHandle, useCallback } from "react";
+import { useTransition, useState, useContext, useRef, useImperativeHandle, useCallback } from "react";
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, FormProvider } from "react-hook-form";
 
 import { AddProductAction } from "@/lib/actions/productActions";
-import { type CategoryTree, type CategoryTreeNode } from "@/lib/actions/categoryAction";
-import { Command, useCommandState } from "cmdk";
+import { type CategoryTreeNode } from "@/lib/actions/categoryAction";
+import { Command } from "cmdk";
+import { EventBus } from "@/classes/EventBus";
 
 import useCategoryTree from "@/hooks/useCategoryTree";
-import CustomCommandContext, { type ICustomCommandContext } from "@/components/context/CustomCommandContext";
+import CustomCommandContext, { type CommandEvents, type ICustomCommandContext } from "@/components/context/CustomCommandContext";
 
+import * as Collapsible from "@radix-ui/react-collapsible";
 import * as Popover from "@radix-ui/react-popover";
 import { Input, TextArea, FieldSet } from "@/components/forms";
 import Button from "@/components/button";
-import { ChevronDown, X as XIcon } from "lucide-react";
-import useDebounce from "@/hooks/useDebouce";
-import { cn, composeRefs } from "@/lib/utils";
+import { ChevronDown, Plus as PlusIcon } from "lucide-react";
+
+import { CmdkInputSelect } from "@/components/custom-category-select/CmdkInputSelect";
 
 const cmdk: Record<string, string> = {
 	SELECT_EVENT: 'cmdk-item-select'
@@ -130,10 +132,10 @@ function CategorySelector({ ...rest }: React.ComponentPropsWithRef<'input'>) {
 	const { isRequestPending, categoryTree } = useCategoryTree();
 	const [ selectedCategories, setSelectedCategories ] = useState<Set<number>>(new Set());
 	const [ isSearchPopoverOpen, setIsSearchPopoverOpen ] = useState<boolean>(false);
-	const [ inputValue, setInputValue ] = useState<string>("");
 	const inputRef = useRef<HTMLInputElement>(null);
 	const listRef = useRef<SearchPopoverHandle>(null);
 	const [ searchString, setSearchString ] = useState<string>("");
+	const events = new EventBus<CommandEvents>();
 
 	const isSearching = searchString !== "";
 
@@ -155,7 +157,7 @@ function CategorySelector({ ...rest }: React.ComponentPropsWithRef<'input'>) {
 		});
 
 		setIsSearchPopoverOpen(false);
-		setInputValue("");
+		events.emit('onCategorySelection');
 
 		return true;
 	}
@@ -168,6 +170,8 @@ function CategorySelector({ ...rest }: React.ComponentPropsWithRef<'input'>) {
 			n.delete(id);
 			return n;
 		});
+
+		events.emit('onCategorySelection');
 
 		return true;
 	}
@@ -183,40 +187,26 @@ function CategorySelector({ ...rest }: React.ComponentPropsWithRef<'input'>) {
 		item?.dispatchEvent(event);
 
 		return true;
-
-		// setIsSearchPopoverOpen(false);
 	}
 
 	const ctx: ICustomCommandContext = {
 		searchValue: searchString,
 		updateSearchString: updateSearchString,
 		triggerSelection,
+		selectedCategories,
 		isSearching,
 		addCategory,
-		removeCategory
+		removeCategory,
+		events,
 	}
-	// const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-	// 	if (event.key === 'Enter') {
-	// 		event.preventDefault();
-	// 		triggerSelection();
-	// 	}
-	// }
 
 	return (
 		<>
 			<input {...rest} type="hidden" />
 			<div className="w-full border border-base-300 rounded-box">
+
 				<CustomCommandContext value={ctx}>
 					<Command loop>
-						{/* <Command.Input
-							ref={inputRef}
-							disabled={isRequestPending}
-							className="w-full border-b border-base-300 px-2 py-1 outline-none"
-							placeholder="Search..."
-							value={inputValue}
-							onValueChange={setInputValue}
-							onKeyDown={handleKeyDown}
-						/> */}
 
 						<CmdkInputSelect
 							ref={inputRef}
@@ -230,173 +220,14 @@ function CategorySelector({ ...rest }: React.ComponentPropsWithRef<'input'>) {
 							ref={listRef}
 						/>
 
-						{/* <SelectedCategoryList selectedIds={selectedCategories} /> */}
 					</Command>
 
-					<div className="h-48 overflow-y-scroll p-2">
+					<div className="flex flex-col gap-2 h-48 overflow-y-scroll p-2">
 						{ categoryTree && <CategoryTreeNode id={-1} name="%ROOT%" children={categoryTree} /> }
 					</div>
 				</CustomCommandContext>
 			</div>
 		</>
-	)
-}
-
-type CmdkInputSelectProps = React.ComponentPropsWithRef<'input'> & {
-	selectedIds: Set<number>
-}
-
-function CmdkInputSelect({
-	ref,
-	className,
-	selectedIds,
-	...rest
-}: CmdkInputSelectProps) {
-	const { flatTree } = useCategoryTree();
-	const [ currentSelection, setCurrentSelection ] = useState<number | null>(null);
-	const [ inputValue, setInputValue ] = useState<string>("");
-	const debouncedSearch = useDebounce(inputValue);
-	const cmdkInput = useRef<HTMLInputElement>(null);
-	const inputRef = useRef<HTMLInputElement>(null);
-	const { updateSearchString, triggerSelection, removeCategory } = useContext(CustomCommandContext);
-
-	const selectionSize = Math.max(selectedIds.size - 1, 0);
-	const isSelecting = (currentSelection !== null) && selectedIds.size > 0;
-
-	useEffect(() => {
-		updateSearchString(debouncedSearch);
-	}, [debouncedSearch, updateSearchString]);
-
-	const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-		if (!inputRef.current) return;
-		switch(event.key) {
-			case 'Enter': {
-				event.preventDefault();
-				const success = triggerSelection();
-				if (success) { setInputValue(""); }
-				break;
-			}
-			case 'ArrowLeft':
-				if (inputRef.current.selectionStart === 0) {
-					setCurrentSelection(prev => {
-						if (prev === null) return selectionSize;
-						else if (prev > 0) return prev - 1;
-						else return prev;
-					});
-				}
-				break;
-			case 'ArrowRight':
-				if (currentSelection !== null) {
-					setCurrentSelection(prev => {
-						if (prev === null) return prev;
-						else if (prev < selectionSize) return prev + 1;
-						else return null;
-					});
-				}
-				break;
-			case 'Backspace':
-				if (inputRef.current.selectionStart === 0 && isSelecting) {
-					const idToRemove = [...selectedIds][selectedIds.size - 1];
-					removeCategory(idToRemove);
-				} else if (isSelecting) {
-					const idToRemove = [...selectedIds][currentSelection];
-					removeCategory(idToRemove);
-				}
-				break;
-			case 'Delete':
-				if (isSelecting) {
-					const idToRemove = [...selectedIds][currentSelection];
-					removeCategory(idToRemove);
-				}
-				break;
-			default:
-				setCurrentSelection(null);
-				break;
-		}
-	}
-
-	const handleDeselect = () => {
-		setCurrentSelection(null);
-	}
-
-	return (
-		<div
-			data-role="cmdk-input-wrapper"
-			className="flex gap-2 border-base-300 border-b p-2"
-		>
-			{ selectedIds.size > 0 && (
-				<div className="flex gap-1">
-					{ [...selectedIds].map((item, idx) => (
-						<SelectedCategoryListItem
-							id={item}
-							key={item}
-							name={flatTree?.find(n => n.id === item)?.name || "ERROR"}
-							isSelected={currentSelection === idx}
-						/>
-					))}
-				</div>
-			)}
-
-			<input
-				className={cn(
-					"placeholder:text-base-300 grow-1 shrink-1 outline-0",
-					isSelecting && "caret-transparent",
-					className
-				)}
-				value={inputValue}
-				onChange={(val) => setInputValue(val.target.value)}
-				onKeyDown={handleKeyDown}
-				onClick={handleDeselect}
-				onBlur={handleDeselect}
-				ref={composeRefs(ref, inputRef)}
-				placeholder="Search..."
-				{...rest}
-			/>
-
-			<Command.Input
-				ref={cmdkInput}
-				value={debouncedSearch}
-				onValueChange={() => {}}
-				disabled={true}
-				className="hidden"
-			/>
-		</div>
-	)
-}
-
-type SelectedCategoryListItemProps = {
-	name: string,
-	id: number,
-	isSelected?: boolean
-}
-
-function SelectedCategoryListItem({
-	name,
-	id,
-	isSelected
-}: SelectedCategoryListItemProps) {
-	const { removeCategory } = useContext(CustomCommandContext);
-	const wrapperRef = useRef<HTMLDivElement>(null);
-
-	return (
-		<div
-			ref={wrapperRef}
-			className={cn(
-				"flex shadow-xs rounded-full group bg-base-400 cursor-pointer select-none overflow-hidden transition-all",
-				isSelected? "ring-3 ring-base-500/50 bg-destructive-content" : "hover:bg-destructive-content"
-			)}
-			data-selected={isSelected}
-		>
-			<span className="bg-base-100 px-1 py-0.5 text-sm font-medium rounded-r-full">
-				{ name }
-			</span>
-			<div
-				className="flex items-center justify-center overflow-hidden w-[4px] group-data-[selected=true]:w-7 group-hover:w-7 transition-all pr-0.5 grow-1 shrink-1 text-destructive"
-				onClick={() => removeCategory(id)}
-			>
-				<XIcon size={20} strokeWidth={3} strokeLinecap="square" />
-			</div>
-		</div>
 	)
 }
 
@@ -410,6 +241,7 @@ function CategoryTreeNode({
 	children,
 	depth = 0
 }: CategoryTreeNodeProps) {
+	const { addCategory } = useContext(CustomCommandContext);
 	const ChildNodes: React.ReactElement<CategoryTreeNode>[] = [];
 
 	const hasChildren = children && children.length > 0;
@@ -421,38 +253,46 @@ function CategoryTreeNode({
 		});
 	}
 
-	if (id == -1) return ChildNodes;
-
-	const Component = () => (
+	const Component = useCallback(() => (
 		<div className="flex justify-between">
-			<div style={{ paddingLeft: (depth - 1) * 16 }}>
+			<div
+				onClick={e => { e.preventDefault(); addCategory(id); }}
+				className="hover:text-primary-300 cursor-pointer"
+			>
 				{ name }
 			</div>
-			{ (hasChildren) && <div><ChevronDown /></div> }
+			{ (hasChildren) && (
+				<div>
+					<ChevronDown className="group-data-[state=open]:rotate-180 transition-transform" />
+				</div>
+			)}
 		</div>
-	)
+	), [hasChildren, name, addCategory, id]);
 
-	const WrappedComponent = () => {
-		return hasChildren
+	if (id == -1) return ChildNodes;
+
+	return hasChildren
 		? (
+			<div className="border border-base-300 rounded-box">
+				<Collapsible.Root>
+					<Collapsible.Trigger className="w-full px-2 py-1 data-[state=open]:bg-base-100 rounded-t-box transition-colors group">
+						<Component />
+					</Collapsible.Trigger>
+
+					<Collapsible.Content
+						className="CollapsibleContent"
+					>
+						<div className="flex flex-col gap-2 px-2 py-3 border-t border-base-300">
+							{ ChildNodes }
+						</div>
+					</Collapsible.Content>
+				</Collapsible.Root>
+			</div>
+		) : (
 			<>
 				<Component />
-
-				{ ChildNodes }
 			</>
 		)
-		: (
-			<>
-				<Component />
-			</>
-		)
-	}
-
-	return (
-		<>
-			<WrappedComponent />
-		</>
-	)
 }
 
 type SearchPopoverProps = {
@@ -534,13 +374,15 @@ function FlatCommandList() {
 }
 
 function NodeItem({ node }: { node: CategoryTreeNode }) {
-	const { addCategory } = useContext(CustomCommandContext);
+	const { addCategory, selectedCategories } = useContext(CustomCommandContext);
+
+	const isValid = !selectedCategories.has(node.id);
 
 	const handleSelection = () => {
 		addCategory(node.id);
 	}
 
-	return (
+	return isValid ? (
 		<Command.Item
 			onSelect={handleSelection}
 			className="px-2 py-0.5 cursor-pointer select-none data-[selected=true]:bg-primary-300 data-[selected=true]:text-primary-content"
@@ -550,5 +392,5 @@ function NodeItem({ node }: { node: CategoryTreeNode }) {
 		>
 			{ node.name }
 		</Command.Item>
-	)
+	) : null;
 }

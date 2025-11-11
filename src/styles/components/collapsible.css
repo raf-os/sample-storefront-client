@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+.CollapsibleContent {
+    overflow: hidden;
+    --slide-height: var(--radix-collapsible-content-height);
+
+    &[data-state=open] {
+        animation: collapsibleSlideDown 100ms ease-out;
+    }
+
+    &[data-state=closed] {
+        animation: collapsibleSlideUp 100ms ease-out;
+    }
+}
+
+@keyframes collapsibleSlideDown {
+    from {
+        height: 0;
+    }
+    to {
+        height: var(--slide-height, 100%);
+    }
+}
+
+@keyframes collapsibleSlideUp {
+    from {
+        height: var(--slide-height, 100%);
+    }
+    to {
+        height: 0;
+    }
+}

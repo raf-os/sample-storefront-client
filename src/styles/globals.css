@@ -3,6 +3,7 @@
 @import "./animations.css";
 
 @import "./components/buttons.css";
+@import "./components/collapsible.css";
 @import "./components/table.css";
 
 @font-face {
