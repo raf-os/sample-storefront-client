@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import fakeProductList, { type ProductProps } from "@/lib/fakes/products";
@@ -5,6 +7,7 @@ import PageSetup from "@/components/layout/PageSetup";
 import Button from "@/components/button";
 import ExpandableImage from "@/components/images/ExpandableImage";
 import { cn } from "@/lib/utils";
+import { GetProductById, type TProductListPageResponse } from "@/lib/actions/productActions";
 
 import { ShoppingCart, Wallet } from "lucide-react";
 
@@ -16,10 +19,20 @@ const fetchItem = (itemId: string) => {
 }
 
 export const Route = createFileRoute('/item/$itemId')({
-    loader: async ({params}) => {
-        const itemData = fetchItem(params.itemId);
+    validateSearch: z.object({
+        itemId: z.string()
+    }),
+    loaderDeps: ({ search: { itemId } }) => ({
+        itemId,
+    }),
+    loader: async ({ deps: { itemId } }) => {
+        const request = await GetProductById(itemId);
+        if (!request.success) throw new Error(request.message);
+
+        const data = request.data!;
+
         return {
-            data: itemData
+            data: data
         }
     },
     component: ItemPage

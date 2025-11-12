@@ -1,4 +1,4 @@
-export type StandardJsonResponse<T = unknown> = {
+export type StandardJsonResponse<T> = {
     success: boolean,
     message?: string,
     data?: T

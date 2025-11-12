@@ -28,3 +28,13 @@ export type TProduct = {
     comments?: TComment[]
     productCategories?: TProductCategory[]
 }
+
+export type TProductListItem = {
+    id: string,
+    creationDate: number,
+    name: string,
+    price: number,
+    discount?: number,
+
+    productCategories?: TProductCategory[]
+}
