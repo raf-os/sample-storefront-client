@@ -19,7 +19,7 @@ export async function AddProductAction(request: AddProductRequest): Promise<Stan
     }
 
     try {
-        const res = await fetch(GlobalConfig.ServerProductEntpoint, {
+        const res = await fetch(GlobalConfig.ServerProductEndpoint, {
             method: "PUT",
             credentials: "include",
             body: JSON.stringify(request)
@@ -41,4 +41,16 @@ export async function AddProductAction(request: AddProductRequest): Promise<Stan
             message: "Error contacting server."
         }
     } 
+}
+
+export async function GetProductById(id: number) {
+    try {
+        const res = await fetch(GlobalConfig.ServerProductEndpoint + `/item/${id}`);
+    } catch(err) {
+        console.error(err);
+        return {
+            success: false,
+            message: "Error contacting server."
+        }
+    }
 }

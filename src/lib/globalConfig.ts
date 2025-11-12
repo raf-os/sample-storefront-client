@@ -4,7 +4,7 @@ const GlobalConfig = {
     AppTitle: "Storefront Sample",
     ServerAddr: SERVER_ADDRESS,
     ServerAuthEndpoint: SERVER_ADDRESS + "/auth",
-    ServerProductEntpoint: SERVER_ADDRESS + "/api/product",
+    ServerProductEndpoint: SERVER_ADDRESS + "/api/product",
     ServerCommentEndpoint: SERVER_ADDRESS + "/api/comment",
     ServerCategoryEndpoint: SERVER_ADDRESS + "/api/category",
     UserRoles: {

@@ -1,8 +1,8 @@
-import { useTransition, useState, useContext, useRef, useImperativeHandle, useCallback } from "react";
+import { useTransition, useState, useContext, useRef, useImperativeHandle, useCallback, useEffect } from "react";
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, useFormContext } from "react-hook-form";
 
 import { AddProductAction } from "@/lib/actions/productActions";
 import { type CategoryTreeNode } from "@/lib/actions/categoryAction";
@@ -34,6 +34,9 @@ const NewProductSchema = z.object({
 		.positive("Price can't be negative."),
 	description: z
 		.string()
+		.optional(),
+	categories: z
+		.set(z.number("Invalid category types."))
 		.optional()
 });
 
@@ -128,16 +131,20 @@ function RouteComponent() {
 	)
 }
 
-function CategorySelector({ ...rest }: React.ComponentPropsWithRef<'input'>) {
+function CategorySelector({
+	name
+}: React.ComponentPropsWithRef<'input'>) {
 	const { isRequestPending, categoryTree } = useCategoryTree();
 	const [ selectedCategories, setSelectedCategories ] = useState<Set<number>>(new Set());
 	const [ isSearchPopoverOpen, setIsSearchPopoverOpen ] = useState<boolean>(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const listRef = useRef<SearchPopoverHandle>(null);
 	const [ searchString, setSearchString ] = useState<string>("");
+	const { register, unregister, setValue } = useFormContext<z.infer<typeof NewProductSchema>>();
 	const events = new EventBus<CommandEvents>();
 
 	const isSearching = searchString !== "";
+	const _name = name as 'categories'; // fuck off, typescript
 
 	const updateSearchString = useCallback((newSearch: string) => {
 		if (newSearch !== "") setIsSearchPopoverOpen(true);
@@ -189,6 +196,19 @@ function CategorySelector({ ...rest }: React.ComponentPropsWithRef<'input'>) {
 		return true;
 	}
 
+	useEffect(() => {
+		register(_name);
+		return () => unregister(_name);
+	}, [register, unregister, _name]);
+
+	useEffect(() => {
+		if (selectedCategories.size > 0) {
+			setValue(_name, selectedCategories);
+		} else {
+			setValue(_name, undefined);
+		}
+	}, [setValue, selectedCategories, _name]);
+
 	const ctx: ICustomCommandContext = {
 		searchValue: searchString,
 		updateSearchString: updateSearchString,
@@ -202,7 +222,6 @@ function CategorySelector({ ...rest }: React.ComponentPropsWithRef<'input'>) {
 
 	return (
 		<>
-			<input {...rest} type="hidden" />
 			<div className="w-full border border-base-300 rounded-box">
 
 				<CustomCommandContext value={ctx}>
@@ -211,6 +230,7 @@ function CategorySelector({ ...rest }: React.ComponentPropsWithRef<'input'>) {
 						<CmdkInputSelect
 							ref={inputRef}
 							selectedIds={selectedCategories}
+							disabled={isRequestPending}
 						/>
 
 						<SearchPopover
