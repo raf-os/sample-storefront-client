@@ -11,6 +11,7 @@ export type TJwtToken = {
     jti: string,
     role: string,
     exp: number,
+    jwt: string,
     [key: string]: unknown
 }
 
@@ -31,7 +32,7 @@ export async function AuthRefresh(): Promise<TJwtToken | null> {
         const data = await res.text();
         const token = jwtDecode<TJwtToken>(data);
 
-        return token;
+        return { ...token, jwt: data };
     } catch(error) {
         console.log(error);
         return null;

@@ -4,12 +4,14 @@ import GlobalConfig from "@/lib/globalConfig";
 import type { StandardJsonResponse } from "@/types/StandardJsonResponse";
 import type { TProduct, TProductListItem } from "@/models";
 
+import AuthSingleton from "@/classes/AuthSingleton";
 import * as RESPONSES from "@/lib/jsonResponses";
 
 type AddProductRequest = {
     name: string,
     price: number,
-    description?: string
+    description?: string,
+    categories?: number[]
 }
 
 export async function AddProductAction(request: AddProductRequest): Promise<StandardJsonResponse<string>> {
@@ -22,9 +24,13 @@ export async function AddProductAction(request: AddProductRequest): Promise<Stan
     }
 
     try {
+        const token = AuthSingleton.getJwtToken();
         const res = await fetch(GlobalConfig.ServerProductEndpoint, {
             method: "PUT",
-            credentials: "include",
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify(request)
         })
 

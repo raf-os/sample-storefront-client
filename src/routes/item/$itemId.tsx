@@ -1,41 +1,24 @@
-import { z } from "zod";
-
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import fakeProductList, { type ProductProps } from "@/lib/fakes/products";
+import { createFileRoute, Await, type ErrorComponentProps } from "@tanstack/react-router";
 import PageSetup from "@/components/layout/PageSetup";
 import Button from "@/components/button";
 import ExpandableImage from "@/components/images/ExpandableImage";
 import { cn } from "@/lib/utils";
-import { GetProductById, type TProductListPageResponse } from "@/lib/actions/productActions";
+import { GetProductById } from "@/lib/actions/productActions";
 
 import { ShoppingCart, Wallet } from "lucide-react";
 
-// Todo: fetch from back end
-// Todo: back end
-const fetchItem = (itemId: string) => {
-    const selectedItem = fakeProductList.find(prod => prod.id === itemId);
-    return selectedItem;
-}
-
 export const Route = createFileRoute('/item/$itemId')({
-    validateSearch: z.object({
-        itemId: z.string()
-    }),
-    loaderDeps: ({ search: { itemId } }) => ({
-        itemId,
-    }),
-    loader: async ({ deps: { itemId } }) => {
-        const request = await GetProductById(itemId);
+    loader: async ({ params }) => {
+        const request = await GetProductById(params.itemId);
         if (!request.success) throw new Error(request.message);
 
         const data = request.data!;
 
-        return {
-            data: data
-        }
+        return data;
     },
-    component: ItemPage
+    component: ItemPage,
+    errorComponent: ErrorContent
 });
 
 function ItemPage() {
@@ -46,9 +29,30 @@ function ItemPage() {
     )
 }
 
+function ErrorContent({ error }: ErrorComponentProps) {
+    return (
+        <div
+            className="w-1/2 mx-auto"
+        >
+            <h1
+                className="text-lg font-semibold mb-4"
+            >
+                Error loading content
+            </h1>
+            <div
+                className="border border-base-300 bg-base-200 rounded-box p-4"
+            >
+                { error.message }
+            </div>
+        </div>
+    )
+}
+
 function PageContent() {
     const data = Route.useLoaderData();
-    const product = data.data;
+    const product = data;
+
+    if (product.discount === undefined) product.discount = 0;
 
     const formatter = Intl.NumberFormat('en-us', {
         style: 'currency',
@@ -72,17 +76,22 @@ function PageContent() {
             <div
                 className="flex flex-col gap-4 w-2/3 h-full p-4 bg-base-200 rounded-box"
             >
-                <ProductImageViewer
-                    displayImage={product.displayImage}
-                    imageList={product.imageList}
-                />
+                { (product.imageList && product.imageList.length !== 0) ? (
+                    <ProductImageViewer
+                        imageList={product.imageList}
+                    />
+                ) : (
+                    <>
+                        No images available.
+                    </>
+                )}
             </div>
 
             <div
                 className="grow-1 shrink-1 flex flex-col h-full bg-base-200 rounded-box p-4"
             >
                 <h1 className="font-bold text-lg">
-                    { product.label }
+                    { product.name }
                 </h1>
 
                 { product.description===undefined

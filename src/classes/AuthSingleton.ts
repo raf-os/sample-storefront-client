@@ -25,11 +25,8 @@ type TAuthData = {
 
 /** Simply a helper, in case this needs to be accessed from outside a react context. */
 class _AuthSingleton {
-    private data: TAuthData | null;
-
-    constructor() {
-        this.data = null;
-    }
+    private data: TAuthData | null = null;
+    private jwt: string | null = null;
 
     private _getFieldOrNull(field: unknown) {
         return (field === null || field === undefined)
@@ -40,6 +37,7 @@ class _AuthSingleton {
     updateToken(token: TJwtToken | null | undefined) {
         if (token === null || token === undefined) {
             this.data = null;
+            this.jwt = null;
         } else {
             this.data = {
                 name: token.unique_name,
@@ -47,6 +45,7 @@ class _AuthSingleton {
                 exp: token.exp,
                 role: MapAuthRole(token.role)
             }
+            this.jwt = token.jwt;
         }
     }
 
@@ -60,6 +59,10 @@ class _AuthSingleton {
 
     getUserRole() {
         return this._getFieldOrNull(this.data?.role);
+    }
+
+    getJwtToken() {
+        return this.jwt;
     }
 
     isUserAuthorized() {

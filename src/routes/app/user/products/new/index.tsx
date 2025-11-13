@@ -59,7 +59,12 @@ function RouteComponent() {
 		if (isPending) return;
 
 		startTransition(async () => {
-			const res = await AddProductAction(data);
+			const res = await AddProductAction({
+				name: data.name,
+				price: data.price,
+				description: data.description,
+				categories: data.categories ? [...data.categories] : undefined
+			});
 
 			if (res.success) {
 				if (res.data) {
@@ -100,6 +105,7 @@ function RouteComponent() {
 							label="Price"
 							errorAlignment="horizontal"
 							type="number"
+							step={0.01}
 							as={Input}
 						/>
 
