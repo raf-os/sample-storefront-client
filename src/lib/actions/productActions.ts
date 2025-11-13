@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import { requestToJson } from "@/lib/utils";
 import TokenRefreshHandler from "@/handlers/TokenRefreshHandler";
 import GlobalConfig from "@/lib/globalConfig";
@@ -73,13 +75,21 @@ export type TProductListPageResponse = {
     totalPages: number
 }
 
-export async function GetProductListPage(params?: { category?: string, offset?: number }): Promise<StandardJsonResponse<TProductListPageResponse>> {
-    try {
-        const urlParams = new URLSearchParams();
-        if (params?.category) urlParams.set("category", params.category);
-        if (params?.offset) urlParams.set("category", String(params.offset));
+export const FetchProductListSchema = z.object({
+    category: z.string().optional(),
+    offset: z.int().transform(n => String(n)).optional(),
+    userId: z.guid().optional()
+}).optional();
 
-        const res = await fetch(GlobalConfig.ServerProductEndpoint + "/page/" + urlParams);
+export type TFetchProductListParams = z.input<typeof FetchProductListSchema>;
+
+export async function GetProductListPage(params: TFetchProductListParams): Promise<StandardJsonResponse<TProductListPageResponse>> {
+    try {
+        const parsed = await z.parseAsync(FetchProductListSchema, params);
+
+        const urlParams = new URLSearchParams(parsed);
+
+        const res = await fetch(GlobalConfig.ServerProductEndpoint + "/page" + urlParams);
 
         if (!res.ok) {
             return new RESPONSES.BadRequest();

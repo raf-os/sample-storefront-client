@@ -1,33 +1,27 @@
-import { useState } from "react";
+import z from "zod";
+import { useEffect, useState, useTransition } from "react";
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { createColumnHelper, useReactTable, getCoreRowModel, flexRender } from '@tanstack/react-table';
-import { z } from "zod";
 
+import AuthSingleton from "@/classes/AuthSingleton";
 import { formatCurrency } from "@/lib/utils";
+import { GetProductListPage, FetchProductListSchema, type TProductListPageResponse } from "@/lib/actions/productActions";
+import type { TProductListItem } from "@/models";
 
 import { Checkbox } from "@/components/forms";
 import Button from "@/components/button";
 import { Ellipsis, Plus as PlusIcon } from "lucide-react";
 
-const RouteSearchParamsSchema = z.object({
-    page: z.number().catch(1),
-    sort: z.enum(['newest', 'oldest']).catch('newest'),
-});
-
-type ProductSearch = z.infer<typeof RouteSearchParamsSchema>;
+const ProductSearchSchema = z.object({
+    offset: z.int().optional(),
+}).optional();
 
 export const Route = createFileRoute('/app/user/products/')({
     component: RouteComponent,
-    validateSearch: (search) => RouteSearchParamsSchema.parse(search),
+    validateSearch: ProductSearchSchema,
 })
 
-type TProductItem = {
-    id: string,
-    name: string,
-    price: number
-}
-
-const columnHelper = createColumnHelper<TProductItem>();
+const columnHelper = createColumnHelper<TProductListItem>();
 
 const columns = [
     columnHelper.display({
@@ -76,31 +70,29 @@ const columns = [
     })
 ]
 
-const FakeProductList: TProductItem[] = [
-    {
-        id: '1',
-        name: 'Fentanyl',
-        price: 29.99
-    }, {
-        id: '2',
-        name: 'The Real Slim Shady (real)',
-        price: 14.49
-    }
-]
-
 function RouteComponent() {
+    const search = Route.useSearch();
+    const [ loadedData, setLoadedData ] = useState<TProductListPageResponse[] | null>(null);
+    const [ isDataReady, setIsDataReady ] = useState<boolean>(false);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const data = await GetProductListPage({ offset: search?.offset });
+        }
+    }, [search]);
+
     return (
         <div
             className="flex flex-col gap-4 bg-base-200 p-4 rounded-box"
         >
             <HeaderControls />
 
-            <ProductTable listings={FakeProductList} />
+            {/* { productList && <ProductTable listings={productList} /> } */}
         </div>
     )
 }
 
-function ProductTable({ listings } : { listings: TProductItem[] }) {
+function ProductTable({ listings } : { listings: TProductListItem[] }) {
     const data = listings;
     const [ rowSelection, setRowSelection ] = useState({});
     const table = useReactTable({
