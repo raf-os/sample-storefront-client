@@ -71,7 +71,10 @@ export async function GetProductById(id: string) {
 }
 
 export type TProductListPageResponse = {
-    items: TProductListItem[],
+    items: {
+        product: TProductListItem,
+        commentCount: number
+    }[],
     totalPages: number
 }
 
@@ -87,9 +90,16 @@ export async function GetProductListPage(params: TFetchProductListParams): Promi
     try {
         const parsed = await z.parseAsync(FetchProductListSchema, params);
 
-        const urlParams = new URLSearchParams(parsed);
+        const urlParams = new URLSearchParams();
+        if (parsed !== undefined) {
+            for (const [k, v] of Object.entries(parsed)) {
+                if (v !== undefined && v !== null) {
+                    urlParams.append(k, v);
+                }
+            }
+        }
 
-        const res = await fetch(GlobalConfig.ServerProductEndpoint + "/page" + urlParams);
+        const res = await fetch(GlobalConfig.ServerProductEndpoint + "/page" + (urlParams ? `?${urlParams}` : ""));
 
         if (!res.ok) {
             return new RESPONSES.BadRequest();

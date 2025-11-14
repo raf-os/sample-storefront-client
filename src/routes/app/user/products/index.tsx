@@ -1,12 +1,11 @@
 import z from "zod";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { createColumnHelper, useReactTable, getCoreRowModel, flexRender } from '@tanstack/react-table';
 
 import AuthSingleton from "@/classes/AuthSingleton";
 import { formatCurrency } from "@/lib/utils";
-import { GetProductListPage, FetchProductListSchema, type TProductListPageResponse } from "@/lib/actions/productActions";
-import type { TProductListItem } from "@/models";
+import { GetProductListPage, type TProductListPageResponse } from "@/lib/actions/productActions";
 
 import { Checkbox } from "@/components/forms";
 import Button from "@/components/button";
@@ -21,7 +20,9 @@ export const Route = createFileRoute('/app/user/products/')({
     validateSearch: ProductSearchSchema,
 })
 
-const columnHelper = createColumnHelper<TProductListItem>();
+type Flatten<T> = T extends (infer U)[] ? U : T;
+
+const columnHelper = createColumnHelper<Flatten<TProductListPageResponse['items']>>();
 
 const columns = [
     columnHelper.display({
@@ -44,11 +45,18 @@ const columns = [
             />
         )
     }),
-    columnHelper.accessor('name', {
+    columnHelper.accessor('product.name', {
         header: "Name",
-        cell: props => props.getValue()
+        cell: props => {
+            const val = props.getValue()
+            return (
+                <span>
+                    <Link to="/item/$itemId" params={{ itemId: props.row.original.product.id ?? "" }}>{ val }</Link>
+                </span>
+            )
+        }
     }),
-    columnHelper.accessor('price', {
+    columnHelper.accessor('product.price', {
         header: "Price",
         cell: props => {
             const amt = formatCurrency(props.getValue());
@@ -72,13 +80,24 @@ const columns = [
 
 function RouteComponent() {
     const search = Route.useSearch();
-    const [ loadedData, setLoadedData ] = useState<TProductListPageResponse[] | null>(null);
+    const [ loadedData, setLoadedData ] = useState<TProductListPageResponse | null>(null);
     const [ isDataReady, setIsDataReady ] = useState<boolean>(false);
+    const [ fetchError, setFetchError ] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
             const data = await GetProductListPage({ offset: search?.offset });
+            setIsDataReady(true);
+
+            if (data.success === false) {
+                setFetchError(data.message ?? "Unknown error fetching resources.");
+                return;
+            }
+
+            setLoadedData(data.data ?? null);
         }
+
+        fetchData();
     }, [search]);
 
     return (
@@ -87,12 +106,31 @@ function RouteComponent() {
         >
             <HeaderControls />
 
-            {/* { productList && <ProductTable listings={productList} /> } */}
+            { isDataReady
+                ? fetchError
+                    ? (
+                        <div>
+                            <p>Error fetching data:</p>
+                            <p>
+                                { fetchError }
+                            </p>
+                        </div>
+                    )
+                    : (
+                        <>
+                            { loadedData && <ProductTable listings={loadedData.items} /> }
+                        </>
+                    )
+                : (
+                    <div>
+                        Loading data...
+                    </div>
+                )}
         </div>
     )
 }
 
-function ProductTable({ listings } : { listings: TProductListItem[] }) {
+function ProductTable({ listings } : { listings: TProductListPageResponse['items'] }) {
     const data = listings;
     const [ rowSelection, setRowSelection ] = useState({});
     const table = useReactTable({
