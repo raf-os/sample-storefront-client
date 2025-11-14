@@ -1,21 +1,22 @@
 import z from "zod";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { createColumnHelper, useReactTable, getCoreRowModel, flexRender, type RowData } from '@tanstack/react-table';
 
 import AuthSingleton from "@/classes/AuthSingleton";
-import { formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { GetProductListPage, type TProductListPageResponse } from "@/lib/actions/productActions";
 
 import { Checkbox } from "@/components/forms";
 import Button from "@/components/button";
-import { Ellipsis, Plus as PlusIcon } from "lucide-react";
+import { Ellipsis, Plus as PlusIcon, ChevronsLeft, ChevronsRight } from "lucide-react";
 import ErrorComponent from "@/components/common/ErrorComponent";
 
 declare module '@tanstack/react-table' {
-  interface ColumnMeta<TData extends RowData, TValue> {
-    size?: string
-  }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface ColumnMeta<TData extends RowData, TValue> {
+        size?: string
+    }
 }
 
 const ProductSearchSchema = z.object({
@@ -69,7 +70,7 @@ const columns = [
             const val = props.getValue()
             return (
                 <span
-                    className="font-bold text-primary-300"
+                    className="font-bold text-primary-300 w-full whitespace-nowrap truncate"
                 >
                     <Link to="/item/$itemId" params={{ itemId: props.row.original.product.id ?? "" }}>{ val }</Link>
                 </span>
@@ -111,13 +112,91 @@ function RouteComponent() {
 
             { data
                 ? (
+                    <>
                     <ProductTable listings={data.items} />
+                    <PaginationComponent />
+                    </>
                 )
                 : (
                     <p>
                         Loading...
                     </p>
                 )}
+        </div>
+    )
+}
+
+function PaginationComponentItem({
+    value,
+    currentValue
+}: {
+    value: number,
+    currentValue: number
+}) {
+    return (
+        <Link to="." search={prev => ({ ...prev, offset: value })} tabIndex={-1}>
+            <button
+                className={cn(
+                    "min-w-8 px-2 py-1 text-center rounded-[4px] cursor-pointer outline-none ring-base-500 focus:ring-2 hover:ring-2 transition-all shadow-xs border",
+                    currentValue === value
+                        ? "bg-base-500 text-primary-content font-bold border-base-500"
+                        : "bg-base-300 text-base-400 border-base-500/5"
+                )}
+            >
+                { value }
+            </button>
+        </Link>
+    )
+}
+
+function PaginationComponent() {
+    const data = Route.useLoaderData();
+    const search = Route.useSearch();
+
+    const currentPage = (search?.offset ?? 1);
+    const totalPages = 20; /*(data?.totalPages ?? 1);*/
+
+    const MAX_VISIBLE_PAGES = 9;
+    const _pageMidPoint = Math.floor(MAX_VISIBLE_PAGES / 2);
+
+    const PaginationElements = useCallback(() => {
+        const elementList: React.ReactElement[] = [];
+        const lowestPage = Math.min(Math.max(currentPage - _pageMidPoint, 1), totalPages - MAX_VISIBLE_PAGES + 1);
+        const highestPage = Math.max(Math.min(totalPages, currentPage + _pageMidPoint), MAX_VISIBLE_PAGES);
+
+        for (let i = lowestPage; i <= highestPage; i++) {
+            if (i == lowestPage && i > 1) {
+                elementList.push((
+                    <Link to="." search={prev => ({ ...prev, offset: undefined })} tabIndex={-1}>
+                        <ElementSeparator>
+                            <ChevronsLeft />
+                        </ElementSeparator>
+                    </Link>
+                ));
+            }
+
+            elementList.push(<PaginationComponentItem value={i} currentValue={currentPage} key={i} />);
+            
+            if (i == highestPage && i < totalPages) {
+                elementList.push((
+                    <Link to="." search={prev => ({ ...prev, offset: totalPages })} tabIndex={-1}>
+                        <ElementSeparator>
+                            <ChevronsRight />
+                        </ElementSeparator>
+                    </Link>
+                ));
+            }
+        }
+
+        return elementList;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentPage, totalPages]);
+
+    const ElementSeparator = ({ children }: { children?: React.ReactNode}) => (<button className="flex [&>svg]:size-6 cursor-pointer text-base-400 hover:text-base-500 transition-colors">{ children }</button>);
+
+    return (
+        <div className="flex gap-2 w-full items-center justify-center">
+            { PaginationElements() }
         </div>
     )
 }
