@@ -26,19 +26,22 @@ type TAuthData = {
 /** Simply a helper, in case this needs to be accessed from outside a react context. */
 class _AuthSingleton {
     private data: TAuthData | null = null;
+    private token: TJwtToken | null = null;
     private jwt: string | null = null;
 
-    private _getFieldOrNull(field: unknown) {
+    private _getFieldOrNull<T>(field: T) {
         return (field === null || field === undefined)
             ? null
             : field;
     }
 
     updateToken(token: TJwtToken | null | undefined) {
+        if (this.token === token) return;
         if (token === null || token === undefined) {
             this.data = null;
             this.jwt = null;
         } else {
+            this.token = token;
             this.data = {
                 name: token.unique_name,
                 id: token.sub,
@@ -63,6 +66,10 @@ class _AuthSingleton {
 
     getJwtToken() {
         return this.jwt;
+    }
+
+    getTokenData() {
+        return this.token;
     }
 
     isUserAuthorized() {

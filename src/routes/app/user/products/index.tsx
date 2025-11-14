@@ -1,7 +1,7 @@
 import z from "zod";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { createColumnHelper, useReactTable, getCoreRowModel, flexRender } from '@tanstack/react-table';
+import { createColumnHelper, useReactTable, getCoreRowModel, flexRender, type RowData } from '@tanstack/react-table';
 
 import AuthSingleton from "@/classes/AuthSingleton";
 import { formatCurrency } from "@/lib/utils";
@@ -10,6 +10,13 @@ import { GetProductListPage, type TProductListPageResponse } from "@/lib/actions
 import { Checkbox } from "@/components/forms";
 import Button from "@/components/button";
 import { Ellipsis, Plus as PlusIcon } from "lucide-react";
+import ErrorComponent from "@/components/common/ErrorComponent";
+
+declare module '@tanstack/react-table' {
+  interface ColumnMeta<TData extends RowData, TValue> {
+    size?: string
+  }
+}
 
 const ProductSearchSchema = z.object({
     offset: z.int().optional(),
@@ -17,7 +24,16 @@ const ProductSearchSchema = z.object({
 
 export const Route = createFileRoute('/app/user/products/')({
     component: RouteComponent,
+    errorComponent: ErrorComponent,
     validateSearch: ProductSearchSchema,
+    loaderDeps: ({ search }) => ({ offset: search?.offset }),
+    loader: async ({ deps }) => {
+        const userId = AuthSingleton.getUserId() as string;
+        const data = await GetProductListPage({ offset: deps.offset, userId });
+
+        if (!data.success) throw new Error(data.message);
+        return data.data;
+    }
 })
 
 type Flatten<T> = T extends (infer U)[] ? U : T;
@@ -27,6 +43,7 @@ const columnHelper = createColumnHelper<Flatten<TProductListPageResponse['items'
 const columns = [
     columnHelper.display({
         id: "select",
+        meta: {size: '48px'},
         header: props => (
             <Checkbox
                 checked={
@@ -47,10 +64,13 @@ const columns = [
     }),
     columnHelper.accessor('product.name', {
         header: "Name",
+        meta: {size: 'auto'},
         cell: props => {
             const val = props.getValue()
             return (
-                <span>
+                <span
+                    className="font-bold text-primary-300"
+                >
                     <Link to="/item/$itemId" params={{ itemId: props.row.original.product.id ?? "" }}>{ val }</Link>
                 </span>
             )
@@ -58,6 +78,7 @@ const columns = [
     }),
     columnHelper.accessor('product.price', {
         header: "Price",
+        meta: {size: '20%'},
         cell: props => {
             const amt = formatCurrency(props.getValue());
 
@@ -66,6 +87,7 @@ const columns = [
     }),
     columnHelper.display({
         id: "actions",
+        meta: {size: '48px'},
         cell: props => {
             return (
                 <div>
@@ -79,26 +101,7 @@ const columns = [
 ]
 
 function RouteComponent() {
-    const search = Route.useSearch();
-    const [ loadedData, setLoadedData ] = useState<TProductListPageResponse | null>(null);
-    const [ isDataReady, setIsDataReady ] = useState<boolean>(false);
-    const [ fetchError, setFetchError ] = useState<string | null>(null);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            const data = await GetProductListPage({ offset: search?.offset });
-            setIsDataReady(true);
-
-            if (data.success === false) {
-                setFetchError(data.message ?? "Unknown error fetching resources.");
-                return;
-            }
-
-            setLoadedData(data.data ?? null);
-        }
-
-        fetchData();
-    }, [search]);
+    const data = Route.useLoaderData();
 
     return (
         <div
@@ -106,25 +109,14 @@ function RouteComponent() {
         >
             <HeaderControls />
 
-            { isDataReady
-                ? fetchError
-                    ? (
-                        <div>
-                            <p>Error fetching data:</p>
-                            <p>
-                                { fetchError }
-                            </p>
-                        </div>
-                    )
-                    : (
-                        <>
-                            { loadedData && <ProductTable listings={loadedData.items} /> }
-                        </>
-                    )
+            { data
+                ? (
+                    <ProductTable listings={data.items} />
+                )
                 : (
-                    <div>
-                        Loading data...
-                    </div>
+                    <p>
+                        Loading...
+                    </p>
                 )}
         </div>
     )
@@ -140,7 +132,7 @@ function ProductTable({ listings } : { listings: TProductListPageResponse['items
         onRowSelectionChange: setRowSelection,
         state: {
             rowSelection
-        }
+        },
     });
 
     return (
@@ -149,7 +141,7 @@ function ProductTable({ listings } : { listings: TProductListPageResponse['items
                 { table.getHeaderGroups().map(headerGroup => (
                     <tr key={headerGroup.id}>
                         { headerGroup.headers.map(header => (
-                            <th key={header.id} colSpan={header.colSpan}>
+                            <th key={header.id} colSpan={header.colSpan} style={{ width: header.column.columnDef.meta?.size || "auto" }}>
                                 { header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext()) }
                             </th>
                         )) }

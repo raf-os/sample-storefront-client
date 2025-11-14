@@ -1,8 +1,17 @@
-import { createRootRoute, HeadContent, Outlet } from '@tanstack/react-router'
+import { createRootRouteWithContext, HeadContent, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 
 import { AuthWrapper } from "@/authWrapper";
 import { NavbarRoot } from '@/components/navbar';
+
+import type { TAuthData } from "@/authContext";
+import { AuthRefresh } from "@/lib/actions/authAction";
+import AuthSingleton from "@/classes/AuthSingleton";
+import TokenRefreshHandler from "@/handlers/TokenRefreshHandler";
+
+interface IRootRouteContext {
+	authData: TAuthData | null
+}
 
 const RootLayout = () => (
 	<>
@@ -21,7 +30,7 @@ const RootLayout = () => (
 	</>
 )
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<IRootRouteContext>()({
 	component: RootLayout,
 	head: () => ({
 		meta: [
@@ -29,5 +38,12 @@ export const Route = createRootRoute({
 				title: "Storefront Sample"
 			}
 		],
-	})
+	}),
+	beforeLoad: async () => {
+		const token = await AuthRefresh();
+		if (token) {
+			AuthSingleton.updateToken(token);
+			TokenRefreshHandler.updateExpireDate(token.exp * 1000);
+		}
+	}
 })

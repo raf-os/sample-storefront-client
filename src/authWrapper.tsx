@@ -53,6 +53,11 @@ export function AuthWrapper({ children }: { children?: React.ReactNode }) {
 
     useEffect(() => {
         const fetchAuth = async () => {
+            const previousToken = AuthSingleton.getTokenData();
+            if (previousToken !== null) {
+                _updateAuth(previousToken);
+                return;
+            }
             const token = await AuthRefresh();
             _updateAuth(token);
         }
