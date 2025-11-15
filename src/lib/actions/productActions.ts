@@ -119,8 +119,11 @@ export async function GetProductListPage(params: TFetchProductListParams): Promi
 
 export async function GetProductComments(productId: string, offset?: number) {
     try {
-        const urlParams = new URLSearchParams({ offset: String(offset) });
-        const res = await fetch(GlobalConfig.ServerProductEndpoint + `/item/${productId}/comments` + (urlParams ? `?${urlParams}` : null));
+        const urlParams = new URLSearchParams();
+        if (offset !== undefined) {
+            urlParams.append('offset', String(offset));
+        }
+        const res = await fetch(GlobalConfig.ServerProductEndpoint + `/item/${productId}/comments` + (offset !== undefined ? `?${urlParams}` : ""));
 
         if (!res.ok)
             return new RESPONSES.BadRequest();

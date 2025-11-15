@@ -19,7 +19,8 @@ export default function useInView<T extends HTMLElement = HTMLElement>(
         observer.observe(ref.current);
 
         return () => observer.disconnect();
-    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [options]);
 
     return ref;
 }

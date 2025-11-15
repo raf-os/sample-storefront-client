@@ -7,10 +7,11 @@ import { cn } from "@/lib/utils";
 import { GetProductById, GetProductComments } from "@/lib/actions/productActions";
 import { useInView } from "@/hooks";
 
-import { ShoppingCart, Wallet } from "lucide-react";
+import { ShoppingCart, Star, Wallet } from "lucide-react";
 import type { TComment } from "@/models";
 import type { WithRequired } from "@/types/utilities";
-import { TextArea } from "@/components/forms";
+import { FieldSet, TextArea } from "@/components/forms";
+import { FormProvider, useForm } from "react-hook-form";
 
 export const Route = createFileRoute('/item/$itemId')({
     loader: async ({ params }) => {
@@ -141,6 +142,8 @@ function PageContent() {
             </div>
         </div>
 
+        <NewReviewForm />
+
         <ProductCommentSection />
         </>
     )
@@ -199,7 +202,7 @@ function ProductCommentSection() {
     const productId = Route.useLoaderData().id;
     const wrapperRef = useInView<HTMLDivElement>(() => onComponentVisible());
 
-    const onComponentVisible = useCallback(async () => {
+    const onComponentVisible = async () => {
         const data = await GetProductComments(productId);
 
         if (!data.success) {
@@ -210,13 +213,17 @@ function ProductCommentSection() {
 
         setFetchError(null);
         setLoadedComments(data.data ?? []);
-    }, [productId]);
+    };
 
     return (
         <div
-            className="flex flex-col gap-4"
+            className="flex flex-col gap-4 bg-base-200 rounded-box p-4"
             ref={wrapperRef}
         >
+            <h1 className="text-lg font-semibold">
+                User reviews
+            </h1>
+
             { fetchError && (
                 <p>
                     { fetchError }
@@ -231,15 +238,19 @@ function ProductCommentSection() {
                 ): fetchError ? null : (
                     <>
                     <div className="flex flex-col gap-4">
-                        { loadedComments.map(comment => (
-                            <ProductComment
-                                comment={comment}
-                                key={comment.id}
-                            />
-                        ))}
+                        { loadedComments.length > 0
+                            ? loadedComments?.map(comment => (
+                                <ProductComment
+                                    comment={comment}
+                                    key={comment.id}
+                                />
+                            )) : (
+                                <p>
+                                    No reviews found.
+                                </p>
+                            )
+                        }
                     </div>
-
-                    <NewCommentForm />
                     </>
                 )
             }
@@ -261,10 +272,105 @@ function ProductComment({
     )
 }
 
-function NewCommentForm() {
+function NewReviewForm() {
+    const formMethods = useForm();
     return (
-        <>
-            <TextArea />
-        </>
+        <form>
+        <FormProvider {...formMethods}>
+            <div
+                className="flex flex-col gap-2 bg-base-200 rounded-box p-4"
+            >
+                <h1 className="text-lg font-semibold">
+                    Leave a review
+                </h1>
+
+                <FieldSet
+                    name="rating"
+                    label="Rating"
+                    as={StarRatingComponent}
+                />
+
+                <FieldSet
+                    name="content"
+                    label="Review"
+                    as={TextArea}
+                />
+            </div>
+        </FormProvider>
+        </form>
+    )
+}
+
+/** TODO: move to its own component file */
+function StarRatingComponent() {
+    const [ selectedRating, setSelectedRating ] = useState<number | null>(null);
+    const [ hoveredRating, setHoveredRating ] = useState<number | null>(null);
+
+    const handleOnHover = (value: number) => {
+        setHoveredRating(value);
+    }
+
+    const handleOnSelect = (value: number) => {
+        setSelectedRating(value);
+    }
+
+    return (
+        <div
+            className="flex self-start grow-0 shrink-0 border border-base-300 rounded-box p-1 shadow-xs"
+            onMouseLeave={() => setHoveredRating(null)}
+        >
+            { [...Array(5)].map((_, idx) => (
+                <StarComp
+                    key={idx}
+                    idx={idx}
+                    hoverIdx={hoveredRating}
+                    selectedIdx={selectedRating}
+                    onHovered={handleOnHover}
+                    onSelected={handleOnSelect}
+                />
+            )) }
+        </div>
+    )
+}
+
+type StarCompProps = {
+    idx: number,
+    hoverIdx: number | null,
+    selectedIdx: number | null,
+    onHovered?: (value: number) => void,
+    onSelected?: (value: number) => void,
+}
+
+function StarComp({ idx, hoverIdx, selectedIdx, onHovered, onSelected }: StarCompProps) {
+    let myColor = "";
+
+    if (hoverIdx !== null) {
+        if (hoverIdx >= idx) {
+            myColor = "fill-amber-500";
+        } else {
+            myColor = "fill-base-500/50";
+        }
+    } else {
+        if (selectedIdx !== null) {
+            if (selectedIdx >= idx)
+                myColor = "fill-amber-400";
+            else
+                myColor = "fill-base-500/25";
+        } else myColor = "fill-base-500/25";
+    }
+    return (
+        <div
+            className="px-1"
+            onMouseOver={() => onHovered?.(idx)}
+            onClick={() => onSelected?.(idx)}
+        >
+            <Star
+                
+                className={cn(
+                    "stroke-0 size-8",
+                    myColor
+                )}
+            />
+        </div>
     )
 }
