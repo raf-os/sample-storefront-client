@@ -10,6 +10,7 @@ import { GetProductListPage, type TProductListPageResponse } from "@/lib/actions
 import { Checkbox } from "@/components/forms";
 import Button from "@/components/button";
 import { Ellipsis, Plus as PlusIcon, ChevronsLeft, ChevronsRight } from "lucide-react";
+import ProductTableItemMenu from "@/components/unique/user-dashboard/ProductTableItemMenu";
 import ErrorComponent from "@/components/common/ErrorComponent";
 
 declare module '@tanstack/react-table' {
@@ -91,11 +92,9 @@ const columns = [
         meta: {size: '48px'},
         cell: props => {
             return (
-                <div>
-                    <Ellipsis
-                        className="size-6"
-                    />
-                </div>
+                <ProductTableItemMenu
+                    itemId={props.row.original.product.id}
+                />
             )
         }
     })
@@ -154,15 +153,15 @@ function PaginationComponent() {
     const search = Route.useSearch();
 
     const currentPage = (search?.offset ?? 1);
-    const totalPages = 20; /*(data?.totalPages ?? 1);*/
+    const totalPages = (data?.totalPages ?? 1);
 
     const MAX_VISIBLE_PAGES = 9;
     const _pageMidPoint = Math.floor(MAX_VISIBLE_PAGES / 2);
 
     const PaginationElements = useCallback(() => {
         const elementList: React.ReactElement[] = [];
-        const lowestPage = Math.min(Math.max(currentPage - _pageMidPoint, 1), totalPages - MAX_VISIBLE_PAGES + 1);
-        const highestPage = Math.max(Math.min(totalPages, currentPage + _pageMidPoint), MAX_VISIBLE_PAGES);
+        const lowestPage = Math.max(Math.min(currentPage - _pageMidPoint, totalPages - MAX_VISIBLE_PAGES + 1), 1);
+        const highestPage = Math.min(totalPages, Math.max(currentPage + _pageMidPoint, MAX_VISIBLE_PAGES));
 
         for (let i = lowestPage; i <= highestPage; i++) {
             if (i == lowestPage && i > 1) {

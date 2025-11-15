@@ -1,12 +1,16 @@
-import { useState } from "react";
-import { createFileRoute, Await, type ErrorComponentProps } from "@tanstack/react-router";
+import { useCallback, useState } from "react";
+import { createFileRoute, useLoaderData, type ErrorComponentProps } from "@tanstack/react-router";
 import PageSetup from "@/components/layout/PageSetup";
 import Button from "@/components/button";
 import ExpandableImage from "@/components/images/ExpandableImage";
 import { cn } from "@/lib/utils";
-import { GetProductById } from "@/lib/actions/productActions";
+import { GetProductById, GetProductComments } from "@/lib/actions/productActions";
+import { useInView } from "@/hooks";
 
 import { ShoppingCart, Wallet } from "lucide-react";
+import type { TComment } from "@/models";
+import type { WithRequired } from "@/types/utilities";
+import { TextArea } from "@/components/forms";
 
 export const Route = createFileRoute('/item/$itemId')({
     loader: async ({ params }) => {
@@ -70,6 +74,7 @@ function PageContent() {
             No product with provided ID found.
         </span>
     ) : (
+        <>
         <div
             className="flex gap-4"
         >
@@ -135,6 +140,9 @@ function PageContent() {
                 </div>
             </div>
         </div>
+
+        <ProductCommentSection />
+        </>
     )
 }
 
@@ -181,6 +189,82 @@ function ProductImageViewer({
                     />
                 )) }
             </div>
+        </>
+    )
+}
+
+function ProductCommentSection() {
+    const [ loadedComments, setLoadedComments ] = useState<WithRequired<TComment, 'user'>[] | null>(null);
+    const [ fetchError, setFetchError ] = useState<string | null>(null);
+    const productId = Route.useLoaderData().id;
+    const wrapperRef = useInView<HTMLDivElement>(() => onComponentVisible());
+
+    const onComponentVisible = useCallback(async () => {
+        const data = await GetProductComments(productId);
+
+        if (!data.success) {
+            setFetchError(data.message ?? "Unknown error occurred.");
+            setLoadedComments([]);
+            return;
+        }
+
+        setFetchError(null);
+        setLoadedComments(data.data ?? []);
+    }, [productId]);
+
+    return (
+        <div
+            className="flex flex-col gap-4"
+            ref={wrapperRef}
+        >
+            { fetchError && (
+                <p>
+                    { fetchError }
+                </p>
+            )}
+
+            { loadedComments === null
+                ? (
+                    <div>
+                        Loading comments...
+                    </div>
+                ): fetchError ? null : (
+                    <>
+                    <div className="flex flex-col gap-4">
+                        { loadedComments.map(comment => (
+                            <ProductComment
+                                comment={comment}
+                                key={comment.id}
+                            />
+                        ))}
+                    </div>
+
+                    <NewCommentForm />
+                    </>
+                )
+            }
+        </div>
+    )
+}
+
+function ProductComment({
+    comment
+}: {
+    comment: WithRequired<TComment, 'user'>
+}) {
+    return (
+        <div>
+            <h1>
+                { comment.user.name }
+            </h1>
+        </div>
+    )
+}
+
+function NewCommentForm() {
+    return (
+        <>
+            <TextArea />
         </>
     )
 }

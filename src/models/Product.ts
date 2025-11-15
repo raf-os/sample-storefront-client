@@ -1,6 +1,7 @@
 import type { TUser } from "./User"
 import type { TProductCategory } from "./ProductCategory"
 import type { TComment } from "./Comment"
+import type { WithRequired } from "@/types/utilities"
 
 export type TProductRating = {
     value?: number,
@@ -29,6 +30,8 @@ export type TProduct = {
     comments?: TComment[]
     productCategories?: TProductCategory[]
 }
+
+export type TProductWithCommments = WithRequired<TProduct, 'comments'>;
 
 export type TProductListItem = {
     id: string,

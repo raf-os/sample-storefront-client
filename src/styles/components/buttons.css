@@ -25,7 +25,7 @@
     }
 
     &:focus {
-        outline: 2px solid var(--color-base-500);
+        @apply ring-2 ring-base-500;
     }
 
     &:hover, &:active {
@@ -57,6 +57,19 @@
 
         &:hover, &:active {
             color: var(--color-primary-300);
+        }
+    }
+
+    &.btn-destructive {
+        background-color: var(--color-destructive);
+        color: var(--color-destructive-content);
+
+        &:hover, &:active {
+            background-color: color-mix(in oklab, var(--color-destructive) 80%, var(--color-destructive-content));
+        }
+
+        &:focus {
+            @apply ring-destructive-content;
         }
     }
 }

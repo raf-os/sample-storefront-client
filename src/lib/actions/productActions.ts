@@ -4,10 +4,11 @@ import { requestToJson } from "@/lib/utils";
 import TokenRefreshHandler from "@/handlers/TokenRefreshHandler";
 import GlobalConfig from "@/lib/globalConfig";
 import type { StandardJsonResponse } from "@/types/StandardJsonResponse";
-import type { TProduct, TProductListItem } from "@/models";
+import type { TComment, TProduct, TProductListItem } from "@/models";
 
 import AuthSingleton from "@/classes/AuthSingleton";
 import * as RESPONSES from "@/lib/jsonResponses";
+import type { WithRequired } from "@/types/utilities";
 
 type AddProductRequest = {
     name: string,
@@ -110,6 +111,25 @@ export async function GetProductListPage(params: TFetchProductListParams): Promi
         if (!data) return new RESPONSES.ServerFetchError();
 
         return new RESPONSES.Ok<TProductListPageResponse>({ data });
+    } catch(err) {
+        console.error(err);
+        return new RESPONSES.ServerFetchError();
+    }
+}
+
+export async function GetProductComments(productId: string, offset?: number) {
+    try {
+        const urlParams = new URLSearchParams({ offset: String(offset) });
+        const res = await fetch(GlobalConfig.ServerProductEndpoint + `/item/${productId}/comments` + (urlParams ? `?${urlParams}` : null));
+
+        if (!res.ok)
+            return new RESPONSES.BadRequest();
+
+        const data = await requestToJson<WithRequired<TComment, 'user'>[]>(res);
+
+        if (!data) return new RESPONSES.ServerFetchError();
+
+        return new RESPONSES.Ok<typeof data>({ data });
     } catch(err) {
         console.error(err);
         return new RESPONSES.ServerFetchError();

@@ -2,6 +2,7 @@
 
 @theme {
     --animate-slideUpAndFade: slideUpAndFade 0.4s ease;
+    --animate-dialogEntry: dialogEntry 0.25s ease;
 
     @keyframes slideUpAndFade {
         from {
@@ -11,6 +12,17 @@
         to {
             opacity: 1;
             transform: translateY(0);
+        }
+    }
+
+    @keyframes dialogEntry {
+        from {
+            opacity: 0;
+            scale: 0.9;
+        }
+        to {
+            opacity: 1;
+            scale: 1;
         }
     }
 }
