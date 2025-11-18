@@ -29,6 +29,7 @@ export function StarRatingComponent({
 
     const handleOnSelect = handleDisabled((value: number) => {
         setSelectedRating(value);
+        setValue(name, value + 1);
     });
 
     const handleOnMouseLeave = () => {
@@ -36,21 +37,28 @@ export function StarRatingComponent({
     }
 
     return (
-        <div
-            className="flex self-start grow-0 shrink-0 border border-base-300 rounded-box p-1 shadow-xs"
-            onMouseLeave={handleOnMouseLeave}
-        >
-            <input {...register(name, { valueAsNumber: true })} type="hidden" value={selectedRating ?? 0} />
-            { [...Array(5)].map((_, idx) => (
-                <StarComp
-                    key={idx}
-                    idx={idx}
-                    hoverIdx={hoveredRating}
-                    selectedIdx={selectedRating}
-                    onHovered={handleOnHover}
-                    onSelected={handleOnSelect}
-                />
-            )) }
+        <div className="flex gap-4 items-center">
+            <div
+                className="flex self-start grow-0 shrink-0 border border-base-300 rounded-box p-1 shadow-xs"
+                onMouseLeave={handleOnMouseLeave}
+            >
+                <input {...register(name, { valueAsNumber: true })} type="hidden" value={selectedRating ?? 0} />
+                { [...Array(5)].map((_, idx) => (
+                    <StarComp
+                        key={idx}
+                        idx={idx}
+                        hoverIdx={hoveredRating}
+                        selectedIdx={selectedRating}
+                        onHovered={handleOnHover}
+                        onSelected={handleOnSelect}
+                    />
+                )) }
+            </div>
+
+            <div>
+                <span className="text-xl font-bold">{ (hoveredRating ?? selectedRating ?? -1) + 1 }</span>
+                <span className="text-xs"> / 5</span>
+            </div>
         </div>
     )
 }

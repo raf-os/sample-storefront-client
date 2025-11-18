@@ -17,7 +17,7 @@ export async function AddCommentAction(params: TAddCommentRequest, productId: st
 
     try {
         const token = AuthSingleton.getJwtToken();
-        const res = await fetch(GlobalConfig.ServerCommentEndpoint + `?id=${productId}`, {
+        const res = await fetch(GlobalConfig.ServerCommentEndpoint + `/${productId}`, {
             method: "PUT",
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -30,6 +30,7 @@ export async function AddCommentAction(params: TAddCommentRequest, productId: st
 
         if (!res.ok) {
             if (res.status === 400) return new RESPONSES.BadRequest({ message: data?.message });
+            else if (res.status === 401) return new RESPONSES.UnauthorizedRequest();
             else return new RESPONSES.ServerFetchError();
         }
 

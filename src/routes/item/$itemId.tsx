@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { GetProductById, GetProductComments } from "@/lib/actions/productActions";
 import { useInView } from "@/hooks";
 
-import { ShoppingCart, Wallet } from "lucide-react";
+import { ShoppingCart, Star, Wallet } from "lucide-react";
 import type { TComment } from "@/models";
 import type { WithRequired } from "@/types/utilities";
 import { NewReviewForm } from "@/components/unique/listings/NewReviewForm";
@@ -262,11 +262,71 @@ function ProductComment({
 }: {
     comment: WithRequired<TComment, 'user'>
 }) {
+    const CategoryElement = ({ header, content }: { header: string, content: React.ReactNode }) => {
+        return (
+            <div className="flex flex-col gap-1 items-start">
+                <h1 className="text-sm font-bold">{ header }</h1>
+                { content }
+            </div>
+        )
+    }
+
     return (
-        <div>
-            <h1>
-                { comment.user.name }
-            </h1>
+        <div
+            className="flex border border-base-300 rounded-box shadow-xs"
+        >
+            <div
+                className="w-42 border-r border-base-300 p-2"
+            >
+                <CategoryElement
+                    header={"Reviewer"}
+                    content={(
+                        <p>
+                            { comment.user.name }
+                        </p>
+                    )}
+                />
+
+               <CategoryElement
+                    header={"Score"}
+                    content={(
+                        <>
+                        <div className="inline-flex gap-1 px-2 py-1 bg-base-100 border border-base-300 shadow-xs rounded-box grow-0 shrink-0">
+                            { [...Array(5)].map((_, idx) => (
+                                <Star
+                                    key={idx}
+                                    size={18}
+                                    className={cn(
+                                        "stroke-1 stroke-base-500/50",
+                                        idx > comment.score
+                                            ? "fill-base-400"
+                                            : "fill-amber-400"
+                                    )}
+                                />
+                            )) }
+                        </div>
+
+                        <p className="sr-only">
+                            { comment.score } out of 5 stars
+                        </p>
+                        </>
+                    )}
+                />
+            </div>
+
+            <div className="grow-1 shrink-1 p-4">
+                { comment.content ? (
+                    <p>
+                        { comment.content }
+                    </p>
+                ): (
+                    <p
+                        className="text-base-400 text-sm italic"
+                    >
+                        User left no comment
+                    </p>
+                )}
+            </div>
         </div>
     )
 }
