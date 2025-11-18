@@ -23,6 +23,15 @@ export class ServerFetchError extends JsonResponse {
     }
 }
 
+export class LoginTokenTimeoutError extends JsonResponse {
+    constructor() {
+        super({
+            success: false,
+            message: "Login token is outdated. Re-login and try again."
+        });
+    }
+}
+
 export class UnauthorizedRequest extends JsonResponse {
     constructor() {
         super({
