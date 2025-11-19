@@ -1,14 +1,16 @@
 import { GetProductListPage, type TProductListPageResponse } from "@/lib/actions/productActions";
 import { useServerAction } from "@/hooks";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import type { TProductListItem } from "@/models";
 import type { Flatten } from "@/types/utilities";
-import { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 
 import ShopItemCard from "@/components/shop-item/ShopItemCard";
+import { ChevronsLeft, ChevronsRight } from "lucide-react";
 
 const DEFAULT_LIST_SIZE = 10;
+const MAX_PAGINATION_VISIBLE_PAGES = 9;
 
 export type ProductListRendererProps = {
     offset?: number,
@@ -65,6 +67,12 @@ function ProductList({
                     />
                 ))
             }
+
+            { (items && items.length === 0) && (
+                <p>
+                    No items found.
+                </p>
+            ) }
         </ul>
     )
 }
@@ -117,17 +125,35 @@ function PaginationItemRender({
     currentSelection
 }: PaginationItemRenderProps) {
     return (
-        <li
-            tabIndex={0}
-            className={cn(
-                "min-w-12 px-2 py-1 text-center border rounded-field shadow-xs cursor-pointer select-none transition-all outline-none focus:ring-3 ring-base-400",
-                currentSelection === selectionId
-                    ? "font-bold bg-base-500 text-base-200 border-base-500"
-                    : "text-base-400 border-base-400 bg-base-100 hover:bg-base-200"
-            )}
-        >
-            { selectionId }
-        </li>
+        <Link to="." search={prev => ({ ...prev, offset: selectionId })}>
+            <li
+                tabIndex={0}
+                className={cn(
+                    "min-w-12 px-2 py-1 text-center border rounded-field shadow-xs cursor-pointer select-none transition-all outline-none focus:ring-3 ring-base-400",
+                    currentSelection === selectionId
+                        ? "font-bold bg-base-500 text-base-200 border-base-500"
+                        : "text-base-400 border-base-400 bg-base-100 hover:bg-base-200"
+                )}
+            >
+                { selectionId }
+            </li>
+        </Link>
+    )
+}
+
+function PaginationItemSkip({
+    children,
+    to
+}: {
+    children?: React.ReactNode,
+    to: number
+}) {
+    return (
+        <Link to="." search={prev => ({ ...prev, offset: to })}>
+            <li className="[&>svg]:size-8 text-base-400 hover:text-base-500 transition-colors">
+                { children }
+            </li>
+        </Link>
     )
 }
 
@@ -140,13 +166,42 @@ function PaginationComponent({
     currentOffset = 1,
     totalPages
 }: PaginationComponentProps) {
-    const pages = 10;
+    const _pagesMidpoint = Math.floor(MAX_PAGINATION_VISIBLE_PAGES / 2);
+    const pages = 20;
+
+    const PaginationElements = useCallback(() => {
+        const elementList: React.ReactElement[]  = [];
+        const lowestPage = Math.max(
+            Math.min(
+                currentOffset - _pagesMidpoint,
+                pages - MAX_PAGINATION_VISIBLE_PAGES + 1
+            ), 1);
+        const highestPage = Math.min(
+            pages,
+            Math.max(
+                currentOffset + _pagesMidpoint,
+                MAX_PAGINATION_VISIBLE_PAGES
+            )
+        );
+
+        for (let i = lowestPage; i <= highestPage; i++) {
+            if (i === lowestPage && i> 1)
+                elementList.push(<PaginationItemSkip to={1}><ChevronsLeft /></PaginationItemSkip>);
+
+            elementList.push(<PaginationItemRender key={i} selectionId={i} currentSelection={currentOffset} />);
+
+            if (i === highestPage && i < pages)
+                elementList.push(<PaginationItemSkip to={pages}><ChevronsRight /></PaginationItemSkip>);
+        }
+
+        return elementList;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [ currentOffset ]);
+
     return (
         <nav className="w-full flex justify-center items-center">
-            <ol className="flex gap-2">
-                { [...Array(pages)].map((_, idx) => (
-                    <PaginationItemRender key={idx} selectionId={idx + 1} currentSelection={currentOffset} />
-                )) }
+            <ol className="flex gap-2 items-center">
+                { PaginationElements() }
             </ol>
         </nav>
     )
