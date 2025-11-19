@@ -87,7 +87,7 @@ export const FetchProductListSchema = z.object({
 
 export type TFetchProductListParams = z.input<typeof FetchProductListSchema>;
 
-export async function GetProductListPage(params: TFetchProductListParams): Promise<StandardJsonResponse<TProductListPageResponse>> {
+export async function GetProductListPage(params: TFetchProductListParams = {}): Promise<StandardJsonResponse<TProductListPageResponse>> {
     try {
         const parsed = await z.parseAsync(FetchProductListSchema, params);
 

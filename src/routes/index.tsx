@@ -1,17 +1,25 @@
+import { z } from "zod";
+
 import { createFileRoute } from '@tanstack/react-router';
 import Layout from '@/components/layout';
-import ShopItemCard from '@/components/shop-item/ShopItemCard';
+
+import ProductListRenderer from "@/components/common/ProductListRenderer";
 
 import PriceRangeFilter from "@/components/filters/PriceRangeFilter";
 import CategoryFilter from "@/components/filters/CategoryFilter";
 
-import fakeProductList from "@/lib/fakes/products";
+const SearchParamsSchema = z.object({
+	offset: z.int().optional(),
+});
 
 export const Route = createFileRoute('/')({
-  component: Index,
+	component: Index,
+	validateSearch: search => SearchParamsSchema.parse(search)
 })
 
 function Index() {
+	const { offset: pageOffset } = Route.useSearch();
+
 	return (
 		<>
 		<HeroPresentation />
@@ -23,26 +31,14 @@ function Index() {
 			</Layout.LeftSidebar>
 
 			<Layout.Main>
-				<ul className="grid md:grid-cols-2 xl:grid-cols-4 gap-x-4 gap-y-8">
-					{ fakeProductList.map((product) => (
-						<ShopItemCard
-							key={product.id}
-							itemId={product.id}
-							itemName={product.name}
-							itemImage={product.displayImage}
-							itemLabel={product.label}
-							itemPrice={product.price}
-							itemDiscount={product.discount}
-						/>
-					)) }
-				</ul>
+				<ProductListRenderer offset={ pageOffset } />
 
-				<div className="flex gap-2">
+				{/* <div className="flex gap-2">
 					<PaletteTest colName="base" />
 					<PaletteTest colName="primary" />
 					<PaletteTest colName="warning" />
 					<PaletteTest colName="destructive" />
-				</div>
+				</div> */}
 			</Layout.Main>
 
 			<Layout.RightSidebar>

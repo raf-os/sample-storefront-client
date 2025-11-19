@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router";
 
 export type ShopItemCardProps = {
     itemId: string,
-    itemName: string,
     itemLabel: string,
     itemPrice: number,
     itemDiscount?: number,
@@ -11,7 +10,6 @@ export type ShopItemCardProps = {
 
 export default function ShopItemCard({
     itemId,
-    itemName,
     itemLabel,
     itemPrice,
     itemImage,
@@ -35,10 +33,10 @@ export default function ShopItemCard({
             }}
         >
         <li
-            className="flex flex-col gap-2 group hover:outline hover:shadow-md outline-base-300 transition-colors rounded-box p-2"
+            className="flex flex-col gap-2 group ring-base-500/5 hover:ring hover:shadow-md transition-colors rounded-box p-2"
             role="button"
         >
-            <div className="relative grow-0 shrink-0 bg-base-200 h-64 w-full rounded-box-inner cursor-pointer overflow-hidden">
+            <div className="relative grow-0 shrink-0 bg-base-200 w-full aspect-square rounded-box-inner cursor-pointer overflow-hidden">
                 { itemImage && <img src={`/images/products/${itemImage}`} className="object-cover object-center w-full h-full" /> }
             </div>
 
