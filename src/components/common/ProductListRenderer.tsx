@@ -1,9 +1,10 @@
+import { useCallback, useEffect, useState, useContext, createContext } from "react";
+
 import { GetProductListPage, type TProductListPageResponse } from "@/lib/actions/productActions";
 import { useServerAction } from "@/hooks";
 import { cn } from "@/lib/utils";
 import type { TProductListItem } from "@/models";
 import type { Flatten } from "@/types/utilities";
-import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 
 import ShopItemCard from "@/components/shop-item/ShopItemCard";
@@ -16,6 +17,10 @@ export type ProductListRendererProps = {
     offset?: number,
 }
 
+const ProductListContext = createContext({
+    isPending: false
+});
+
 export default function ProductListRenderer({
     offset
 }: ProductListRendererProps) {
@@ -24,6 +29,7 @@ export default function ProductListRenderer({
 
     useEffect(() => {
         startTransition(async () => {
+            // await new Promise(resolve => setTimeout(resolve, 1000));
             const data = await GetProductListPage({ offset: offset });
             if (!data.success) throw new Error(data.message ?? "Unknown error occurred.");
 
@@ -32,17 +38,23 @@ export default function ProductListRenderer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ offset ]);
 
-    return (
-        <div className="flex flex-col gap-4">
-            { errorMessage && (
-                <p className="text-sm text-destructive-content">
-                    { errorMessage }
-                </p>
-            )}
-            <ProductList items={productListData?.items} />
+    const ctx = {
+        isPending
+    };
 
-            { (productListData?.totalPages !== undefined) && <PaginationComponent currentOffset={offset} totalPages={productListData.totalPages} /> }
-        </div>
+    return (
+        <ProductListContext value={ctx}>
+            <div className="flex flex-col gap-4">
+                { errorMessage && (
+                    <p className="text-sm text-destructive-content">
+                        { errorMessage }
+                    </p>
+                )}
+                <ProductList items={productListData?.items} />
+
+                { (productListData?.totalPages !== undefined) && <PaginationComponent currentOffset={offset} totalPages={productListData.totalPages} /> }
+            </div>
+        </ProductListContext>
     )
 }
 
@@ -124,15 +136,17 @@ function PaginationItemRender({
     selectionId,
     currentSelection
 }: PaginationItemRenderProps) {
+    const { isPending } = useContext(ProductListContext);
     return (
-        <Link to="." search={prev => ({ ...prev, offset: selectionId })}>
+        <Link to="." search={prev => ({ ...prev, offset: selectionId })} disabled={isPending}>
             <li
                 tabIndex={0}
                 className={cn(
                     "min-w-12 px-2 py-1 text-center border rounded-field shadow-xs cursor-pointer select-none transition-all outline-none focus:ring-3 ring-base-400",
                     currentSelection === selectionId
                         ? "font-bold bg-base-500 text-base-200 border-base-500"
-                        : "text-base-400 border-base-400 bg-base-100 hover:bg-base-200"
+                        : "text-base-400 border-base-400 bg-base-100 hover:bg-base-200",
+                    isPending && "opacity-25"
                 )}
             >
                 { selectionId }
@@ -148,9 +162,15 @@ function PaginationItemSkip({
     children?: React.ReactNode,
     to: number
 }) {
+    const { isPending } = useContext(ProductListContext);
+
     return (
-        <Link to="." search={prev => ({ ...prev, offset: to })}>
-            <li className="[&>svg]:size-8 text-base-400 hover:text-base-500 transition-colors">
+        <Link to="." search={prev => ({ ...prev, offset: to })} disabled={isPending}>
+            <li className={cn(
+                "[&>svg]:size-8 text-base-400 hover:text-base-500 transition-colors group-[disabled=true]:opacity-15",
+                isPending && "opacity-25"
+            )}
+            >
                 { children }
             </li>
         </Link>
@@ -167,7 +187,7 @@ function PaginationComponent({
     totalPages
 }: PaginationComponentProps) {
     const _pagesMidpoint = Math.floor(MAX_PAGINATION_VISIBLE_PAGES / 2);
-    const pages = 20;
+    const pages = totalPages;
 
     const PaginationElements = useCallback(() => {
         const elementList: React.ReactElement[]  = [];
