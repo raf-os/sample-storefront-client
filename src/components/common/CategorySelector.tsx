@@ -4,7 +4,7 @@ import { Command } from "cmdk";
 import { EventBus } from "@/classes/EventBus";
 import CustomCommandContext, { type ICustomCommandContext, type CommandEvents } from "@/components/context/CustomCommandContext";
 import useCategoryTree from "@/hooks/useCategoryTree";
-import { useFormContext, type FieldValues } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 
 import { CmdkInputSelect } from "@/components/custom-category-select/CmdkInputSelect";
 import * as Collapsible from "@radix-ui/react-collapsible";

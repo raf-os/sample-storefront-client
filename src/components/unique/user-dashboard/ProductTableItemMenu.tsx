@@ -31,9 +31,11 @@ export default function ProductTableItemMenu({
                         </MenuItem>
                     </Link>
 
-                    <MenuItem>
-                        Edit
-                    </MenuItem>
+                    <Link to="/app/user/products/edit/$itemId" params={{ itemId }}>
+                        <MenuItem>
+                            Edit
+                        </MenuItem>
+                    </Link>
 
                     <MenuSeparator />
 

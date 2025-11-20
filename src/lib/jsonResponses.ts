@@ -51,10 +51,10 @@ export class BadRequest extends JsonResponse {
 }
 
 export class NotFound extends JsonResponse {
-    constructor() {
+    constructor(message?: string) {
         super({
             success: false,
-            message: "Resource not found."
+            message: message ?? "Resource not found."
         });
     }
 }

@@ -5,6 +5,7 @@ export default function useServerAction() {
     const [ isPending, startTransition ] = useTransition();
 
     const wrappedTransition = (callback: () => Promise<void>) => {
+        setErrorMessage(null);
         return startTransition(async () => {
             try {
                 await callback();
@@ -24,6 +25,5 @@ export default function useServerAction() {
         isPending,
         wrappedTransition,
         errorMessage,
-        clearError
     ] as const;
 }

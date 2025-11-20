@@ -58,8 +58,8 @@
 
     --col-base-100: oklch(93% 0.005 245);
     --col-base-200: oklch(98% 0.0055 210);
-    --col-base-300: oklch(91% 0.02 260);
-    --col-base-400: oklch(57% 0.015 270);
+    --col-base-300: oklch(89% 0.01 260);
+    --col-base-400: oklch(79% 0.007 270);
     --col-base-500: oklch(25% 0.01 290);
     --col-base-content: var(--col-base-500);
 

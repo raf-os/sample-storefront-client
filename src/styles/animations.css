@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+@utility shimmer {
+    --prop-bg-col: var(--shimmer-background, var(--color-base-300));
+    --prop-fg-col: var(--shimmer-foreground, var(--color-base-400));
+    background-image: linear-gradient(-45deg, var(--prop-bg-col) 30%, color-mix(in oklab, var(--prop-fg-col) 30%, var(--prop-bg-col)) 50%, var(--prop-bg-col) 70%);
+    background-size: 400% 100%;
+    animation: animateShimmer 2s infinite linear;
+}
+
 @theme {
     --animate-slideUpAndFade: slideUpAndFade 0.4s ease;
     --animate-dialogEntry: dialogEntry 0.25s ease;
@@ -23,6 +31,15 @@
         to {
             opacity: 1;
             scale: 1;
+        }
+    }
+
+    @keyframes animateShimmer {
+        0%, 75% {
+            background-position-x: 0%;
+        }
+        100% {
+            background-position-x: 100%;
         }
     }
 }

@@ -25,7 +25,7 @@ export default function ProductListRenderer({
     offset
 }: ProductListRendererProps) {
     const [ productListData, setProductListData ] = useState<TProductListPageResponse | null>(null);
-    const [ isPending, startTransition, errorMessage, clearError ] = useServerAction();
+    const [ isPending, startTransition, errorMessage ] = useServerAction();
 
     useEffect(() => {
         startTransition(async () => {

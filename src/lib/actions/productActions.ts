@@ -9,6 +9,8 @@ import type { TComment, TProduct, TProductListItem } from "@/models";
 import AuthSingleton from "@/classes/AuthSingleton";
 import * as RESPONSES from "@/lib/jsonResponses";
 import type { WithRequired } from "@/types/utilities";
+import type { PatchDocument } from "@/types/jsonPatch";
+import { PatchBuilder } from "@/lib/patchBuilder";
 
 type AddProductRequest = {
     name: string,
@@ -137,4 +139,31 @@ export async function GetProductComments(productId: string, offset?: number) {
         console.error(err);
         return new RESPONSES.ServerFetchError();
     }
+}
+
+const ProductPatchSchema = z.object({
+    name: z.string().optional(),
+    price: z.float32().min(0).optional(),
+    discount: z.float32().min(0).max(100).optional(),
+    description: z.string().optional(),
+});
+
+/** TODO: This */
+export async function PatchDocumentById(
+    productId: string,
+    patchProps: z.infer<typeof ProductPatchSchema>
+) {
+    const patchedData = await ProductPatchSchema.parseAsync(patchProps);
+
+    const p = new PatchBuilder<z.infer<typeof ProductPatchSchema>>();
+
+    const res = await fetch(GlobalConfig.ServerProductEndpoint + `${productId}`);
+
+    if (!res.ok) {
+        if (res.status === 400) return new RESPONSES.BadRequest();
+        else if (res.status === 401) return new RESPONSES.UnauthorizedRequest();
+        else return new RESPONSES.NotFound();
+    }
+
+    return new RESPONSES.Ok();
 }
