@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
+import { useFormContext } from "react-hook-form";
 
 export type InputProps = React.ComponentPropsWithRef<'input'> & {
     onValueChange?: (newValue: React.ComponentPropsWithRef<'input'>['value']) => void,
@@ -16,6 +17,8 @@ export default function Input({
 }: InputProps) {
     const isControlled = value !== undefined;
 
+    const { setValue } = useFormContext();
+
     const [ inputValue, setInputValue ] = useState<typeof value>(defaultValue ?? "");
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,9 +34,13 @@ export default function Input({
 
     useEffect(() => {
         if (isControlled) return;
-        if (defaultValue !== undefined && defaultValue !== null)
+        if (defaultValue !== undefined && defaultValue !== null) {
             setInputValue(defaultValue);
-    }, [ defaultValue, isControlled ]);
+            if (setValue && name) {
+                setValue(name, defaultValue);
+            }
+        }
+    }, [ defaultValue, isControlled, name, setValue ]);
 
     return (
         <input

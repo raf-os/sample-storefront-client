@@ -1,11 +1,12 @@
 import { cn } from "@/lib/utils";
 import { useFormContext } from "react-hook-form";
 
-export type FieldSetProps<T extends React.ElementType = "input"> = Omit<React.ComponentPropsWithRef<T>, "name"> & {
+export type FieldSetProps<T extends React.ElementType = "input"> = Omit<React.ComponentPropsWithRef<T>, "name" | "onBlur"> & {
     name: string,
-    label?: string,
+    label?: React.ReactNode,
     errorAlignment?: "horizontal" | "vertical",
-    as?: T
+    as?: T,
+    onBlur?: (e: React.SyntheticEvent) => void,
 }
 
 export default function FieldSet<T extends React.ElementType = "input">({
@@ -15,6 +16,7 @@ export default function FieldSet<T extends React.ElementType = "input">({
     label,
     type,
     errorAlignment = "vertical",
+    onBlur,
     ...rest
 }: FieldSetProps<T>) {
     const { register, formState: { errors } } = useFormContext();
@@ -32,7 +34,7 @@ export default function FieldSet<T extends React.ElementType = "input">({
                         errorAlignment === "horizontal" && "justify-between"
                     )}
                 >
-                        <label className="font-bold text-sm grow-0 shrink-0">
+                        <label className="flex items-center font-bold text-sm grow-0 shrink-0">
                             { label }
                         </label>
 
@@ -45,7 +47,7 @@ export default function FieldSet<T extends React.ElementType = "input">({
             )}
 
             <Component
-                {...register(name, { valueAsNumber: type==="number" })}
+                {...register(name, { onBlur: (e) => onBlur?.(e) })}
                 aria-invalid={!!errors[name]}
                 type={type}
                 {...rest}

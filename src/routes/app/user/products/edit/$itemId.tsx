@@ -1,7 +1,8 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { createFileRoute } from '@tanstack/react-router';
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, useFormContext } from "react-hook-form";
 
 import { useServerAction } from "@/hooks";
 
@@ -11,6 +12,10 @@ import type { TProduct } from "@/models";
 import { Input, FieldSet, TextArea } from "@/components/forms";
 import CategorySelector from "@/components/common/CategorySelector";
 import Button from "@/components/button";
+
+import {
+	CircleAlert
+} from "lucide-react";
 
 export const Route = createFileRoute('/app/user/products/edit/$itemId')({
 	component: RouteComponent,
@@ -24,13 +29,15 @@ const ProductPatchSchema = z.object({
 	name: z
 		.string()
 		.min(4, "Name must have at least 4 characters.")
-		.max(100, "Name must be at most 100 characters long."),
-	price: z
-		.number("Price must be a number.")
-		.positive("Price can't be negative."),
-	discount: z
-		.number()
-		.positive()
+		.max(100, "Name must be at most 100 characters long.")
+		.optional(),
+	price: z.coerce
+		.number<number>()
+		.min(0, "Price can't be negative.")
+		.optional(),
+	discount: z.coerce
+		.number<number>()
+		.min(0)
 		.max(100)
 		.optional(),
 	description: z
@@ -57,7 +64,11 @@ function ItemEditPage() {
 	const [ productData, setProductData ] = useState<TProduct | null>(null);
 	const [ isPending, startTransition, errorMessage ] = useServerAction();
 
-	const methods = useForm<z.infer<typeof ProductPatchSchema>>();
+	const methods = useForm<z.infer<typeof ProductPatchSchema>>({
+		resolver: zodResolver(ProductPatchSchema)
+	});
+
+	const { getValues, handleSubmit } = methods;
 
 	const isRequestReady = productData !== null || errorMessage !== null;
 
@@ -76,6 +87,12 @@ function ItemEditPage() {
 		});
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [routeParams]);
+
+	const onSubmit = (data: z.infer<typeof ProductPatchSchema>) => {
+		const vals = getValues(undefined, { dirtyFields: true });
+		const parsed = ProductPatchSchema.parse(vals);
+		console.log(parsed)
+	}
 
 	const ctx: TEditFormContext = {
 		isLoading: isPending,
@@ -107,7 +124,7 @@ function ItemEditPage() {
 				className="bg-base-200 rounded-box p-4"
 			>
 				<FormProvider {...methods}>
-					<form>
+					<form onSubmit={handleSubmit(onSubmit)}>
 						<div className="flex flex-col gap-4">
 							<AwaitedFieldSet
 								as={Input}
@@ -147,7 +164,11 @@ function ItemEditPage() {
 								//value={productData?.discount}
 							/>
 
-							<Button className="btn-primary">
+							<Button
+								className="btn-primary"
+								type="submit"
+								disabled={isPending}
+							>
 								Save changes
 							</Button>
 						</div>
@@ -161,12 +182,37 @@ function ItemEditPage() {
 function AwaitedFieldSet<T extends keyof z.infer<typeof ProductPatchSchema>>({
 	disabled,
 	name,
+	label,
 	value,
 	...rest
 }: React.ComponentPropsWithRef<typeof FieldSet> & { value?: z.output<typeof ProductPatchSchema>[T], name: T }) {
 	const { isLoading, isError } = useContext(EditFormContext);
+	const { getFieldState, trigger } = useFormContext<z.infer<typeof ProductPatchSchema>>();
+	const { isDirty } = getFieldState(name);
+
 	const myVal = value;
+
+	const labelJsx = useCallback(() => (
+		<>
+			{label}
+			{ isDirty && (
+				<CircleAlert className="inline-block ml-2 size-5 stroke-primary-300" />
+			)}
+		</>
+	), [label, isDirty]);
+
+	const handleOnBlur = () => {
+		trigger(name);
+	}
+
 	return (
-		<FieldSet {...rest} name={name} defaultValue={myVal} disabled={ isLoading || isError || disabled } />
+		<FieldSet
+			{...rest}
+			name={name}
+			label={labelJsx()}
+			defaultValue={myVal}
+			disabled={ isLoading || isError || disabled }
+			onBlur={handleOnBlur}
+		/>
 	);
 }
