@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { z } from "zod";
 import { createFileRoute } from '@tanstack/react-router';
 import { useForm, FormProvider } from "react-hook-form";
@@ -7,6 +7,10 @@ import { useServerAction } from "@/hooks";
 
 import { GetProductById } from "@/lib/actions/productActions";
 import type { TProduct } from "@/models";
+
+import { Input, FieldSet, TextArea } from "@/components/forms";
+import CategorySelector from "@/components/common/CategorySelector";
+import Button from "@/components/button";
 
 export const Route = createFileRoute('/app/user/products/edit/$itemId')({
 	component: RouteComponent,
@@ -24,12 +28,29 @@ const ProductPatchSchema = z.object({
 	price: z
 		.number("Price must be a number.")
 		.positive("Price can't be negative."),
+	discount: z
+		.number()
+		.positive()
+		.max(100)
+		.optional(),
 	description: z
 		.string()
 		.optional(),
 	categories: z
 		.set(z.number("Invalid category types."))
 		.optional()
+});
+
+type TEditFormContext = {
+	isError: boolean,
+	isLoading: boolean,
+	loadedData: TProduct | null
+}
+
+const EditFormContext = createContext<TEditFormContext>({
+	isError: false,
+	isLoading: false,
+	loadedData: null
 });
 
 function ItemEditPage() {
@@ -44,7 +65,10 @@ function ItemEditPage() {
 
 	useEffect(() => {
 		startTransition(async () => {
+			// Manual delay for testing purposes
+			// await new Promise(resolve => setTimeout(resolve, 1000));
 			const data = await GetProductById(routeParams.itemId);
+			// console.log(data)
 
 			if (!data.success) throw new Error(data.message);
 
@@ -53,8 +77,14 @@ function ItemEditPage() {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [routeParams]);
 
+	const ctx: TEditFormContext = {
+		isLoading: isPending,
+		isError: !!errorMessage,
+		loadedData: productData
+	}
+
 	return (
-		<div>
+		<EditFormContext value={ctx}>
 			<div className="flex gap-2 mb-2">
 				<h1 className="font-bold text-xl">
 					Editing {` `}
@@ -78,10 +108,65 @@ function ItemEditPage() {
 			>
 				<FormProvider {...methods}>
 					<form>
-						form
+						<div className="flex flex-col gap-4">
+							<AwaitedFieldSet
+								as={Input}
+								name="name"
+								label="Product name"
+								value={productData?.name}
+							/>
+
+							<AwaitedFieldSet
+								as={Input}
+								name="price"
+								label="Product price"
+								value={productData?.price}
+								type="number"
+							/>
+
+							<AwaitedFieldSet
+								as={Input}
+								name="discount"
+								label="Discount (%)"
+								value={productData?.discount}
+								type="number"
+							/>
+
+							<AwaitedFieldSet
+								as={TextArea}
+								name="description"
+								label="Description"
+								value={productData?.description}
+								rows={8}
+							/>
+
+							<AwaitedFieldSet
+								as={CategorySelector}
+								name="categories"
+								label="Categories"
+								//value={productData?.discount}
+							/>
+
+							<Button className="btn-primary">
+								Save changes
+							</Button>
+						</div>
 					</form>
 				</FormProvider>
 			</div>
-		</div>
+		</EditFormContext>
 	)
+}
+
+function AwaitedFieldSet<T extends keyof z.infer<typeof ProductPatchSchema>>({
+	disabled,
+	name,
+	value,
+	...rest
+}: React.ComponentPropsWithRef<typeof FieldSet> & { value?: z.output<typeof ProductPatchSchema>[T], name: T }) {
+	const { isLoading, isError } = useContext(EditFormContext);
+	const myVal = value;
+	return (
+		<FieldSet {...rest} name={name} defaultValue={myVal} disabled={ isLoading || isError || disabled } />
+	);
 }
