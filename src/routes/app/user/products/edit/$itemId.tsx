@@ -47,7 +47,7 @@ function ItemEditPage() {
 
 	const navigate = useNavigate();
 
-	const methods = useForm<z.infer<typeof ProductPatchSchema>>({
+	const methods = useForm<z.input<typeof ProductPatchSchema>, any, z.output<typeof ProductPatchSchema>>({
 		resolver: zodResolver(ProductPatchSchema)
 	});
 
@@ -156,7 +156,7 @@ function ItemEditPage() {
 								as={CategorySelector}
 								name="categories"
 								label="Categories"
-								//value={productData?.discount}
+								//value={productData ? new Set((productData.productCategories ?? []) as number[]) : undefined}
 							/>
 
 							<Button

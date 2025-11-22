@@ -76,6 +76,7 @@ function ProductList({
                 : items.map((item) => (
                     <ItemRender
                         data={item}
+                        key={item.product.id}
                     />
                 ))
             }

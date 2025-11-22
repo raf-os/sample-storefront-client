@@ -21,9 +21,11 @@ const cmdk: Record<string, string> = {
 	SELECT_EVENT: 'cmdk-item-select'
 }
 
+export type TCategorySelectorProps = WithRequired<React.ComponentPropsWithRef<'input'>, "name">;
+
 export default function CategorySelector({
-	name
-}: WithRequired<React.ComponentPropsWithRef<'input'>, "name">) {
+	name,
+}: TCategorySelectorProps) {
 	const { isRequestPending, categoryTree } = useCategoryTree();
 	const [ selectedCategories, setSelectedCategories ] = useState<Set<number>>(new Set());
 	const [ isSearchPopoverOpen, setIsSearchPopoverOpen ] = useState<boolean>(false);
@@ -31,6 +33,7 @@ export default function CategorySelector({
 	const listRef = useRef<SearchPopoverHandle>(null);
 	const [ searchString, setSearchString ] = useState<string>("");
 	const { register, unregister, setValue } = useFormContext();
+	const isFirstMount = useRef<boolean>(false);
 	const events = new EventBus<CommandEvents>();
 
 	const isSearching = searchString !== "";
@@ -91,10 +94,14 @@ export default function CategorySelector({
 	}, [register, unregister, name]);
 
 	useEffect(() => {
+		if (isFirstMount.current === true) {
+			isFirstMount.current = false;
+			return;
+		}
 		if (selectedCategories.size > 0) {
-			setValue(name, selectedCategories);
+			setValue(name, selectedCategories, { shouldDirty: true });
 		} else {
-			setValue(name, undefined);
+			setValue(name, undefined, { shouldDirty: true });
 		}
 	}, [setValue, selectedCategories, name]);
 

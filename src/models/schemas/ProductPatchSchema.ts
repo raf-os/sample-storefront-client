@@ -19,6 +19,7 @@ export const ProductPatchSchema = z.object({
         .string()
         .optional(),
     categories: z
-        .set(z.number("Invalid category types."))
+        .set(z.number())
+        .transform(v => ([...v]))
         .optional()
 });

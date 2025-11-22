@@ -144,7 +144,7 @@ export async function GetProductComments(productId: string, offset?: number) {
 /** TODO: This */
 export async function PatchDocumentById(
     productId: string,
-    patchProps: z.infer<typeof ProductPatchSchema>
+    patchProps: z.input<typeof ProductPatchSchema>
 ) {
     const tokenCheck = await TokenRefreshHandler.validateToken();
     if (!tokenCheck) return new RESPONSES.UnauthorizedRequest("You're not authorized for this action.");
@@ -166,13 +166,14 @@ export async function PatchDocumentById(
 
     const patch = pb.build();
 
+
     const res = await fetch(GlobalConfig.ServerProductEndpoint + `/${productId}`, {
         method: "PATCH",
         headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ patchItem: patch }),
+        body: JSON.stringify(patch),
     });
 
     if (!res.ok) {
