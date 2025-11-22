@@ -9,12 +9,14 @@ import { AuthRefresh } from "@/lib/actions/authAction";
 import AuthSingleton from "@/classes/AuthSingleton";
 import TokenRefreshHandler from "@/handlers/TokenRefreshHandler";
 
+import { TooltipProvider } from "@radix-ui/react-tooltip";
+
 interface IRootRouteContext {
 	authData: TAuthData | null
 }
 
 const RootLayout = () => (
-	<>
+	<TooltipProvider>
 		<HeadContent />
 		<AuthWrapper>
 			<div className='flex flex-col min-h-dvh'>
@@ -27,7 +29,7 @@ const RootLayout = () => (
 				<TanStackRouterDevtools />
 			</div>
 		</AuthWrapper>
-	</>
+	</TooltipProvider>
 )
 
 export const Route = createRootRouteWithContext<IRootRouteContext>()({

@@ -2,7 +2,7 @@
 
 import type { Path, PathValue, PatchDocument, PatchOperation } from "@/types/jsonPatch";
 
-export class PatchBuilder<T> {
+export class PatchBuilder<T extends object> {
     private patchDoc: Set<PatchOperation<T>> = new Set();
 
     replace<P extends Path<T>>(path: P, value: PathValue<T, P>) {
@@ -29,10 +29,7 @@ export class PatchBuilder<T> {
         this.patchDoc.add({ op: 'test' as const, path, value });
     }
 
-    build() { return this.patchDoc };
-
-    parseObject(obj: T) {
-    }
+    build() { return [...this.patchDoc] };
 }
 
 function createPatch<T>() {

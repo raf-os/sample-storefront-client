@@ -34,7 +34,7 @@ export default function FieldSet<T extends React.ElementType = "input">({
                         errorAlignment === "horizontal" && "justify-between"
                     )}
                 >
-                        <label className="flex items-center font-bold text-sm grow-0 shrink-0">
+                        <label className="flex items-center font-bold text-sm grow-0 shrink-0 [&_svg]:size-4">
                             { label }
                         </label>
 

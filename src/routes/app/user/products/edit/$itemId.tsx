@@ -1,20 +1,23 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useForm, FormProvider, useFormContext } from "react-hook-form";
 
 import { useServerAction } from "@/hooks";
 
-import { GetProductById } from "@/lib/actions/productActions";
+import { GetProductById, PatchDocumentById } from "@/lib/actions/productActions";
 import type { TProduct } from "@/models";
+import { ProductPatchSchema } from "@/models/schemas";
 
+import * as Tooltip from "@radix-ui/react-tooltip";
 import { Input, FieldSet, TextArea } from "@/components/forms";
 import CategorySelector from "@/components/common/CategorySelector";
 import Button from "@/components/button";
 
 import {
-	CircleAlert
+	FilePen,
+	TriangleAlert as AlertIcon
 } from "lucide-react";
 
 export const Route = createFileRoute('/app/user/products/edit/$itemId')({
@@ -24,29 +27,6 @@ export const Route = createFileRoute('/app/user/products/edit/$itemId')({
 function RouteComponent() {
 	return <ItemEditPage />
 }
-
-const ProductPatchSchema = z.object({
-	name: z
-		.string()
-		.min(4, "Name must have at least 4 characters.")
-		.max(100, "Name must be at most 100 characters long.")
-		.optional(),
-	price: z.coerce
-		.number<number>()
-		.min(0, "Price can't be negative.")
-		.optional(),
-	discount: z.coerce
-		.number<number>()
-		.min(0)
-		.max(100)
-		.optional(),
-	description: z
-		.string()
-		.optional(),
-	categories: z
-		.set(z.number("Invalid category types."))
-		.optional()
-});
 
 type TEditFormContext = {
 	isError: boolean,
@@ -63,6 +43,9 @@ const EditFormContext = createContext<TEditFormContext>({
 function ItemEditPage() {
 	const [ productData, setProductData ] = useState<TProduct | null>(null);
 	const [ isPending, startTransition, errorMessage ] = useServerAction();
+	const [ isSuccess, setIsSuccess ] = useState<boolean>(false);
+
+	const navigate = useNavigate();
 
 	const methods = useForm<z.infer<typeof ProductPatchSchema>>({
 		resolver: zodResolver(ProductPatchSchema)
@@ -88,14 +71,23 @@ function ItemEditPage() {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [routeParams]);
 
-	const onSubmit = (data: z.infer<typeof ProductPatchSchema>) => {
-		const vals = getValues(undefined, { dirtyFields: true });
-		const parsed = ProductPatchSchema.parse(vals);
-		console.log(parsed)
+	const onSubmit = async () => {
+		if (isPending) return;
+		const patchProps = getValues(undefined, { dirtyFields: true });
+		startTransition(async () => {
+			const res = await PatchDocumentById(routeParams.itemId, patchProps);
+
+			if (!res.success) throw new Error(res.message);
+			else {
+				console.log(res)
+				setIsSuccess(true);
+				navigate({ to: "/item/$itemId", params: { itemId: routeParams.itemId } });
+			}
+		});
 	}
 
 	const ctx: TEditFormContext = {
-		isLoading: isPending,
+		isLoading: isPending || isSuccess,
 		isError: !!errorMessage,
 		loadedData: productData
 	}
@@ -126,6 +118,9 @@ function ItemEditPage() {
 				<FormProvider {...methods}>
 					<form onSubmit={handleSubmit(onSubmit)}>
 						<div className="flex flex-col gap-4">
+							{ errorMessage && (
+								<p className="text-destructive-content">{ errorMessage }</p>
+							)}
 							<AwaitedFieldSet
 								as={Input}
 								name="name"
@@ -188,18 +183,25 @@ function AwaitedFieldSet<T extends keyof z.infer<typeof ProductPatchSchema>>({
 }: React.ComponentPropsWithRef<typeof FieldSet> & { value?: z.output<typeof ProductPatchSchema>[T], name: T }) {
 	const { isLoading, isError } = useContext(EditFormContext);
 	const { getFieldState, trigger } = useFormContext<z.infer<typeof ProductPatchSchema>>();
-	const { isDirty } = getFieldState(name);
+	const { isDirty, error } = getFieldState(name);
 
 	const myVal = value;
 
 	const labelJsx = useCallback(() => (
 		<>
 			{label}
+			<div className="flex gap-1 ml-2">
 			{ isDirty && (
-				<CircleAlert className="inline-block ml-2 size-5 stroke-primary-300" />
+				<FormChangeAlertButton tooltip="This field was changed.">
+					<FilePen className="inline-block stroke-primary-200" />
+				</FormChangeAlertButton>
 			)}
+			{ error && (
+				<AlertIcon className="stroke-destructive-content" />
+			)}
+			</div>
 		</>
-	), [label, isDirty]);
+	), [label, isDirty, error]);
 
 	const handleOnBlur = () => {
 		trigger(name);
@@ -211,8 +213,27 @@ function AwaitedFieldSet<T extends keyof z.infer<typeof ProductPatchSchema>>({
 			name={name}
 			label={labelJsx()}
 			defaultValue={myVal}
-			disabled={ isLoading || isError || disabled }
+			disabled={ isLoading || disabled }
 			onBlur={handleOnBlur}
 		/>
 	);
+}
+
+function FormChangeAlertButton({ children, tooltip }: { children: React.ReactNode, tooltip: React.ReactNode }) {
+	return (
+		<Tooltip.Root>
+			<Tooltip.Trigger asChild>
+				{ children }
+			</Tooltip.Trigger>
+			<Tooltip.Portal>
+				<Tooltip.Content
+					sideOffset={4}
+					className="bg-base-200 border border-base-300 px-3 py-2 rounded-box shadow-sm text-sm text-base-500/75 animate-slideUpAndFade"
+				>
+					{ tooltip }
+					<Tooltip.Arrow className="fill-base-400" />
+				</Tooltip.Content>
+			</Tooltip.Portal>
+		</Tooltip.Root>
+	)
 }

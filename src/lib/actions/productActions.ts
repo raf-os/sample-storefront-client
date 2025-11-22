@@ -9,7 +9,7 @@ import type { TComment, TProduct, TProductListItem } from "@/models";
 import AuthSingleton from "@/classes/AuthSingleton";
 import * as RESPONSES from "@/lib/jsonResponses";
 import type { WithRequired } from "@/types/utilities";
-import type { PatchDocument } from "@/types/jsonPatch";
+import { ProductPatchSchema } from "@/models/schemas";
 import { PatchBuilder } from "@/lib/patchBuilder";
 
 type AddProductRequest = {
@@ -141,23 +141,39 @@ export async function GetProductComments(productId: string, offset?: number) {
     }
 }
 
-const ProductPatchSchema = z.object({
-    name: z.string().optional(),
-    price: z.float32().min(0).optional(),
-    discount: z.float32().min(0).max(100).optional(),
-    description: z.string().optional(),
-});
-
 /** TODO: This */
 export async function PatchDocumentById(
     productId: string,
     patchProps: z.infer<typeof ProductPatchSchema>
 ) {
+    const tokenCheck = await TokenRefreshHandler.validateToken();
+    if (!tokenCheck) return new RESPONSES.UnauthorizedRequest("You're not authorized for this action.");
+
+    const token = AuthSingleton.getJwtToken();
+
     const patchedData = await ProductPatchSchema.parseAsync(patchProps);
+    if (Object.keys(patchedData).length === 0) return new RESPONSES.BadRequest();
 
-    const p = new PatchBuilder<z.infer<typeof ProductPatchSchema>>();
+    const pb = new PatchBuilder<z.infer<typeof ProductPatchSchema>>();
 
-    const res = await fetch(GlobalConfig.ServerProductEndpoint + `${productId}`);
+    for (const [k, v] of Object.entries(patchedData)) {
+        if (v === undefined) {
+            pb.remove(`/${k}` as any);
+        } else {
+            pb.replace(`/${k}` as any, v as any);
+        }
+    }
+
+    const patch = pb.build();
+
+    const res = await fetch(GlobalConfig.ServerProductEndpoint + `/${productId}`, {
+        method: "PATCH",
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ patchItem: patch }),
+    });
 
     if (!res.ok) {
         if (res.status === 400) return new RESPONSES.BadRequest();

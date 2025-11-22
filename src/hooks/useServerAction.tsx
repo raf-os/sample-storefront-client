@@ -3,12 +3,15 @@ import { useTransition, useState } from "react";
 export default function useServerAction() {
     const [ errorMessage, setErrorMessage ] = useState<string | null>(null);
     const [ isPending, startTransition ] = useTransition();
+    const [ isSuccess, setIsSuccess ] = useState<boolean>(false);
 
-    const wrappedTransition = (callback: () => Promise<void>) => {
+    const wrappedTransition = (callback: () => Promise<unknown>) => {
         setErrorMessage(null);
+        setIsSuccess(false);
         return startTransition(async () => {
             try {
                 await callback();
+                setIsSuccess(true);
             } catch (err) {
                 if (err instanceof Error) {
                     setErrorMessage(err.message ?? "Unknown error occurred.");
@@ -19,11 +22,12 @@ export default function useServerAction() {
         });
     };
 
-    const clearError = () => setErrorMessage(null);
+    // const clearError = () => setErrorMessage(null);
 
     return [
         isPending,
         wrappedTransition,
         errorMessage,
+        isSuccess
     ] as const;
 }

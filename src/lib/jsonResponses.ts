@@ -33,10 +33,10 @@ export class LoginTokenTimeoutError extends JsonResponse {
 }
 
 export class UnauthorizedRequest extends JsonResponse {
-    constructor() {
+    constructor(message?: string) {
         super({
             success: false,
-            message: "You are unauthorized for this action."
+            message: message ?? "You are unauthorized for this action."
         });
     }
 }
