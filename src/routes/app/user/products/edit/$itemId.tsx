@@ -57,6 +57,13 @@ function ItemEditPage() {
 
 	const routeParams = Route.useParams();
 
+	const loadedCategoryList = new Set<number>();
+	if (productData && productData.categories) {
+		for (const cat of productData.categories) {
+			loadedCategoryList.add(cat.id);
+		}
+	}
+
 	useEffect(() => {
 		startTransition(async () => {
 			// Manual delay for testing purposes
@@ -156,7 +163,7 @@ function ItemEditPage() {
 								as={CategorySelector}
 								name="categories"
 								label="Categories"
-								//value={productData ? new Set((productData.productCategories ?? []) as number[]) : undefined}
+								value={loadedCategoryList}
 							/>
 
 							<Button
@@ -180,8 +187,8 @@ function AwaitedFieldSet<T extends keyof z.infer<typeof ProductPatchSchema>>({
 	label,
 	value,
 	...rest
-}: React.ComponentPropsWithRef<typeof FieldSet> & { value?: z.output<typeof ProductPatchSchema>[T], name: T }) {
-	const { isLoading, isError } = useContext(EditFormContext);
+}: React.ComponentPropsWithRef<typeof FieldSet> & { value?: z.input<typeof ProductPatchSchema>[T], name: T }) {
+	const { isLoading } = useContext(EditFormContext);
 	const { getFieldState, trigger } = useFormContext<z.infer<typeof ProductPatchSchema>>();
 	const { isDirty, error } = getFieldState(name);
 

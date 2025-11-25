@@ -21,10 +21,20 @@ const cmdk: Record<string, string> = {
 	SELECT_EVENT: 'cmdk-item-select'
 }
 
-export type TCategorySelectorProps = WithRequired<React.ComponentPropsWithRef<'input'>, "name">;
+export type TCategorySelectorProps = WithRequired<
+	Omit<
+		React.ComponentPropsWithRef<'input'>,
+		"defaultValue"
+	>,
+	"name"
+> & {
+	defaultValue: Set<number>
+};
 
 export default function CategorySelector({
 	name,
+	defaultValue,
+	disabled
 }: TCategorySelectorProps) {
 	const { isRequestPending, categoryTree } = useCategoryTree();
 	const [ selectedCategories, setSelectedCategories ] = useState<Set<number>>(new Set());
@@ -48,6 +58,7 @@ export default function CategorySelector({
 
 	const addCategory = (id: number) => {
 		if (selectedCategories.has(id)) return false;
+		if (disabled || isRequestPending) return false;
 
 		setSelectedCategories(prev => {
 			const n = new Set(prev);
@@ -63,6 +74,7 @@ export default function CategorySelector({
 
 	const removeCategory = (id: number) => {
 		if (!selectedCategories.has(id)) return false;
+		if (disabled || isRequestPending) return false;
 
 		setSelectedCategories(prev => {
 			const n = new Set(prev);
@@ -105,6 +117,12 @@ export default function CategorySelector({
 		}
 	}, [setValue, selectedCategories, name]);
 
+	useEffect(() => {
+		if (defaultValue !== undefined && defaultValue !== null && defaultValue instanceof Set) {
+			setSelectedCategories(defaultValue);
+		}
+	}, [defaultValue]);
+
 	const ctx: ICustomCommandContext = {
 		searchValue: searchString,
 		updateSearchString: updateSearchString,
@@ -126,7 +144,7 @@ export default function CategorySelector({
 						<CmdkInputSelect
 							ref={inputRef}
 							selectedIds={selectedCategories}
-							disabled={isRequestPending}
+							disabled={isRequestPending || disabled}
 						/>
 
 						<SearchPopover

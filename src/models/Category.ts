@@ -4,3 +4,8 @@ export type TCategory = {
     parentId?: number,
     parent?: TCategory
 }
+
+export type TCategoryDTO = {
+    id: number,
+    name: string,
+}

@@ -1,7 +1,7 @@
 import type { TUser } from "./User"
-import type { TProductCategory } from "./ProductCategory"
 import type { TComment } from "./Comment"
 import type { WithRequired } from "@/types/utilities"
+import type { TCategoryDTO } from "@/models/Category"
 
 export type TProductRating = {
     value?: number,
@@ -27,8 +27,9 @@ export type TProduct = {
     userId: string,
     user?: TUser,
 
-    comments?: TComment[]
-    productCategories?: TProductCategory[]
+    comments?: TComment[],
+    categories?: TCategoryDTO[],
+    //productCategories?: TProductCategory[]
 }
 
 export type TProductWithCommments = WithRequired<TProduct, 'comments'>;
@@ -40,5 +41,6 @@ export type TProductListItem = {
     price: number,
     discount?: number,
 
-    productCategories?: TProductCategory[]
+    categories?: TCategoryDTO[],
+    //productCategories?: TProductCategory[]
 }

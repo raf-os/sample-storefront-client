@@ -113,7 +113,7 @@ export function CmdkInputSelect({
 
 			<input
 				className={cn(
-					"placeholder:text-base-300 grow-1 shrink-1 outline-0",
+					"placeholder:text-base-300 grow-1 shrink-1 outline-0 disabled:bg-base-300",
 					isSelecting && "caret-transparent",
 					className
 				)}

@@ -68,9 +68,13 @@ export default function NavbarUserControls() {
                         sideOffset={6}
                     >
                         <MenuContext.Provider value={ctx}>
-                        <ul className="flex flex-col">
+                        <ul className="flex flex-col gap-2 p-1">
                             <MenuItem>
                                 <Link to="/app/user">Account settings</Link>
+                            </MenuItem>
+
+                            <MenuItem>
+                                <Link to="/app/user/products">View my listings</Link>
                             </MenuItem>
 
                             <div className="h-px bg-base-300" />
@@ -119,7 +123,7 @@ function MenuItem({
         <li
             onClick={handleItemClick}
             className={cn(
-                "p-2",
+                "px-2 py-1",
                 className
             )}
             {...rest}
