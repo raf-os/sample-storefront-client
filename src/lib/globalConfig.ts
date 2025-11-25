@@ -11,7 +11,8 @@ const GlobalConfig = {
         User: "User",
         Operator: "Operator",
         Admin: "Admin"
-    }
+    },
+    MaxImagesPerListing: 7
 }
 
 export default GlobalConfig;

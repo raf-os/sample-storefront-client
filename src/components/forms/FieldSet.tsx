@@ -22,6 +22,24 @@ export default function FieldSet<T extends React.ElementType = "input">({
     const { register, formState: { errors } } = useFormContext();
     const Component = as || "input";
 
+    const getTopmostErrorMessage = (error: any) => {
+        if (error?.message) {
+            return error.message;
+        }
+
+        if (error && typeof error === "object") {
+            for (const key in error) {
+                if (key !== "message" && error[key].message) {
+                    return error[key].message;
+                }
+            }
+        }
+
+        return undefined;
+    }
+
+    const error = getTopmostErrorMessage(errors[name]);
+
     return (
         <fieldset
             className="flex flex-col gap-2"
@@ -39,9 +57,9 @@ export default function FieldSet<T extends React.ElementType = "input">({
                         </label>
 
                     { errors[name] && (
-                        <p className="text-red-500 text-sm">
-                            { String(errors[name].message) }
-                        </p>
+                        <div className="text-red-500 text-sm">
+                            { error }
+                        </div>
                     ) }
                 </div>
             )}

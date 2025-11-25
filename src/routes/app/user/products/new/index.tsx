@@ -5,11 +5,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, FormProvider } from "react-hook-form";
 
 import { AddProductAction } from "@/lib/actions/productActions";
+import { ImageUploadSchema } from "@/models/schemas/ImageUploadSchema";
 
-import { Input, TextArea, FieldSet } from "@/components/forms";
+import { Input, TextArea, FieldSet, FileUploadInput } from "@/components/forms";
 import Button from "@/components/button";
 
 import CategorySelector from "@/components/common/CategorySelector";
+import GlobalConfig from "@/lib/globalConfig";
 
 const NewProductSchema = z.object({
 	name: z
@@ -24,6 +26,10 @@ const NewProductSchema = z.object({
 		.optional(),
 	categories: z
 		.set(z.number("Invalid category types."))
+		.optional(),
+	files: z
+		.array(ImageUploadSchema)
+		.max(GlobalConfig.MaxImagesPerListing, `Only up to ${GlobalConfig.MaxImagesPerListing} files may be uploaded.`)
 		.optional()
 });
 
@@ -33,6 +39,7 @@ export const Route = createFileRoute('/app/user/products/new/')({
 
 function RouteComponent() {
 	// TODO: maybe extract this transition + error message into a custom hook
+	// Update: useServerAction() custom hook is available, change this into that
 	const [ isPending, startTransition ] = useTransition();
 	const [ formError, setFormError ] = useState<string | null>(null);
 	const navigate = useNavigate();
@@ -109,6 +116,13 @@ function RouteComponent() {
 							label="Categories"
 							errorAlignment="horizontal"
 							as={CategorySelector}
+						/>
+
+						<FieldSet
+							name="files"
+							label={`Product photos (up to ${GlobalConfig.MaxImagesPerListing} files)`}
+							errorAlignment="horizontal"
+							as={FileUploadInput}
 						/>
 
 						<Button

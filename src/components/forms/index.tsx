@@ -4,6 +4,7 @@ import SearchBar from "./SearchBar";
 import Checkbox from "./Checkbox";
 import FieldSet from "./FieldSet";
 import { StarRatingComponent } from "./StarRating";
+import FileUploadInput from "./FileUpload";
 
 export {
     Input,
@@ -11,5 +12,6 @@ export {
     SearchBar,
     Checkbox,
     FieldSet,
-    StarRatingComponent
+    StarRatingComponent,
+    FileUploadInput
 }

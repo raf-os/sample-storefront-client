@@ -28,7 +28,7 @@ export type TCategorySelectorProps = WithRequired<
 	>,
 	"name"
 > & {
-	defaultValue: Set<number>
+	defaultValue?: Set<number>
 };
 
 export default function CategorySelector({

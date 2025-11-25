@@ -15,6 +15,21 @@ export function formatCurrency(amount: number) {
 	return formatter.format(amount);
 }
 
+export function formatFileSize(bytes: number): string {
+	if (bytes === 0) return '0 Bytes';
+
+	const k = 1024;
+	const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+	const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+	const formatter = new Intl.NumberFormat('un-US', {
+		maximumFractionDigits: 2,
+		minimumFractionDigits: 0
+	});
+
+	return formatter.format(bytes / Math.pow(k, i)) + '' + sizes[i];
+}
+
 export async function requestToJson<T = StandardJsonResponse>(res: Response): Promise<T | null> {
 	const text = await res.text();
 	if (!text) return null;
