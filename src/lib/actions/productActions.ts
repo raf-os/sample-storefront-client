@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { requestToJson } from "@/lib/utils";
+import { requestToJson, toFormData } from "@/lib/utils";
 import TokenRefreshHandler from "@/handlers/TokenRefreshHandler";
 import GlobalConfig from "@/lib/globalConfig";
 import type { StandardJsonResponse } from "@/types/StandardJsonResponse";
@@ -9,17 +9,18 @@ import type { TComment, TProduct, TProductListItem } from "@/models";
 import AuthSingleton from "@/classes/AuthSingleton";
 import * as RESPONSES from "@/lib/jsonResponses";
 import type { WithRequired } from "@/types/utilities";
-import { ProductPatchSchema } from "@/models/schemas";
+import { ProductPatchSchema, NewProductSchema } from "@/models/schemas";
 import { PatchBuilder } from "@/lib/patchBuilder";
 
 type AddProductRequest = {
     name: string,
     price: number,
     description?: string,
-    categories?: number[]
+    categories?: number[],
+    files?: File[]
 }
 
-export async function AddProductAction(request: AddProductRequest): Promise<StandardJsonResponse<string>> {
+export async function AddProductAction(request: z.output<typeof NewProductSchema>): Promise<StandardJsonResponse<string>> {
     const tokenCheck = await TokenRefreshHandler.validateToken();
 
     if (!tokenCheck) {
@@ -28,21 +29,27 @@ export async function AddProductAction(request: AddProductRequest): Promise<Stan
         }
     }
 
+    const validated = await NewProductSchema.parseAsync(request);
+    console.log(validated);
+
+    const formData = toFormData(request);
+    console.log(formData);
+
     try {
         const token = AuthSingleton.getJwtToken();
         const res = await fetch(GlobalConfig.ServerProductEndpoint, {
-            method: "PUT",
+            method: "POST",
             headers: {
                 'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+                //'Content-Type': 'application/json'
             },
-            body: JSON.stringify(request)
+            body: formData
         })
 
         const data = await requestToJson<{ id: string }>(res);
 
         if (!res.ok) {
-            if (res.status===400) return { success: false, message: "Bad fetch request." }
+            if (res.status===400) return new RESPONSES.BadRequest();
             else if (res.status===401) return new RESPONSES.UnauthorizedRequest();
             else return { success: false }
         }

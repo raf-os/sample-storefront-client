@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { createFileRoute, useLoaderData, type ErrorComponentProps } from "@tanstack/react-router";
+import { createFileRoute, type ErrorComponentProps } from "@tanstack/react-router";
 import PageSetup from "@/components/layout/PageSetup";
 import Button from "@/components/button";
-import ExpandableImage from "@/components/images/ExpandableImage";
+import ImagePromise from "@/components/common/ImagePromise";
+import ExpandableImage, { SuspenseThumbnail } from "@/components/images/ExpandableImage";
 import { cn } from "@/lib/utils";
 import { GetProductById, GetProductComments } from "@/lib/actions/productActions";
 import { useInView } from "@/hooks";
@@ -11,6 +12,7 @@ import { ShoppingCart, Star, Wallet } from "lucide-react";
 import type { TComment } from "@/models";
 import type { WithRequired } from "@/types/utilities";
 import { NewReviewForm } from "@/components/unique/listings/NewReviewForm";
+import GlobalConfig from "@/lib/globalConfig";
 
 export const Route = createFileRoute('/item/$itemId')({
     loader: async ({ params }) => {
@@ -171,7 +173,8 @@ function ProductImageViewer({
         <>
             <div className="flex justify-center max-h-128 object-contain">
                 <ExpandableImage
-                    imgSrc={`/images/products/${productImages[selectedImg]}`}
+                    imgSrc={`${GlobalConfig.ServerEndpoints.ProductImages}/${productImages[selectedImg]}`}
+                    imgThumbnailSrc={`${GlobalConfig.ServerEndpoints.ProductImageThumbnails}/${productImages[selectedImg]}`}
                     className="cursor-pointer"
                 />
             </div>
@@ -180,8 +183,10 @@ function ProductImageViewer({
                 className="flex gap-4 h-28 bg-base-100 p-4 rounded-box"
             >
                 { productImages.map((i, idx) => (
-                    <img
-                        src={`/images/products/${i}`}
+                    <ImagePromise
+                        src={`${GlobalConfig.ServerEndpoints.ProductImageThumbnails}/${i}`}
+                        loadingComponent={<SuspenseThumbnail className="w-24" />}
+                        fallback="error"
                         key={`product-image-${idx}`}
                         className={cn(
                             "cursor-pointer w-24 object-scale-down",

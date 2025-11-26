@@ -53,3 +53,23 @@ export function composeRefs<T>(...refs: (React.Ref<T> | undefined)[]): (instance
 		}
 	}
 }
+
+export function toFormData(data: object): FormData {
+	const formData = new FormData();
+
+	Object.entries(data).forEach(([key, value]) => {
+		if (value instanceof FileList) {
+			Array.from(value).forEach((file) => {
+				formData.append(key, file);
+			});
+		} else if (Array.isArray(data)) {
+			value.forEach((item: unknown) => {
+				formData.append(key, item instanceof Blob ? item : String(item));
+			})
+		} else if (value !== null && value !== undefined) {
+			formData.append(key, String(value));
+		}
+	});
+
+	return formData;
+}

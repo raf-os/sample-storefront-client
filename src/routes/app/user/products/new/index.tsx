@@ -5,33 +5,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, FormProvider } from "react-hook-form";
 
 import { AddProductAction } from "@/lib/actions/productActions";
-import { ImageUploadSchema } from "@/models/schemas/ImageUploadSchema";
+import { NewProductSchema } from "@/models/schemas";
 
 import { Input, TextArea, FieldSet, FileUploadInput } from "@/components/forms";
 import Button from "@/components/button";
 
 import CategorySelector from "@/components/common/CategorySelector";
 import GlobalConfig from "@/lib/globalConfig";
-
-const NewProductSchema = z.object({
-	name: z
-		.string()
-		.min(4, "Name must have at least 4 characters.")
-		.max(100, "Name must be at most 100 characters long."),
-	price: z
-		.number("Price must be a number.")
-		.positive("Price can't be negative."),
-	description: z
-		.string()
-		.optional(),
-	categories: z
-		.set(z.number("Invalid category types."))
-		.optional(),
-	files: z
-		.array(ImageUploadSchema)
-		.max(GlobalConfig.MaxImagesPerListing, `Only up to ${GlobalConfig.MaxImagesPerListing} files may be uploaded.`)
-		.optional()
-});
 
 export const Route = createFileRoute('/app/user/products/new/')({
 	component: RouteComponent,
@@ -44,12 +24,12 @@ function RouteComponent() {
 	const [ formError, setFormError ] = useState<string | null>(null);
 	const navigate = useNavigate();
 
-	const formMethods = useForm<z.infer<typeof NewProductSchema>>({
+	const formMethods = useForm<z.input<typeof NewProductSchema>, any, z.output<typeof NewProductSchema>>({
 		resolver: zodResolver(NewProductSchema)
 	});
 	const { handleSubmit } = formMethods;
 
-	const onSubmit = (data: z.infer<typeof NewProductSchema>) => {
+	const onSubmit = (data: z.output<typeof NewProductSchema>) => {
 		if (isPending) return;
 
 		startTransition(async () => {
@@ -57,7 +37,8 @@ function RouteComponent() {
 				name: data.name,
 				price: data.price,
 				description: data.description,
-				categories: data.categories ? [...data.categories] : undefined
+				categories: data.categories,
+				files: data.files
 			});
 
 			if (res.success) {
@@ -85,7 +66,7 @@ function RouteComponent() {
 			)}
 
 			<FormProvider {...formMethods}>
-				<form onSubmit={handleSubmit(onSubmit)}>
+				<form onSubmit={handleSubmit(onSubmit as any)}>
 					<div className="flex flex-col gap-4">
 						<FieldSet
 							name="name"

@@ -7,6 +7,10 @@ const GlobalConfig = {
     ServerProductEndpoint: SERVER_ADDRESS + "/api/product",
     ServerCommentEndpoint: SERVER_ADDRESS + "/api/comment",
     ServerCategoryEndpoint: SERVER_ADDRESS + "/api/category",
+    ServerEndpoints: {
+        ProductImages: SERVER_ADDRESS + "/api/product/image",
+        ProductImageThumbnails: SERVER_ADDRESS + "/api/product/thumbnail"
+    },
     UserRoles: {
         User: "User",
         Operator: "Operator",

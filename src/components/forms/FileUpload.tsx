@@ -21,7 +21,7 @@ export default function FileUploadInput({
 }) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [ selectedFiles, setSelectedFiles ] = useState<FileMetadata[]>([]);
-    const { register, unregister, formState: { errors }, setError, setValue } = useFormContext();
+    const { register, unregister, formState: { errors }, setValue } = useFormContext();
 
     const handleClick = () => {
         fileInputRef.current?.click();
@@ -32,10 +32,7 @@ export default function FileUploadInput({
         if (!files) return;
 
         if ((files.length + selectedFiles.length) > MAX_FILE_AMOUNT) {
-            setError(name, {
-                type: "custom",
-                message: `Only up to ${MAX_FILE_AMOUNT} image uploads are allowed.`
-            });
+            alert(`Only up to ${MAX_FILE_AMOUNT} files are allowed.`);
             return;
         }
 
@@ -82,14 +79,14 @@ export default function FileUploadInput({
                     ? (
                         <>
                         <div className="flex flex-wrap gap-2">
-                        {selectedFiles.map((file, idx) => (
-                            <FileUploadPreview
-                                key={idx}
-                                url={file.urlPreview}
-                                file={file.file}
-                                isError={!!(get(errors, `${name}.${idx}`))}
-                            />
-                        ))}
+                            {selectedFiles.map((file, idx) => (
+                                <FileUploadPreview
+                                    key={idx}
+                                    url={file.urlPreview}
+                                    file={file.file}
+                                    isError={!!(get(errors, `${name}.${idx}`))}
+                                />
+                            ))}
                         </div>
 
                         <p>
