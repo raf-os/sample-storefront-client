@@ -40,6 +40,7 @@ export type TProductListItem = {
     name: string,
     price: number,
     discount?: number,
+    imageIds?: string[],
 
     categories?: TCategoryDTO[],
     //productCategories?: TProductCategory[]

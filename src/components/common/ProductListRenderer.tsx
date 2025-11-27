@@ -123,6 +123,7 @@ function ItemRender({
                 itemLabel={ product.name }
                 itemPrice={ product.price }
                 itemDiscount={ product.discount }
+                itemImage={ (product.imageIds && product.imageIds.length !== 0) ? product.imageIds.at(0) : undefined }
             />
         </>
     )

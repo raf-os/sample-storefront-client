@@ -1,3 +1,5 @@
+import ImagePromise from "@/components/common/ImagePromise";
+import GlobalConfig from "@/lib/globalConfig";
 import { Link } from "@tanstack/react-router";
 
 export type ShopItemCardProps = {
@@ -37,7 +39,12 @@ export default function ShopItemCard({
             role="button"
         >
             <div className="relative grow-0 shrink-0 bg-base-200 w-full aspect-square rounded-box-inner cursor-pointer overflow-hidden">
-                { itemImage && <img src={`/images/products/${itemImage}`} className="object-cover object-center w-full h-full" /> }
+                { itemImage && (
+                    <ImagePromise
+                        src={`${GlobalConfig.ServerEndpoints.ProductImageThumbnails}/${itemImage}`}
+                        className="object-contain object-center w-full h-full"
+                    />
+                )}
             </div>
 
             <div className="grow-1 shrink-1 flex flex-col px-1 py-1">
