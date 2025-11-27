@@ -52,6 +52,12 @@ export default function FileUploadInput({
         });
     }
 
+    const handleListDeletion = (id: number) => {
+        if (id > selectedFiles.length) return;
+
+        setSelectedFiles(prev => prev.filter((_, idx) => id !== idx));
+    }
+
     useEffect(() => {
         register(name);
 
@@ -85,6 +91,8 @@ export default function FileUploadInput({
                                     url={file.urlPreview}
                                     file={file.file}
                                     isError={!!(get(errors, `${name}.${idx}`))}
+                                    idx={idx}
+                                    onItemRemove={handleListDeletion}
                                 />
                             ))}
                         </div>
@@ -113,19 +121,36 @@ export default function FileUploadInput({
 function FileUploadPreview({
     file,
     url,
-    isError
+    isError,
+    idx,
+    onItemRemove
 }: {
     file?: File | null,
     url?: string,
-    isError?: boolean
+    isError?: boolean,
+    idx: number,
+    onItemRemove?: (id: number) => void
 }) {
     const formattedSize = formatFileSize(file?.size ?? 0);
+
+    const handleItemDeletion = () => {
+        onItemRemove?.(idx);
+    }
+
+    const handleFocusKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+        if (e.key === "Delete" || e.key === "Backspace") {
+            handleItemDeletion();
+        }
+    }
+
     return (
         <div
             className={cn(
-                "min-w-48 relative text-sm rounded-box bg-base-100 inline-flex flex-col p-1 outline-none transition-all self-start",
+                "min-w-48 relative text-sm rounded-box bg-base-100 inline-flex flex-col p-1 outline-none transition-all self-start group",
                 isError === true ? "ring-2 ring-destructive-content bg-destructive" : "focus:ring-2 hover:ring-2 ring-base-500"
             )}
+            tabIndex={0}
+            onKeyDown={handleFocusKeyDown}
         >
             <img
                 src={url}
@@ -142,7 +167,12 @@ function FileUploadPreview({
                 </p>
             </div>
 
-            <div className="absolute top-1 right-1 p-1 bg-base-500 text-base-200 rounded-full hover:bg-destructive-content hover:text-destructive transition-colors"><XIcon size="1.5rem" /></div>
+            <div
+                onClick={handleItemDeletion}
+                className="absolute top-1 right-1 p-1 bg-base-500 text-base-200 rounded-full opacity-50 group-focus:opacity-100 group-hover:opacity-100 hover:bg-destructive-content hover:text-destructive transition-all"
+            >
+                <XIcon size="1.5rem" />
+            </div>
         </div>
     )
 }
