@@ -12,10 +12,10 @@ export const NewProductSchema = z.object({
 		.positive("Price can't be negative."),
 	description: z
 		.string()
+		.transform(x => { if (x==="") return undefined; else return x; })
 		.optional(),
 	categories: z
 		.array(z.number("Invalid category types."))
-		//.transform(v => ([...v]))
 		.optional(),
 	files: z
 		.array(ImageUploadSchema)

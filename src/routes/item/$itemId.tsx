@@ -83,9 +83,9 @@ function PageContent() {
             <div
                 className="flex flex-col gap-4 w-2/3 h-full p-4 bg-base-200 rounded-box"
             >
-                { (product.imageList && product.imageList.length !== 0) ? (
+                { (product.imageIds && product.imageIds.length !== 0) ? (
                     <ProductImageViewer
-                        imageList={product.imageList}
+                        imageList={product.imageIds}
                     />
                 ) : (
                     <>

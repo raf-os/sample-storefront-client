@@ -62,9 +62,9 @@ export function toFormData(data: object): FormData {
 			Array.from(value).forEach((file) => {
 				formData.append(key, file);
 			});
-		} else if (Array.isArray(data)) {
+		} else if (Array.isArray(value)) {
 			value.forEach((item: unknown) => {
-				formData.append(key, item instanceof Blob ? item : String(item));
+				formData.append(key, item instanceof File ? item : String(item));
 			})
 		} else if (value !== null && value !== undefined) {
 			formData.append(key, String(value));

@@ -21,7 +21,7 @@ export type TProduct = {
     description?: string,
     rating: TProductRating
     tags?: string[],
-    imageList?: string[],
+    imageIds?: string[],
     metadata: TProductMetadata
 
     userId: string,

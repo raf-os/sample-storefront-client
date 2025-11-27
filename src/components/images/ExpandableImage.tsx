@@ -10,6 +10,7 @@ export type ExpandableImageProps = Omit<React.ComponentPropsWithRef<'img'>, 'src
 
 export default function ExpandableImage({
     imgSrc,
+    imgThumbnailSrc,
     alt,
     className,
     ...rest
@@ -19,7 +20,7 @@ export default function ExpandableImage({
             <Dialog.Trigger asChild>
                 <ImagePromise
                     src={imgSrc}
-                    alt={alt}
+                    alt={imgThumbnailSrc}
                     className={className}
                     fallback="error"
                     loadingComponent={SuspenseThumbnail({ className })}

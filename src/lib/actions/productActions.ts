@@ -20,7 +20,7 @@ type AddProductRequest = {
     files?: File[]
 }
 
-export async function AddProductAction(request: z.output<typeof NewProductSchema>): Promise<StandardJsonResponse<string>> {
+export async function AddProductAction(request: z.input<typeof NewProductSchema>): Promise<StandardJsonResponse<string>> {
     const tokenCheck = await TokenRefreshHandler.validateToken();
 
     if (!tokenCheck) {
@@ -30,10 +30,10 @@ export async function AddProductAction(request: z.output<typeof NewProductSchema
     }
 
     const validated = await NewProductSchema.parseAsync(request);
-    console.log(validated);
+    //console.log(validated);
 
-    const formData = toFormData(request);
-    console.log(formData);
+    const formData = toFormData(validated);
+    //console.log(formData);
 
     try {
         const token = AuthSingleton.getJwtToken();

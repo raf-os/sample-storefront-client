@@ -111,7 +111,7 @@ export default function CategorySelector({
 			return;
 		}
 		if (selectedCategories.size > 0) {
-			setValue(name, selectedCategories, { shouldDirty: true });
+			setValue(name, Array.from(selectedCategories), { shouldDirty: true });
 		} else {
 			setValue(name, undefined, { shouldDirty: true });
 		}

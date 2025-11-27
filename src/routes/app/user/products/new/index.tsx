@@ -29,7 +29,7 @@ function RouteComponent() {
 	});
 	const { handleSubmit } = formMethods;
 
-	const onSubmit = (data: z.output<typeof NewProductSchema>) => {
+	const onSubmit = (data: z.infer<typeof NewProductSchema>) => {
 		if (isPending) return;
 
 		startTransition(async () => {
@@ -66,7 +66,7 @@ function RouteComponent() {
 			)}
 
 			<FormProvider {...formMethods}>
-				<form onSubmit={handleSubmit(onSubmit as any)}>
+				<form onSubmit={handleSubmit(onSubmit)}>
 					<div className="flex flex-col gap-4">
 						<FieldSet
 							name="name"
