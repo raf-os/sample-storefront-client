@@ -68,9 +68,9 @@ export default function FieldSet<T extends React.ElementType = "input">({
                 {...register(name, { onBlur: (e) => onBlur?.(e) })}
                 aria-invalid={!!errors[name]}
                 type={type}
+                children={children}
                 {...rest}
             />
-            { children }
         </fieldset>
     )
 }

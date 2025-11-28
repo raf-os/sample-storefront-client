@@ -73,3 +73,13 @@ export function toFormData(data: object): FormData {
 
 	return formData;
 }
+
+export const ServerPathHelper = {
+	ProductThumbnailPath(productId: string) {
+		return `${GlobalConfig.ServerEndpoints.ProductImageThumbnails}/${productId}`;
+	},
+
+	ProductImagePath(productId: string) {
+		return `${GlobalConfig.ServerEndpoints.ProductImages}/${productId}`;
+	}
+}

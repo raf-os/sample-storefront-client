@@ -1,3 +1,4 @@
+import { ImageUploadSchema } from "@/models/schemas/ImageUploadSchema";
 import { z } from "zod";
 
 export const ProductPatchSchema = z.object({
@@ -21,5 +22,11 @@ export const ProductPatchSchema = z.object({
     categories: z
         .set(z.number())
         .transform(v => ([...v]))
+        .optional(),
+    files: z
+		.array(ImageUploadSchema)
+		.optional(),
+    filesToDelete: z
+        .array(z.string())
         .optional()
 });

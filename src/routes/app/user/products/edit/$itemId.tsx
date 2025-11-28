@@ -11,7 +11,7 @@ import type { TProduct } from "@/models";
 import { ProductPatchSchema } from "@/models/schemas";
 
 import * as Tooltip from "@radix-ui/react-tooltip";
-import { Input, FieldSet, TextArea } from "@/components/forms";
+import { Input, FieldSet, TextArea, FileUploadInput } from "@/components/forms";
 import CategorySelector from "@/components/common/CategorySelector";
 import Button from "@/components/button";
 
@@ -19,6 +19,7 @@ import {
 	FilePen,
 	TriangleAlert as AlertIcon
 } from "lucide-react";
+import GlobalConfig from "@/lib/globalConfig";
 
 export const Route = createFileRoute('/app/user/products/edit/$itemId')({
 	component: RouteComponent,
@@ -164,6 +165,13 @@ function ItemEditPage() {
 								name="categories"
 								label="Categories"
 								value={loadedCategoryList}
+							/>
+
+							<AwaitedFieldSet
+								as={FileUploadInput}
+								name="files"
+								label={`Product photos (up to ${GlobalConfig.MaxImagesPerListing} files)`}
+								value={productData?.imageIds as any}
 							/>
 
 							<Button
