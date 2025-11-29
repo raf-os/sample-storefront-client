@@ -20,8 +20,8 @@ export const ProductPatchSchema = z.object({
         .string()
         .optional(),
     categories: z
-        .set(z.number())
-        .transform(v => ([...v]))
+        .array(z.number())
+        //.transform(v => ([...v]))
         .optional(),
     files: z
 		.array(ImageUploadSchema)

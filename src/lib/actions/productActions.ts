@@ -173,6 +173,7 @@ export async function PatchDocumentById(
 
     const patch = pb.build();
 
+    //return new RESPONSES.ServerFetchError();
 
     const res = await fetch(GlobalConfig.ServerProductEndpoint + `/${productId}`, {
         method: "PATCH",

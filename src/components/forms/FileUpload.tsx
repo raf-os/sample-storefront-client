@@ -30,11 +30,13 @@ type TFileHandlerAction = (id: number, action: "delete" | "setAsMain") => void;
 
 export default function FileUploadInput({
     name,
+    children,
     'aria-invalid': ariaInvalid,
     defaultValue,
     disabled = false
 }: {
     name: string,
+    children?: React.ReactNode,
     'aria-invalid'?: boolean,
     defaultValue?: string[] // These are files already on the server,
     disabled?: boolean
@@ -86,7 +88,7 @@ export default function FileUploadInput({
     const handleListDeletion = (id: number) => {
         if (id > currentFileAmount) return;
 
-        if (id <= dummyFiles.length) {
+        if (id < dummyFiles.length) {
             const guid = dummyFiles.at(id);
             if (!guid) return;
 
@@ -105,7 +107,7 @@ export default function FileUploadInput({
             return;
         }
 
-        setSelectedFiles(prev => prev.filter((_, idx) => id !== idx));
+        setSelectedFiles(prev => prev.filter((_, idx) => id !== idx + dummyFiles.length));
 
         if (mainImageId >= id)
             setMainImageId(prev => Math.max(0, prev - 1));
@@ -137,6 +139,7 @@ export default function FileUploadInput({
     }, [register, name, unregister]);
 
     return (
+        <CTX value={{ filesToDelete }}>
         <div className="flex items-end gap-4">
             <input
                 type="file"
@@ -146,6 +149,10 @@ export default function FileUploadInput({
                 ref={fileInputRef}
                 onChange={handleFileChange}
             />
+
+            <div className="hidden">
+                { children }
+            </div>
 
             <div
                 className={cn(
@@ -212,6 +219,7 @@ export default function FileUploadInput({
                 Upload files...
             </Button>
         </div>
+        </CTX>
     )
 }
 
@@ -263,14 +271,14 @@ function FileUploadPreview({
                 <div
                     className={cn(
                         "w-32 relative text-sm rounded-box bg-base-100 inline-flex flex-col outline-none transition-all self-start group overflow-hidden shadow-sm",
-                        isError === true ? "ring-3 ring-destructive-content bg-destructive" : "focus:ring-3 hover:ring-3 ring-base-500",
-                        isFlaggedForDeletion ? "outline-2 outline-solid outline-destructive-content" : (isMainImage === true && "outline-1 outline-solid outline-primary-300")
+                        isError === true ? "ring-3 ring-destructive-content" : "focus:ring-3 hover:ring-3 ring-base-500",
+                        isFlaggedForDeletion ? "outline-2 outline-solid outline-destructive-content bg-destructive" : (isMainImage === true && "outline-1 outline-solid outline-primary-300 bg-primary-500")
                     )}
                     tabIndex={0}
                     onKeyDown={handleFocusKeyDown}
                 >
                     <div className="relative flex justify-center p-1 pb-0">
-                        <ImagePromise src={imagePath} className="size-full rounded-box" />
+                        <ImagePromise src={imagePath} className={cn("size-full rounded-box", isFlaggedForDeletion && "opacity-50")} />
                     </div>
 
                     <div className="relative">
@@ -363,3 +371,17 @@ function ContextMenuItem({
         </ContextMenu.Item>
     )
 }
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const FileUploadAttachments = {
+    FlaggedForDeletion({ name }: { name: string }) {
+        const { setValue } = useFormContext();
+        const { filesToDelete } = useContext(CTX);
+
+        useEffect(() => {
+            setValue(name, filesToDelete, { shouldDirty: true });
+        }, [setValue, name, filesToDelete]);
+
+        return null;
+    },
+};

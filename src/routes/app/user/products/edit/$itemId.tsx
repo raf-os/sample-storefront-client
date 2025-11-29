@@ -3,6 +3,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useForm, FormProvider, useFormContext } from "react-hook-form";
+import { FileUploadAttachments } from "@/components/forms/FileUpload";
 
 import { useServerAction } from "@/hooks";
 
@@ -164,7 +165,7 @@ function ItemEditPage() {
 								as={CategorySelector}
 								name="categories"
 								label="Categories"
-								value={loadedCategoryList}
+								value={Array.from(loadedCategoryList)}
 							/>
 
 							<AwaitedFieldSet
@@ -172,7 +173,9 @@ function ItemEditPage() {
 								name="files"
 								label={`Product photos (up to ${GlobalConfig.MaxImagesPerListing} files)`}
 								value={productData?.imageIds as any}
-							/>
+							>
+								<FileUploadAttachments.FlaggedForDeletion name="filesToDelete" />
+							</AwaitedFieldSet>
 
 							<Button
 								className="btn-primary"

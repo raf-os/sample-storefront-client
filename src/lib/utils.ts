@@ -22,7 +22,7 @@ export function formatFileSize(bytes: number): string {
 	const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
 	const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-	const formatter = new Intl.NumberFormat('un-US', {
+	const formatter = new Intl.NumberFormat('en-US', {
 		maximumFractionDigits: 2,
 		minimumFractionDigits: 0
 	});
