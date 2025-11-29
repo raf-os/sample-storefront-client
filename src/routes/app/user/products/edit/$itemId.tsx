@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
@@ -45,7 +45,9 @@ const EditFormContext = createContext<TEditFormContext>({
 function ItemEditPage() {
 	const [ productData, setProductData ] = useState<TProduct | null>(null);
 	const [ isPending, startTransition, errorMessage ] = useServerAction();
+	const [ fetchRequestMessages, setFetchRequestMessages ] = useState<string[] | null>(null);
 	const [ isSuccess, setIsSuccess ] = useState<boolean>(false);
+	const errorBox = useRef<HTMLDivElement>(null);
 
 	const navigate = useNavigate();
 
@@ -53,7 +55,7 @@ function ItemEditPage() {
 		resolver: zodResolver(ProductPatchSchema)
 	});
 
-	const { getValues, handleSubmit } = methods;
+	const { getValues, handleSubmit, reset: formReset } = methods;
 
 	const isRequestReady = productData !== null || errorMessage !== null;
 
@@ -80,19 +82,38 @@ function ItemEditPage() {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [routeParams]);
 
+	useEffect(() => {
+		if (errorMessage && errorBox.current !== null) {
+			errorBox.current.scrollIntoView();
+		}
+	}, [errorMessage]);
+
 	const onSubmit = async () => {
 		if (isPending) return;
 		const patchProps = getValues(undefined, { dirtyFields: true });
+		setFetchRequestMessages(null);
 		startTransition(async () => {
-			const res = await PatchDocumentById(routeParams.itemId, patchProps);
+			const successMessages: string[] = [];
+			const res = await PatchDocumentById(routeParams.itemId, patchProps, successMessages);
 
-			if (!res.success) throw new Error(res.message);
+			if (!res.success) {
+				if (successMessages.length !== 0)
+					setFetchRequestMessages(successMessages);
+				
+				if (successMessages.at(0) !== undefined)
+					formReset({}, { keepValues: true });
+
+				throw new Error(res.message);
+			}
 			else {
-				console.log(res)
 				setIsSuccess(true);
 				navigate({ to: "/item/$itemId", params: { itemId: routeParams.itemId } });
 			}
 		});
+	}
+
+	const onError = () => {
+		startTransition(async () => { throw new Error("One or more validation errors occurred.") });
 	}
 
 	const ctx: TEditFormContext = {
@@ -125,10 +146,14 @@ function ItemEditPage() {
 				className="bg-base-200 rounded-box p-4"
 			>
 				<FormProvider {...methods}>
-					<form onSubmit={handleSubmit(onSubmit)}>
+					<form onSubmit={handleSubmit(onSubmit, onError)}>
 						<div className="flex flex-col gap-4">
 							{ errorMessage && (
-								<p className="text-destructive-content">{ errorMessage }</p>
+								<PartialSuccessFetchMessage
+									errorMsg={errorMessage}
+									successes={fetchRequestMessages}
+									ref={errorBox}
+								/>
 							)}
 							<AwaitedFieldSet
 								as={Input}
@@ -189,6 +214,37 @@ function ItemEditPage() {
 				</FormProvider>
 			</div>
 		</EditFormContext>
+	)
+}
+
+function PartialSuccessFetchMessage({
+	errorMsg,
+	successes,
+	ref
+}: {
+	errorMsg: string,
+	successes?: string[] | null,
+	ref?: React.Ref<HTMLDivElement>
+}) {
+	return (
+		<div className="flex flex-col gap-2 [&>div]:shadow-md" ref={ref}>
+			{ (successes && successes.length !== 0) && (
+				<div className="rounded-box px-2 py-1 border border-success-content/25 bg-success text-success-content">
+					{ successes.map((succ, idx) => (
+						<p key={idx}>{ succ }</p>
+					))}
+				</div>
+			)}
+
+			<div className="bg-error border border-error-content/25 text-error-content rounded-box px-2 py-1">
+				<h1 className="font-bold">
+					Error
+				</h1>
+				<p>
+					{ errorMsg }
+				</p>
+			</div>
+		</div>
 	)
 }
 

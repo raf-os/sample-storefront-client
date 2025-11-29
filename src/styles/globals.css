@@ -39,6 +39,9 @@
     --color-error: var(--col-error);
     --color-error-content: var(--col-error-content);
 
+    --color-success: var(--col-success);
+    --color-success-content: var(--col-success-content);
+
     --color-base-content: var(--col-base-content);
     --color-muted: var(--col-muted);
 
@@ -77,8 +80,11 @@
     --col-destructive-500: oklch(89% 0.1 40);
     --col-destructive-content: oklch(63% 0.23 30);
 
-    --col-error: oklch(80% 0.18 25);
-    --col-error-content: oklch(63% 0.23 25);
+    --col-error: oklch(94% 0.08 25);
+    --col-error-content: oklch(53% 0.23 25);
+
+    --col-success: oklch(96% 0.09 122);
+    --col-success-content: oklch(49% 0.19 140);
 
     --col-muted: var(--col-base-400);
 }

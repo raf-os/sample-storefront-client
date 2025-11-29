@@ -151,17 +151,21 @@ export async function GetProductComments(productId: string, offset?: number) {
 /** TODO: This */
 export async function PatchDocumentById(
     productId: string,
-    patchProps: z.input<typeof ProductPatchSchema>
+    patchProps: z.input<typeof ProductPatchSchema>,
+    successMessages?: string[]
 ) {
+
     const tokenCheck = await TokenRefreshHandler.validateToken();
     if (!tokenCheck) return new RESPONSES.UnauthorizedRequest("You're not authorized for this action.");
 
     const token = AuthSingleton.getJwtToken();
 
-    const patchedData = await ProductPatchSchema.parseAsync(patchProps);
-    if (Object.keys(patchedData).length === 0) return new RESPONSES.BadRequest();
+    const data = await ProductPatchSchema.parseAsync(patchProps);
+    if (Object.keys(data).length === 0) return new RESPONSES.BadRequest();
 
-    const pb = new PatchBuilder<z.infer<typeof ProductPatchSchema>>();
+    const { files, filesToDelete, ...patchedData } = data;
+
+    const pb = new PatchBuilder<Omit<z.infer<typeof ProductPatchSchema>, "files" | "filesToDelete">>();
 
     for (const [k, v] of Object.entries(patchedData)) {
         if (v === undefined) {
@@ -173,21 +177,49 @@ export async function PatchDocumentById(
 
     const patch = pb.build();
 
-    //return new RESPONSES.ServerFetchError();
+    if (patch.length !== 0) {
+        const res = await fetch(GlobalConfig.ServerProductEndpoint + `/${productId}`, {
+            method: "PATCH",
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(patch),
+        });
 
-    const res = await fetch(GlobalConfig.ServerProductEndpoint + `/${productId}`, {
-        method: "PATCH",
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(patch),
-    });
+        if (!res.ok) {
+            if (res.status === 400) return new RESPONSES.BadRequest();
+            else if (res.status === 401) return new RESPONSES.UnauthorizedRequest();
+            else return new RESPONSES.NotFound();
+        }
+        
+        if (Array.isArray(successMessages))
+            successMessages?.push("Fields were updated successfully.");
+    }
 
-    if (!res.ok) {
-        if (res.status === 400) return new RESPONSES.BadRequest();
-        else if (res.status === 401) return new RESPONSES.UnauthorizedRequest();
-        else return new RESPONSES.NotFound();
+    if ((filesToDelete && filesToDelete.length !== 0) || (files && files.length !== 0)) {
+        const formData = new FormData();
+        filesToDelete?.forEach(fileId => formData.append('remove', fileId));
+        files?.forEach(file => formData.append('uploads', file));
+
+        const res = await fetch(GlobalConfig.ServerProductEndpoint + `/item/${productId}/image`, {
+            method: "PATCH",
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+            body: formData
+        });
+
+        // TODO: Make helper function so I don't have to repeat this every time
+        if (!res.ok) {
+            if (res.status === 400) return new RESPONSES.BadRequest({ message: "Invalid file update request." });
+            else if (res.status === 401) return new RESPONSES.UnauthorizedRequest("You're not authorized to alter this product's attachments.");
+            else if (res.status === 404) return new RESPONSES.NotFound("Requested product was not found. This is unexpected, as the previous operation succeeded.");
+            else return new RESPONSES.ServerFetchError();
+        }
+
+        if (Array.isArray(successMessages))
+            successMessages?.push("Images updated successfully.");
     }
 
     return new RESPONSES.Ok();

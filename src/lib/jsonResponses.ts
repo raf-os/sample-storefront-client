@@ -15,10 +15,10 @@ export class JsonResponse<T = undefined> {
 }
 
 export class ServerFetchError extends JsonResponse {
-    constructor() {
+    constructor(message?: string) {
         super({
             success: false,
-            message: "Error contacting server."
+            message: message ?? "Error contacting server."
         });
     }
 }
