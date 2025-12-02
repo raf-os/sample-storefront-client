@@ -1,5 +1,6 @@
 import type { TUser } from "./User"
 import type { TProduct } from "./Product"
+import type { WithRequired } from "@/types/utilities"
 
 export type TComment = {
     id: string,
@@ -12,4 +13,10 @@ export type TComment = {
 
     userId: string,
     user?: TUser
+}
+
+export type TCommentPayload = {
+    comments: WithRequired<TComment, 'user'>[],
+    isEndOfList: boolean,
+    hasCommented: boolean
 }

@@ -2,7 +2,8 @@ import { useEffect, useRef } from "react";
 
 export default function useInView<T extends HTMLElement = HTMLElement>(
     callback: () => void,
-    options?: IntersectionObserverInit
+    options?: IntersectionObserverInit,
+    deps: React.DependencyList = []
 ) {
     const ref = useRef<T>(null);
 
@@ -20,7 +21,7 @@ export default function useInView<T extends HTMLElement = HTMLElement>(
 
         return () => observer.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [options]);
+    }, [options, ...deps]);
 
     return ref;
 }

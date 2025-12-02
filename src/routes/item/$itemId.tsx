@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createFileRoute, type ErrorComponentProps } from "@tanstack/react-router";
 import PageSetup from "@/components/layout/PageSetup";
 import Button from "@/components/button";
@@ -6,13 +6,17 @@ import ImagePromise from "@/components/common/ImagePromise";
 import ExpandableImage, { SuspenseThumbnail } from "@/components/images/ExpandableImage";
 import { cn } from "@/lib/utils";
 import { GetProductById, GetProductComments } from "@/lib/actions/productActions";
-import { useInView } from "@/hooks";
+import { useInView, useServerAction } from "@/hooks";
 
 import { ShoppingCart, Star, Wallet } from "lucide-react";
 import type { TComment } from "@/models";
 import type { WithRequired } from "@/types/utilities";
 import { NewReviewForm } from "@/components/unique/listings/NewReviewForm";
 import GlobalConfig from "@/lib/globalConfig";
+
+import {
+    LoaderCircle
+} from "lucide-react";
 
 export const Route = createFileRoute('/item/$itemId')({
     loader: async ({ params }) => {
@@ -200,49 +204,73 @@ function ProductImageViewer({
     )
 }
 
+type TPaginationData = {
+    lastIndex?: string,
+    lastDate?: number
+}
+
 function ProductCommentSection() {
+    const [ isPending, startTransition, errorMessage, isSuccess ] = useServerAction();
+    const [ paginationData, setPaginationData ] = useState<TPaginationData | null>(null);
+    const [ isPaginationEnd, setIsPaginationEnd ] = useState<boolean>(false);
     const [ loadedComments, setLoadedComments ] = useState<WithRequired<TComment, 'user'>[] | null>(null);
-    const [ fetchError, setFetchError ] = useState<string | null>(null);
     const productId = Route.useLoaderData().id;
-    const wrapperRef = useInView<HTMLDivElement>(() => onComponentVisible());
 
-    const onComponentVisible = async () => {
-        const data = await GetProductComments(productId);
+    const triggerRef = useInView<HTMLDivElement>(() => onComponentVisible(), {}, [isPending, isPaginationEnd]);
 
-        if (!data.success) {
-            setFetchError(data.message ?? "Unknown error occurred.");
-            setLoadedComments([]);
-            return;
-        }
+    const onComponentVisible = useCallback(() => {
+        if (isPaginationEnd || isPending) return;
 
-        setFetchError(null);
-        setLoadedComments(data.data ?? []);
-    };
+        startTransition(async () => {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            const data = await GetProductComments(productId, paginationData?.lastIndex, paginationData?.lastDate);
+
+            if (!data.success) {
+                setLoadedComments([]);
+                throw new Error(data.message);
+            }
+            
+            const comments = data.data?.comments;
+            setLoadedComments(prev => {
+                const newComments = comments ?? [];
+                if (prev === null) return newComments;
+                else return [...prev, ...newComments];
+            });
+
+            if (data.data?.isEndOfList === true) {
+                setIsPaginationEnd(true);
+                return;
+            }
+
+            if (comments && comments.length !== 0) {
+                const lastComment = comments.at(-1);
+                setPaginationData({
+                    lastIndex: lastComment?.id,
+                    lastDate: lastComment?.postDate
+                });
+            }
+        });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isPending, isPaginationEnd, paginationData?.lastDate, paginationData?.lastIndex]);
 
     return (
         <div
             className="flex flex-col gap-4 bg-base-200 rounded-box p-4"
-            ref={wrapperRef}
         >
             <h1 className="text-lg font-semibold">
                 User reviews
             </h1>
 
-            { fetchError && (
+            { errorMessage && (
                 <p>
-                    { fetchError }
+                    { errorMessage }
                 </p>
             )}
 
-            { loadedComments === null
-                ? (
-                    <div>
-                        Loading comments...
-                    </div>
-                ): fetchError ? null : (
+            { errorMessage ? null : loadedComments && (
                     <>
                     <div className="flex flex-col gap-4">
-                        { loadedComments.length > 0
+                        { (loadedComments.length > 0)
                             ? loadedComments?.map(comment => (
                                 <ProductComment
                                     comment={comment}
@@ -258,6 +286,16 @@ function ProductCommentSection() {
                     </>
                 )
             }
+
+            { (errorMessage === null && isPaginationEnd === false) && (
+                <div
+                    className="flex gap-2 border border-base-300 text-base-400 rounded-box p-2"
+                    ref={triggerRef}
+                >
+                    <LoaderCircle className="animate-spin" />
+                    <p>Loading more comments...</p>
+                </div>
+            )}
         </div>
     )
 }

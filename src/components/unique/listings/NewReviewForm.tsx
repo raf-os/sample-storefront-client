@@ -34,6 +34,7 @@ export function NewReviewForm({
 
         startTransition(async () => {
             const res = await AddCommentAction(data, productId);
+            console.log(res)
 
             if (!res.success) throw new Error(res.message);
             else navigate({ to: '.' });

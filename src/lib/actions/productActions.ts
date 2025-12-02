@@ -11,6 +11,7 @@ import * as RESPONSES from "@/lib/jsonResponses";
 import type { WithRequired } from "@/types/utilities";
 import { ProductPatchSchema, NewProductSchema } from "@/models/schemas";
 import { PatchBuilder } from "@/lib/patchBuilder";
+import type { TCommentPayload } from "@/models/Comment";
 
 type AddProductRequest = {
     name: string,
@@ -126,18 +127,19 @@ export async function GetProductListPage(params: TFetchProductListParams = {}): 
     }
 }
 
-export async function GetProductComments(productId: string, offset?: number) {
+export async function GetProductComments(productId: string, lastId?: string, lastDate?: number) {
     try {
         const urlParams = new URLSearchParams();
-        if (offset !== undefined) {
-            urlParams.append('offset', String(offset));
+        if (lastId !== undefined && lastDate !== undefined) {
+            urlParams.append('lastId', lastId);
+            urlParams.append('lastDate', String(lastDate));
         }
-        const res = await fetch(GlobalConfig.ServerProductEndpoint + `/item/${productId}/comments` + (offset !== undefined ? `?${urlParams}` : ""));
+        const res = await fetch(GlobalConfig.ServerCommentEndpoint + `/${productId}` + (urlParams.size !== 0 ? `?${urlParams}` : ""));
 
         if (!res.ok)
             return new RESPONSES.BadRequest();
 
-        const data = await requestToJson<WithRequired<TComment, 'user'>[]>(res);
+        const data = await requestToJson<TCommentPayload>(res);
 
         if (!data) return new RESPONSES.ServerFetchError();
 
