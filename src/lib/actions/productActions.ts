@@ -129,12 +129,19 @@ export async function GetProductListPage(params: TFetchProductListParams = {}): 
 
 export async function GetProductComments(productId: string, lastId?: string, lastDate?: number) {
     try {
+        await TokenRefreshHandler.validateToken();
+        const token = AuthSingleton.getJwtToken();
         const urlParams = new URLSearchParams();
         if (lastId !== undefined && lastDate !== undefined) {
             urlParams.append('lastId', lastId);
             urlParams.append('lastDate', String(lastDate));
         }
-        const res = await fetch(GlobalConfig.ServerCommentEndpoint + `/${productId}` + (urlParams.size !== 0 ? `?${urlParams}` : ""));
+        const res = await fetch(GlobalConfig.ServerCommentEndpoint + `/${productId}` + (urlParams.size !== 0 ? `?${urlParams}` : ""), {
+            method: "GET",
+            headers: token ? {
+                'Authorization': `Bearer ${token}`,
+            } : undefined,
+        });
 
         if (!res.ok)
             return new RESPONSES.BadRequest();

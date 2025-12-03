@@ -1,4 +1,3 @@
-import { useTransition } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { FieldSet, StarRatingComponent, TextArea } from "@/components/forms";
 import Button from "@/components/button";
@@ -22,7 +21,7 @@ export function NewReviewForm({
 }: {
     productId: string
 }) {
-    const [ isPending, startTransition, errorMessage, clearError ] = useServerAction();
+    const [ isPending, startTransition, errorMessage ] = useServerAction();
     const navigate = useNavigate();
     const formMethods = useForm<z.infer<typeof NewReviewSchema>>({
         resolver: zodResolver(NewReviewSchema)

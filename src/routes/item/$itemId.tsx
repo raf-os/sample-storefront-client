@@ -147,8 +147,6 @@ function PageContent() {
             </div>
         </div>
 
-        <NewReviewForm productId={data.id} />
-
         <ProductCommentSection />
         </>
     )
@@ -213,6 +211,7 @@ function ProductCommentSection() {
     const [ isPending, startTransition, errorMessage, isSuccess ] = useServerAction();
     const [ paginationData, setPaginationData ] = useState<TPaginationData | null>(null);
     const [ isPaginationEnd, setIsPaginationEnd ] = useState<boolean>(false);
+    const [ userHasCommented, setUserHasCommented ] = useState<boolean>(false);
     const [ loadedComments, setLoadedComments ] = useState<WithRequired<TComment, 'user'>[] | null>(null);
     const productId = Route.useLoaderData().id;
 
@@ -229,6 +228,7 @@ function ProductCommentSection() {
                 setLoadedComments([]);
                 throw new Error(data.message);
             }
+            console.log(data.data)
             
             const comments = data.data?.comments;
             setLoadedComments(prev => {
@@ -236,6 +236,8 @@ function ProductCommentSection() {
                 if (prev === null) return newComments;
                 else return [...prev, ...newComments];
             });
+
+            if (data.data?.hasCommented === true) setUserHasCommented(true);
 
             if (data.data?.isEndOfList === true) {
                 setIsPaginationEnd(true);
@@ -255,12 +257,8 @@ function ProductCommentSection() {
 
     return (
         <div
-            className="flex flex-col gap-4 bg-base-200 rounded-box p-4"
+            className="flex flex-col gap-4"
         >
-            <h1 className="text-lg font-semibold">
-                User reviews
-            </h1>
-
             { errorMessage && (
                 <p>
                     { errorMessage }
@@ -269,7 +267,13 @@ function ProductCommentSection() {
 
             { errorMessage ? null : loadedComments && (
                     <>
-                    <div className="flex flex-col gap-4">
+                    { userHasCommented === false && (<NewReviewForm productId={productId} />) }
+
+                    <div className="flex flex-col gap-4 rounded-box bg-base-200 p-4">
+                        <h1 className="text-lg font-semibold">
+                            User reviews
+                        </h1>
+
                         { (loadedComments.length > 0)
                             ? loadedComments?.map(comment => (
                                 <ProductComment
