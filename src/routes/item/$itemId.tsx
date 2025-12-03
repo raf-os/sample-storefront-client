@@ -208,7 +208,7 @@ type TPaginationData = {
 }
 
 function ProductCommentSection() {
-    const [ isPending, startTransition, errorMessage, isSuccess ] = useServerAction();
+    const [ isPending, startTransition, errorMessage ] = useServerAction();
     const [ paginationData, setPaginationData ] = useState<TPaginationData | null>(null);
     const [ isPaginationEnd, setIsPaginationEnd ] = useState<boolean>(false);
     const [ userHasCommented, setUserHasCommented ] = useState<boolean>(false);
@@ -225,7 +225,7 @@ function ProductCommentSection() {
             const data = await GetProductComments(productId, paginationData?.lastIndex, paginationData?.lastDate);
 
             if (!data.success) {
-                setLoadedComments([]);
+                // setLoadedComments([]);
                 throw new Error(data.message);
             }
             console.log(data.data)
@@ -259,15 +259,15 @@ function ProductCommentSection() {
         <div
             className="flex flex-col gap-4"
         >
-            { errorMessage && (
-                <p>
+            { (errorMessage !== null && loadedComments === null) && (
+                <FetchErrorMessage>
                     { errorMessage }
-                </p>
+                </FetchErrorMessage>
             )}
 
-            { errorMessage ? null : loadedComments && (
+            { loadedComments && (
                     <>
-                    { userHasCommented === false && (<NewReviewForm productId={productId} />) }
+                    { userHasCommented === false && (<NewReviewForm productId={productId} disabled={!!errorMessage} />) }
 
                     <div className="flex flex-col gap-4 rounded-box bg-base-200 p-4">
                         <h1 className="text-lg font-semibold">
@@ -286,6 +286,12 @@ function ProductCommentSection() {
                                 </p>
                             )
                         }
+
+                        { errorMessage && (
+                            <FetchErrorMessage>
+                                { errorMessage }
+                            </FetchErrorMessage>
+                        )}
                     </div>
                     </>
                 )
@@ -300,6 +306,14 @@ function ProductCommentSection() {
                     <p>Loading more comments...</p>
                 </div>
             )}
+        </div>
+    )
+}
+
+function FetchErrorMessage({ children }: { children?: React.ReactNode }) {
+    return (
+        <div className="text-error-content border border-error-content rounded-box bg-error px-4 py-2">
+            { children }
         </div>
     )
 }

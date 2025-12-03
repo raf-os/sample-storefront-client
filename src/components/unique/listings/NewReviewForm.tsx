@@ -17,9 +17,11 @@ const NewReviewSchema = z.object({
 });
 
 export function NewReviewForm({
-    productId
+    productId,
+    disabled
 }: {
-    productId: string
+    productId: string,
+    disabled?: boolean
 }) {
     const [ isPending, startTransition, errorMessage ] = useServerAction();
     const navigate = useNavigate();
@@ -60,20 +62,20 @@ export function NewReviewForm({
                         name="rating"
                         label="Rating"
                         as={StarRatingComponent}
-                        disabled={isPending}
+                        disabled={isPending || disabled}
                     />
 
                     <FieldSet
                         name="content"
                         label="Review"
                         as={TextArea}
-                        disabled={isPending}
+                        disabled={isPending || disabled}
                     />
 
                     <Button
                         className="btn-primary"
                         type="submit"
-                        disabled={isPending}
+                        disabled={isPending || disabled}
                     >
                         Submit
                     </Button>
