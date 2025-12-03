@@ -70,11 +70,11 @@ export async function GetProductById(id: string) {
             return new RESPONSES.NotFound();
         }
 
-        const data = await requestToJson<TProduct>(res);
+        const data = await requestToJson<WithRequired<TProduct, 'user'>>(res);
 
         if (!data) return new RESPONSES.NotFound();
 
-        return new RESPONSES.Ok<TProduct>({ data });
+        return new RESPONSES.Ok<typeof data>({ data });
     } catch(err) {
         console.error(err);
         return new RESPONSES.ServerFetchError();

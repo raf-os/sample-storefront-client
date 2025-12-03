@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { createFileRoute, type ErrorComponentProps } from "@tanstack/react-router";
+import { useCallback, useContext, useState } from "react";
+import { createFileRoute, Link, type ErrorComponentProps } from "@tanstack/react-router";
+import * as Dropdown from "@radix-ui/react-dropdown-menu";
 import PageSetup from "@/components/layout/PageSetup";
 import Button from "@/components/button";
 import ImagePromise from "@/components/common/ImagePromise";
@@ -7,15 +8,20 @@ import ExpandableImage, { SuspenseThumbnail } from "@/components/images/Expandab
 import { cn } from "@/lib/utils";
 import { GetProductById, GetProductComments } from "@/lib/actions/productActions";
 import { useInView, useServerAction } from "@/hooks";
+import { AuthContext } from "@/authContext";
 
-import { ShoppingCart, Star, Wallet } from "lucide-react";
 import type { TComment } from "@/models";
 import type { WithRequired } from "@/types/utilities";
 import { NewReviewForm } from "@/components/unique/listings/NewReviewForm";
 import GlobalConfig from "@/lib/globalConfig";
+import { DropdownContent, DropdownItem, DropdownSeparator } from "@/components/common/Dropdown";
 
 import {
-    LoaderCircle
+    LoaderCircle,
+    Ellipsis,
+    ShoppingCart,
+    Star,
+    Wallet,
 } from "lucide-react";
 
 export const Route = createFileRoute('/item/$itemId')({
@@ -62,12 +68,22 @@ function PageContent() {
     const data = Route.useLoaderData();
     const product = data;
 
+    const { authData } = useContext(AuthContext);
+
     if (product.discount === undefined) product.discount = 0;
 
     const formatter = Intl.NumberFormat('en-us', {
         style: 'currency',
         currency: 'USD'
     });
+
+    const formattedScore =
+        product.rating.value === undefined
+        ? "-"
+        : new Intl.NumberFormat('en-US', {
+            maximumFractionDigits: 2,
+            minimumFractionDigits: 0
+        }).format(product.rating.value);
 
     const finalPrice = product
         ? (product.discount > 0)
@@ -99,36 +115,46 @@ function PageContent() {
             </div>
 
             <div
-                className="grow-1 shrink-1 flex flex-col h-full bg-base-200 rounded-box p-4"
+                className="relative grow-1 shrink-1 flex flex-col h-full bg-base-200 rounded-box p-4"
             >
-                <h1 className="font-bold text-lg">
-                    { product.name }
-                </h1>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <h1 className="font-bold text-lg">
+                            { product.name }
+                        </h1>
 
-                { product.description===undefined
-                    ? <p className="text-muted">No description found.</p>
-                    : (
-                        <p>
-                            { product.description }
-                        </p>
-                    )
-                }
-
-                <div
-                    className="flex items-end gap-2 py-2"
-                >
-                    { (product.discount > 0) && (
-                        <span
-                            className="text-muted line-through leading-none"
+                        <div
+                            className="flex items-end gap-2 py-2"
                         >
-                            {formatter.format(product.price)}
-                        </span>
-                    ) }
-                    <span
-                        className="font-bold text-primary-300 text-xl leading-none"
-                    >
-                        {formatter.format(finalPrice)}
-                    </span>
+                            { (product.discount > 0) && (
+                                <span
+                                    className="text-muted line-through leading-none"
+                                >
+                                    {formatter.format(product.price)}
+                                </span>
+                            ) }
+                            <span
+                                className="font-bold text-primary-300 text-xl leading-none"
+                            >
+                                {formatter.format(finalPrice)}
+                            </span>
+                        </div>
+                    </div>
+
+                { authData?.userId === product.userId && <ListingUserActions /> }
+                </div>
+
+                <div>
+                    <h2>Sold by:</h2>
+                    <p>
+                        { product.user.name }
+                    </p>
+
+                    <h2>Score:</h2>
+                    <p>
+                        { formattedScore } / 5
+                        ({product.rating.amount} votes)
+                    </p>
                 </div>
 
                 <div className="flex flex-col gap-4 mt-2">
@@ -149,6 +175,46 @@ function PageContent() {
 
         <ProductCommentSection />
         </>
+    )
+}
+
+function ListingUserActions() {
+    const { itemId } = Route.useParams();
+
+    return (
+        <Dropdown.Root>
+            <Dropdown.Trigger asChild>
+                <button
+                    className="p-1 flex items-center rounded-full bg-base-200 border border-base-400 text-base-500/75 shadow-xs focus:ring-4 ring-base-400"
+                    type="button"
+                >
+                    <Ellipsis className="size-6" />
+                </button>
+            </Dropdown.Trigger>
+
+            <Dropdown.Portal>
+                <DropdownContent
+                    sideOffset={4}
+                    align="end"
+                >
+                    <Link to="/app/user/products/edit/$itemId" params={{ itemId }}>
+                        <DropdownItem>
+                            Edit item
+                        </DropdownItem>
+                    </Link>
+
+                    <DropdownItem disabled>
+                        View analytics
+                    </DropdownItem>
+
+                    <DropdownSeparator />
+
+                    <DropdownItem variant="destructive">
+                        Delete item
+                    </DropdownItem>
+                </DropdownContent>
+            </Dropdown.Portal>
+        </Dropdown.Root>
     )
 }
 
@@ -188,7 +254,7 @@ function ProductImageViewer({
                     <ImagePromise
                         src={`${GlobalConfig.ServerEndpoints.ProductImageThumbnails}/${i}`}
                         loadingComponent={<SuspenseThumbnail className="w-24" />}
-                        fallback="error"
+                        fallback="Error fetching image."
                         key={`product-image-${idx}`}
                         className={cn(
                             "cursor-pointer w-24 object-scale-down",
@@ -228,7 +294,6 @@ function ProductCommentSection() {
                 // setLoadedComments([]);
                 throw new Error(data.message);
             }
-            console.log(data.data)
             
             const comments = data.data?.comments;
             setLoadedComments(prev => {
@@ -359,7 +424,7 @@ function ProductComment({
                                     size={18}
                                     className={cn(
                                         "stroke-1 stroke-base-500/50",
-                                        idx > comment.score
+                                        idx >= comment.score
                                             ? "fill-base-400"
                                             : "fill-amber-400"
                                     )}
