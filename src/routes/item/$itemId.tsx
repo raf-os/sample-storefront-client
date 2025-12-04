@@ -147,7 +147,9 @@ function PageContent() {
                 <div>
                     <h2>Sold by:</h2>
                     <p>
-                        { product.user.name }
+                        <Link to="/user/$userId" params={{ userId: product.user.id }}>
+                            { product.user.name }
+                        </Link>
                     </p>
 
                     <h2>Score:</h2>

@@ -13,6 +13,7 @@ import { Route as UnauthorizedRouteImport } from './routes/unauthorized'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ListingsIndexRouteImport } from './routes/listings/index'
+import { Route as UserUserIdRouteImport } from './routes/user/$userId'
 import { Route as ItemItemIdRouteImport } from './routes/item/$itemId'
 import { Route as AppUserRouteRouteImport } from './routes/app/user/route'
 import { Route as AppUserIndexRouteImport } from './routes/app/user/index'
@@ -38,6 +39,11 @@ const IndexRoute = IndexRouteImport.update({
 const ListingsIndexRoute = ListingsIndexRouteImport.update({
   id: '/listings/',
   path: '/listings/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UserUserIdRoute = UserUserIdRouteImport.update({
+  id: '/user/$userId',
+  path: '/user/$userId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ItemItemIdRoute = ItemItemIdRouteImport.update({
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/unauthorized': typeof UnauthorizedRoute
   '/app/user': typeof AppUserRouteRouteWithChildren
   '/item/$itemId': typeof ItemItemIdRoute
+  '/user/$userId': typeof UserUserIdRoute
   '/listings': typeof ListingsIndexRoute
   '/app/user/': typeof AppUserIndexRoute
   '/app/user/products': typeof AppUserProductsIndexRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/sign-up': typeof SignUpRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/item/$itemId': typeof ItemItemIdRoute
+  '/user/$userId': typeof UserUserIdRoute
   '/listings': typeof ListingsIndexRoute
   '/app/user': typeof AppUserIndexRoute
   '/app/user/products': typeof AppUserProductsIndexRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/unauthorized': typeof UnauthorizedRoute
   '/app/user': typeof AppUserRouteRouteWithChildren
   '/item/$itemId': typeof ItemItemIdRoute
+  '/user/$userId': typeof UserUserIdRoute
   '/listings/': typeof ListingsIndexRoute
   '/app/user/': typeof AppUserIndexRoute
   '/app/user/products/': typeof AppUserProductsIndexRoute
@@ -116,6 +125,7 @@ export interface FileRouteTypes {
     | '/unauthorized'
     | '/app/user'
     | '/item/$itemId'
+    | '/user/$userId'
     | '/listings'
     | '/app/user/'
     | '/app/user/products'
@@ -127,6 +137,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/unauthorized'
     | '/item/$itemId'
+    | '/user/$userId'
     | '/listings'
     | '/app/user'
     | '/app/user/products'
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/unauthorized'
     | '/app/user'
     | '/item/$itemId'
+    | '/user/$userId'
     | '/listings/'
     | '/app/user/'
     | '/app/user/products/'
@@ -152,6 +164,7 @@ export interface RootRouteChildren {
   UnauthorizedRoute: typeof UnauthorizedRoute
   AppUserRouteRoute: typeof AppUserRouteRouteWithChildren
   ItemItemIdRoute: typeof ItemItemIdRoute
+  UserUserIdRoute: typeof UserUserIdRoute
   ListingsIndexRoute: typeof ListingsIndexRoute
 }
 
@@ -183,6 +196,13 @@ declare module '@tanstack/react-router' {
       path: '/listings'
       fullPath: '/listings'
       preLoaderRoute: typeof ListingsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/user/$userId': {
+      id: '/user/$userId'
+      path: '/user/$userId'
+      fullPath: '/user/$userId'
+      preLoaderRoute: typeof UserUserIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/item/$itemId': {
@@ -254,6 +274,7 @@ const rootRouteChildren: RootRouteChildren = {
   UnauthorizedRoute: UnauthorizedRoute,
   AppUserRouteRoute: AppUserRouteRouteWithChildren,
   ItemItemIdRoute: ItemItemIdRoute,
+  UserUserIdRoute: UserUserIdRoute,
   ListingsIndexRoute: ListingsIndexRoute,
 }
 export const routeTree = rootRouteImport
