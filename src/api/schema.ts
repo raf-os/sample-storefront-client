@@ -37,7 +37,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/User/{id}": {
+    "/User/{Id}": {
         parameters: {
             query?: never;
             header?: never;

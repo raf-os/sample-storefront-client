@@ -2,7 +2,9 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useServerAction } from "@/hooks";
 import PageSetup from "@/components/layout/PageSetup";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+import { GetUserPageById } from "@/lib/actions/userAction";
 
 export const Route = createFileRoute('/user/$userId')({
 	component: RouteComponent,
@@ -13,7 +15,17 @@ function RouteComponent() {
 }
 
 function MainContent() {
+	const { userId } = Route.useParams();
 	const [ loadedData, setLoadedData ] = useState();
+	const [ isPending, startTransition, errorMessage ] = useServerAction();
+
+	useEffect(() => {
+		startTransition(async () => {
+			const data = await GetUserPageById(userId);
+		});
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [userId]);
+	
 	return (
 		<div className="flex flex-col">
 			<div className="flex gap-2">

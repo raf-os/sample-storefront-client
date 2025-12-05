@@ -13,14 +13,6 @@ import { ProductPatchSchema, NewProductSchema } from "@/models/schemas";
 import { PatchBuilder } from "@/lib/patchBuilder";
 import type { TCommentPayload } from "@/models/Comment";
 
-type AddProductRequest = {
-    name: string,
-    price: number,
-    description?: string,
-    categories?: number[],
-    files?: File[]
-}
-
 export async function AddProductAction(request: z.input<typeof NewProductSchema>): Promise<StandardJsonResponse<string>> {
     const tokenCheck = await TokenRefreshHandler.validateToken();
 

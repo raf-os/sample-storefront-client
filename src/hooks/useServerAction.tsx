@@ -22,8 +22,6 @@ export default function useServerAction() {
         });
     };
 
-    // const clearError = () => setErrorMessage(null);
-
     return [
         isPending,
         wrappedTransition,
