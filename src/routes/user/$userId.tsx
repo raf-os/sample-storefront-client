@@ -22,6 +22,7 @@ function MainContent() {
 	useEffect(() => {
 		startTransition(async () => {
 			const data = await GetUserPageById(userId);
+			console.log(data)
 		});
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [userId]);

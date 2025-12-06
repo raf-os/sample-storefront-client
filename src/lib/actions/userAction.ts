@@ -1,7 +1,7 @@
-import { authClient } from "@/lib/serverRequest";
+import { authClient, serverRequest } from "@/lib/serverRequest";
 
 export async function GetUserPageById(uid: string) {
-    const { data, error } = await authClient.GET("/User/{Id}", {
+    const data = await serverRequest("get", "/User/{Id}", {
         params: {
             path: { Id: uid }
         }
