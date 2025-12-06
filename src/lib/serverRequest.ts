@@ -1,14 +1,14 @@
 import GlobalConfig from "@/lib/globalConfig";
-import createClient, { type Middleware, type MaybeOptionalInit, type ClientRequestMethod, type Client, createFinalURL, createQuerySerializer, type ParamsOption, type HeadersOptions } from "openapi-fetch";
-import type { MediaType, HttpMethod, PathsWithMethod, RequiredKeysOf, RequestBodyJSON, OperationRequestBody, ResponseObjectMap, SuccessResponse, ErrorResponse, SuccessResponseJSON, ErrorResponseJSON } from "openapi-typescript-helpers";
+import type { HttpMethod, PathsWithMethod, SuccessResponseJSON, ErrorResponseJSON, OperationRequestBody } from "openapi-typescript-helpers";
 import type { paths } from "@/api/schema";
-import { QueryClient, type QueryFunctionContext } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 
 import TokenRefreshHandler from "@/handlers/TokenRefreshHandler";
 import AuthSingleton from "@/classes/AuthSingleton";
+import { CustomResponseError } from "@/classes/errors";
 
-type RequestBody<Path extends keyof paths, Method extends keyof paths[Path]> = 
-    paths[Path][Method] extends { requestBody: { content: { 'application/json': infer B } } } ? B : never;
+// type RequestBody<Path extends keyof paths, Method extends keyof paths[Path]> = 
+//     paths[Path][Method] extends { requestBody: { content: { 'application/json': infer B } } } ? B : never;
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -16,33 +16,6 @@ const queryClient = new QueryClient({
         }
     }
 });
-
-const authMiddleware: Middleware = {
-    async onRequest({ request }) {
-        const tokenCheck = await TokenRefreshHandler.validateToken();
-
-        if (!tokenCheck) {
-            throw new Error("You're unauthorized for this request.");
-        }
-
-        const token = AuthSingleton.getJwtToken();
-
-        request.headers.set("Authorization", `Bearer ${token}`);
-        return request;
-    }
-}
-
-const queryMiddleware: Middleware = {
-    async onRequest({ request, params }) {
-        const data = await queryClient.fetchQuery({
-            queryKey: [ request.method, params.path, params.query ],
-        });
-    }
-}
-
-const client = createClient<paths>({ baseUrl: GlobalConfig.ServerAddr });
-const authClient = createClient<paths>({ baseUrl: GlobalConfig.ServerAddr });
-authClient.use(authMiddleware);
 
 function replacePath(path: string, params?: Record<string, string | number>): string {
     if (!params) return path;
@@ -81,8 +54,41 @@ type PathParams<Path extends keyof paths, Method extends keyof paths[Path]> =
 type QueryParams<Path extends keyof paths, Method extends keyof paths[Path]> = 
     paths[Path][Method] extends { parameters: { query: infer Q } } ? Q : never;
 
-type ResponseBody<Path extends keyof paths, Method extends keyof paths[Path]> = 
-    paths[Path][Method] extends { responses: { 200: { content: { 'application/json': infer R } } } } ? R : unknown;
+export class CustomResponse<
+    Method extends HttpMethod,
+    Path extends PathsWithMethod<paths, Method>,
+> {
+    resObj: Response;
+
+    constructor(res: Response) {
+        this.resObj = res;
+    }
+
+    async Parse() {
+        const res = this.resObj;
+
+        if (res.headers.get("Content-Length") === "0") {
+            // Handle no-content responses
+            if (res.ok) {
+                return undefined as SuccessResponseJSON<paths[Path][Method] & Record<string | number, any>>;
+            } else {
+                throw new CustomResponseError(res.status);
+            }
+        }
+
+        const data = await res.json();
+
+        if (res.ok) {
+            return data as SuccessResponseJSON<paths[Path][Method] & Record<string | number, any>>;
+        } else {
+            throw new CustomResponseError<ErrorResponseJSON<paths[Path][Method] & Record<string | number, any>>>(res.status, "Fetch error:", data);
+        }
+    }
+}
+
+export interface IRequestMetadata {
+    useAuth?: boolean
+}
 
 export async function serverRequest<
     Method extends HttpMethod,
@@ -97,8 +103,9 @@ export async function serverRequest<
         },
         body?: OperationRequestBody<paths[Path][Method]>,
         headers?: HeadersInit
-    }
-): Promise<SuccessResponseJSON<paths[Path][Method] & Record<string | number, any>>> {
+    },
+    metadata?: IRequestMetadata
+): Promise<CustomResponse<Method, Path>> {
     const baseUrl = GlobalConfig.ServerAddr;
 
     let url = replacePath(String(path), options?.params?.path as any);
@@ -115,19 +122,21 @@ export async function serverRequest<
         fetchOptions.body = JSON.stringify(options.body);
     }
 
-    const response = await fetch(`${baseUrl}${url}`, fetchOptions);
+    const req = new Request(`${baseUrl}${url}`, fetchOptions);
+
+    if (metadata?.useAuth === true) {
+        await TokenRefreshHandler.validateToken();
+        const token = await AuthSingleton.getJwtToken();
+
+        req.headers.set("Authorization", `Bearer ${token}`);
+    }
+
+    const response = await queryClient.fetchQuery({
+        queryKey: [ method, path, options?.params ],
+        queryFn: () => { return fetch(req) }
+    });
 
     if (!response.ok) throw new Error(`API Error: ${response.status}`);
 
-    const contentType = response.headers.get('content-type');
-    if (contentType?.includes('application/json')) {
-        return response.json();
-    }
-
-    return response.json();
-}
-
-export {
-    client,
-    authClient
+    return new CustomResponse(response);
 }

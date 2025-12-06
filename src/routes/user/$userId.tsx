@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 
 import { GetUserPageById } from "@/lib/actions/userAction";
 
+import type { paths } from "@/api/schema";
+
 export const Route = createFileRoute('/user/$userId')({
 	component: RouteComponent,
 })
@@ -14,15 +16,19 @@ function RouteComponent() {
 	return <PageSetup mainContent={MainContent} />
 }
 
+type UserDataAlias = paths['/User/{Id}']['get']['responses']['200']['content']['application/json'];
+
 function MainContent() {
 	const { userId } = Route.useParams();
-	const [ loadedData, setLoadedData ] = useState();
+	const [ loadedData, setLoadedData ] = useState<UserDataAlias | null>(null);
 	const [ isPending, startTransition, errorMessage ] = useServerAction();
 
 	useEffect(() => {
 		startTransition(async () => {
-			const data = await GetUserPageById(userId);
-			console.log(data)
+			const res = await GetUserPageById(userId);
+			const data = await res.Parse();
+			
+			setLoadedData(data);
 		});
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [userId]);
@@ -37,7 +43,8 @@ function MainContent() {
 				<LayoutBlock
 					className="w-96 grow-0 shrink-0"
 				>
-					test
+					<p>User:</p>
+					{ loadedData && loadedData.name }
 				</LayoutBlock>
 			</div>
 		</div>
