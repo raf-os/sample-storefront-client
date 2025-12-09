@@ -53,7 +53,8 @@ type TMenuItem = {
 	href?: ValidateToPath,
 	exactPath?: boolean,
 	label: string,
-	children?: TMenuItem[]
+	children?: TMenuItem[],
+	disabled?: boolean,
 }
 
 type TMenu = {

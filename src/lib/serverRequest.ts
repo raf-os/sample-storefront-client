@@ -1,5 +1,5 @@
 import GlobalConfig from "@/lib/globalConfig";
-import type { HttpMethod, PathsWithMethod, SuccessResponseJSON, ErrorResponseJSON, OperationRequestBody } from "openapi-typescript-helpers";
+import type { HttpMethod, PathsWithMethod, SuccessResponseJSON, ErrorResponseJSON } from "openapi-typescript-helpers";
 import type { paths } from "@/api/schema";
 import { QueryClient } from "@tanstack/react-query";
 
@@ -117,7 +117,7 @@ export async function serverRequest<
         headers?: HeadersInit
     },
     metadata?: IRequestMetadata
-): Promise<CustomResponse<Method, Path>> {
+): Promise<SuccessResponseJSON<paths[Path][Method] & Record<string | number, any>>> {
     const baseUrl = GlobalConfig.ServerAddr;
 
     let url = replacePath(String(path), options?.params?.path as any);
@@ -146,10 +146,15 @@ export async function serverRequest<
 
     const response = await queryClient.fetchQuery({
         queryKey: [ method, path, options?.params ],
-        queryFn: () => { return fetch(req) }
+        queryFn: async () => {
+            const res = await fetch(req);
+            const custom = new CustomResponse<Method, Path>(res);
+            const data = await custom.Parse();
+            return data;
+        }
     });
 
-    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+    // if (!response.ok) throw new Error(`API Error: ${response.status}`);
 
-    return new CustomResponse(response);
+    return response;
 }

@@ -87,6 +87,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/User/my-data": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["UserDTO"];
+                        "application/json": components["schemas"]["UserDTO"];
+                        "text/json": components["schemas"]["UserDTO"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/Auth/login": {
         parameters: {
             query?: never;
@@ -725,6 +773,18 @@ export interface components {
             username?: string;
             password?: string;
             email?: string;
+        };
+        UserDTO: {
+            /** Format: uuid */
+            id?: string;
+            name?: string;
+            email?: string;
+            role?: components["schemas"]["UserRole"];
+            /** Format: date-time */
+            signupDate?: string;
+            isVerified?: boolean;
+            comments?: components["schemas"]["CommentDTO"][] | null;
+            products?: unknown[] | null;
         };
         UserPublicDTO: {
             /** Format: uuid */

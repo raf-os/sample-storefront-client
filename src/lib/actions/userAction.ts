@@ -9,3 +9,8 @@ export async function GetUserPageById(uid: string) {
 
     return data;
 }
+
+export async function GetUserPrivateData() {
+    const data = await serverRequest("get", "/User/my-data", {}, { useAuth: true });
+    return data;
+}

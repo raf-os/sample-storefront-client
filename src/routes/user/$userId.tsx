@@ -25,8 +25,7 @@ function MainContent() {
 
 	useEffect(() => {
 		startTransition(async () => {
-			const res = await GetUserPageById(userId);
-			const data = await res.Parse();
+			const data = await GetUserPageById(userId);
 			
 			setLoadedData(data);
 		});

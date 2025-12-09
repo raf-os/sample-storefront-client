@@ -5,7 +5,7 @@ export default function useServerAction() {
     const [ isPending, startTransition ] = useTransition();
     const [ isSuccess, setIsSuccess ] = useState<boolean>(false);
 
-    const wrappedTransition = (callback: () => Promise<unknown>) => {
+    const wrappedTransition = (callback: () => Promise<unknown>, onError?: (message: string) => void) => {
         setErrorMessage(null);
         setIsSuccess(false);
         return startTransition(async () => {
@@ -14,7 +14,9 @@ export default function useServerAction() {
                 setIsSuccess(true);
             } catch (err) {
                 if (err instanceof Error) {
-                    setErrorMessage(err.message ?? "Unknown error occurred.");
+                    const message = err.message ?? "Unknown error occurred.";
+                    setErrorMessage(message);
+                    onError?.(message);
                 } else {
                     console.error("Unknown error caught in useServerAction hook: ", err);
                 }

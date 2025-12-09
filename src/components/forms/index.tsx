@@ -13,5 +13,5 @@ export {
     Checkbox,
     FieldSet,
     StarRatingComponent,
-    FileUploadInput
+    FileUploadInput,
 }
