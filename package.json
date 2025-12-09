@@ -26,6 +26,7 @@
     "@tanstack/react-router": "^1.132.47",
     "@tanstack/react-router-devtools": "^1.132.47",
     "@tanstack/react-table": "^8.21.3",
+    "baseline-browser-mapping": "^2.9.5",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "jwt-decode": "^4.0.0",

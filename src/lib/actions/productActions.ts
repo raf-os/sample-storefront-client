@@ -12,6 +12,7 @@ import type { WithRequired } from "@/types/utilities";
 import { ProductPatchSchema, NewProductSchema } from "@/models/schemas";
 import { PatchBuilder } from "@/lib/patchBuilder";
 import type { TCommentPayload } from "@/models/Comment";
+import { serverRequest } from "@/lib/serverRequest";
 
 export async function AddProductAction(request: z.input<typeof NewProductSchema>): Promise<StandardJsonResponse<string>> {
     const tokenCheck = await TokenRefreshHandler.validateToken();
