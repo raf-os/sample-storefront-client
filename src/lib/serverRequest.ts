@@ -64,7 +64,7 @@ type RequestBody<Path extends keyof paths, Method extends keyof paths[Path]> =
         : never;
 
 type MaybeOptionalBody<Path extends keyof paths, Method extends keyof paths[Path]> = RequestBody<Path, Method> extends never
-    ? { body?: never } : { body: RequestBody<Path, Method> };
+    ? never : RequestBody<Path, Method>;
 
 export class CustomResponse<
     Method extends HttpMethod,
@@ -76,22 +76,23 @@ export class CustomResponse<
         this.resObj = res;
     }
 
-    async Parse() {
+    async Parse(): Promise<SuccessResponseJSON<paths[Path][Method] & Record<string | number, any>>> {
         const res = this.resObj;
 
-        if (res.headers.get("Content-Length") === "0") {
-            // Handle no-content responses
+        if (res.status === 204 || res.headers.get("Content-Length") === "0") {
+            // Handle no-content or empty responses
             if (res.ok) {
-                return undefined as SuccessResponseJSON<paths[Path][Method] & Record<string | number, any>>;
+                return {} as any;
             } else {
                 throw new CustomResponseError(res.status);
             }
         }
 
-        const data = await res.json();
+        const text = await res.text();
+        const data = (!text || text.trim() === "") ? undefined : await JSON.parse(text);
 
         if (res.ok) {
-            return data as SuccessResponseJSON<paths[Path][Method] & Record<string | number, any>>;
+            return data;
         } else {
             throw new CustomResponseError<ErrorResponseJSON<paths[Path][Method] & Record<string | number, any>>>(res.status, "Fetch error:", data);
         }
@@ -132,7 +133,10 @@ export async function serverRequest<
 
     if (options?.body && ['POST', 'PUT', 'PATCH'].includes(String(method).toUpperCase())) {
         if (options.body && (options.body as unknown) instanceof FormData) fetchOptions.body = options.body as FormData;
-        else fetchOptions.body = JSON.stringify(options.body);
+        else {
+            fetchOptions.body = JSON.stringify(options.body);
+            fetchOptions.headers = { ...fetchOptions.headers, "Content-Type": "application/json" }
+        }
     }
 
     const req = new Request(`${baseUrl}${url}`, fetchOptions);
@@ -153,8 +157,6 @@ export async function serverRequest<
             return data;
         }
     });
-
-    // if (!response.ok) throw new Error(`API Error: ${response.status}`);
 
     return response;
 }

@@ -37,104 +37,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/User/{Id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    Id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "text/plain": components["schemas"]["UserPublicDTO"];
-                        "application/json": components["schemas"]["UserPublicDTO"];
-                        "text/json": components["schemas"]["UserPublicDTO"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "text/plain": components["schemas"]["ProblemDetails"];
-                        "application/json": components["schemas"]["ProblemDetails"];
-                        "text/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/User/my-data": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "text/plain": components["schemas"]["UserDTO"];
-                        "application/json": components["schemas"]["UserDTO"];
-                        "text/json": components["schemas"]["UserDTO"];
-                    };
-                };
-                /** @description Unauthorized */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "text/plain": components["schemas"]["ProblemDetails"];
-                        "application/json": components["schemas"]["ProblemDetails"];
-                        "text/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/Auth/login": {
         parameters: {
             query?: never;
@@ -425,9 +327,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["ProductDTO2"];
-                        "application/json": components["schemas"]["ProductDTO2"];
-                        "text/json": components["schemas"]["ProductDTO2"];
+                        "text/plain": components["schemas"]["ProductDTO"];
+                        "application/json": components["schemas"]["ProductDTO"];
+                        "text/json": components["schemas"]["ProductDTO"];
                     };
                 };
                 /** @description Not Found */
@@ -668,14 +570,290 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/User/{Id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    comments?: boolean;
+                    products?: boolean;
+                };
+                header?: never;
+                path: {
+                    Id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["UserPublicDTO2"];
+                        "application/json": components["schemas"]["UserPublicDTO2"];
+                        "text/json": components["schemas"]["UserPublicDTO2"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/User/my-data": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["UserDTO"];
+                        "application/json": components["schemas"]["UserDTO"];
+                        "text/json": components["schemas"]["UserDTO"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/User/update-profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json-patch+json": components["schemas"]["UserUpdateSchemaRequest"];
+                    "application/json": components["schemas"]["UserUpdateSchemaRequest"];
+                    "text/json": components["schemas"]["UserUpdateSchemaRequest"];
+                    "application/*+json": components["schemas"]["UserUpdateSchemaRequest"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/User/profile-pic": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/x-www-form-urlencoded": {
+                        Image?: components["schemas"]["IFormFile"];
+                    };
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        Category: {
+            /** Format: int32 */
+            id?: number;
+            name?: string;
+            /** Format: int32 */
+            parentId?: number | null;
+            parent?: components["schemas"]["Category"];
+            productCategories?: unknown;
+        };
         CategoryDTO: {
             /** Format: int32 */
             id?: number;
             name?: string;
+        };
+        Comment: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: date-time */
+            postDate?: string;
+            content?: string | null;
+            /** Format: float */
+            score?: number;
+            /** Format: uuid */
+            productId?: string;
+            product?: components["schemas"]["Product"];
+            /** Format: uuid */
+            userId?: string;
+            user?: components["schemas"]["User"];
         };
         CommentDTO: {
             /** Format: uuid */
@@ -685,13 +863,27 @@ export interface components {
             content?: string | null;
             /** Format: float */
             score?: number;
-            product?: components["schemas"]["ProductDTO"];
+            product?: components["schemas"]["ProductDTO2"];
             /** Format: uuid */
             userId?: string;
-            user?: components["schemas"]["UserPublicDTO2"];
+            user?: components["schemas"]["UserPublicDTO"];
         };
         /** Format: binary */
         IFormFile: string;
+        ImageUpload: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: date-time */
+            uploadDate?: string;
+            url?: string;
+            /** Format: int32 */
+            width?: number;
+            /** Format: int32 */
+            height?: number;
+            thumbnailUrl?: string | null;
+            /** Format: uuid */
+            uploaderId?: string;
+        };
         LoginRequest: {
             username: string;
             password: string;
@@ -717,6 +909,35 @@ export interface components {
             detail?: string | null;
             instance?: string | null;
         };
+        Product: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: date-time */
+            creationDate?: string;
+            name: string;
+            /** Format: float */
+            price: number;
+            /** Format: float */
+            discount?: number | null;
+            description?: string | null;
+            rating?: components["schemas"]["ProductRating"];
+            tags?: string[];
+            metadata?: components["schemas"]["ProductMetadata"];
+            /** Format: uuid */
+            userId?: string;
+            user?: components["schemas"]["User"];
+            comments?: unknown;
+            productCategories?: unknown;
+            productImages?: unknown;
+        };
+        ProductCategory: {
+            /** Format: uuid */
+            productId?: string;
+            /** Format: int32 */
+            categoryId?: number;
+            product?: components["schemas"]["Product"];
+            category?: components["schemas"]["Category"];
+        };
         ProductDTO: {
             /** Format: uuid */
             id?: string;
@@ -734,10 +955,10 @@ export interface components {
             imageIds?: string[];
             /** Format: uuid */
             userId?: string;
-            user?: components["schemas"]["UserPublicDTO2"];
+            user?: components["schemas"]["UserPublicDTO"];
             comments?: unknown[] | null;
             categories?: components["schemas"]["CategoryDTO"][];
-        } | null;
+        };
         ProductDTO2: {
             /** Format: uuid */
             id?: string;
@@ -750,14 +971,22 @@ export interface components {
             discount?: number | null;
             description?: string | null;
             rating?: unknown;
-            tags?: unknown;
+            tags?: string[];
             metadata?: unknown;
-            imageIds?: unknown;
+            imageIds?: string[];
             /** Format: uuid */
             userId?: string;
             user?: unknown;
             comments?: unknown[] | null;
             categories?: components["schemas"]["CategoryDTO"][];
+        } | null;
+        ProductImage: {
+            /** Format: uuid */
+            productId?: string;
+            product?: components["schemas"]["Product"];
+            /** Format: uuid */
+            imageUploadId?: string;
+            imageUpload?: components["schemas"]["ImageUpload"];
         };
         ProductMetadata: {
             /** Format: int32 */
@@ -774,6 +1003,30 @@ export interface components {
             password?: string;
             email?: string;
         };
+        User: {
+            /** Format: uuid */
+            id?: string;
+            name: string;
+            password: string;
+            email: string;
+            /** Format: date-time */
+            signupDate?: string;
+            isVerified?: boolean;
+            role?: components["schemas"]["UserRole"];
+            comments?: components["schemas"]["Comment"][];
+            products?: unknown;
+            avatar?: unknown;
+        };
+        UserAvatar: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: date-time */
+            uploadDate?: string;
+            url?: string;
+            /** Format: uuid */
+            userId?: string;
+            user?: components["schemas"]["User"];
+        } | null;
         UserDTO: {
             /** Format: uuid */
             id?: string;
@@ -785,6 +1038,7 @@ export interface components {
             isVerified?: boolean;
             comments?: components["schemas"]["CommentDTO"][] | null;
             products?: unknown[] | null;
+            avatar?: components["schemas"]["UserAvatar"];
         };
         UserPublicDTO: {
             /** Format: uuid */
@@ -794,8 +1048,9 @@ export interface components {
             /** Format: date-time */
             signupDate?: string;
             comments?: components["schemas"]["CommentDTO"][] | null;
-            products?: components["schemas"]["ProductDTO2"][] | null;
-        };
+            products?: components["schemas"]["ProductDTO"][] | null;
+            avatar?: unknown;
+        } | null;
         UserPublicDTO2: {
             /** Format: uuid */
             id?: string;
@@ -804,9 +1059,16 @@ export interface components {
             /** Format: date-time */
             signupDate?: string;
             comments?: components["schemas"]["CommentDTO"][] | null;
-            products?: components["schemas"]["ProductDTO2"][] | null;
-        } | null;
+            products?: components["schemas"]["ProductDTO"][] | null;
+            avatar?: unknown;
+        };
         UserRole: number;
+        UserUpdateSchemaRequest: {
+            password: string;
+            newPassword?: string | null;
+            newPasswordConfirm?: string | null;
+            email?: string | null;
+        };
     };
     responses: never;
     parameters: never;

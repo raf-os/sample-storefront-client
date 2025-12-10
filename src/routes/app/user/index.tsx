@@ -3,7 +3,7 @@ import z from "zod";
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState } from "react";
 import { useAuth, useServerAction } from "@/hooks";
-import { GetUserPrivateData } from "@/lib/actions/userAction";
+import { GetUserPrivateData, UpdateAccountDetails } from "@/lib/actions/userAction";
 import type { paths } from "@/api/schema";
 import { cn } from "@/lib/utils";
 
@@ -18,12 +18,12 @@ export const Route = createFileRoute('/app/user/')({
     component: RouteComponent,
 })
 
-type TPrivateUserAlias = paths['/User/my-data']['get']['responses']['200']['content']['application/json'];
+type TPrivateUserAlias = paths['/api/User/my-data']['get']['responses']['200']['content']['application/json'];
 
 const AwaitedFieldSet = createAwaitedFieldSet<typeof UserAccountForm>();
 
 function RouteComponent() {
-    const { authData } = useAuth();
+    // const { authData } = useAuth();
     const [ isPending, startTransition, errorMessage ] = useServerAction();
     const [ loadedData, setLoadedData ] = useState<TPrivateUserAlias | null>(null);
 
@@ -71,17 +71,24 @@ function ErrorComponent({ children, className, ...rest }: React.ComponentPropsWi
 
 function FormComponent({
     data,
-    isPending
+    isPending: isParentPending
 }: {
     data: TPrivateUserAlias | null,
     isPending: boolean
 }) {
+    const [ isActionPending, startTransition, errorMessage, isSuccess ] = useServerAction();
     const methods = useForm<z.infer<typeof UserAccountForm>>({
         resolver: zodResolver(UserAccountForm)
     });
 
+    const isPending = isActionPending || isParentPending;
+
     const onSubmit = (data: z.output<typeof UserAccountForm>) => {
-        console.log(data);
+        if (isPending) return;
+
+        startTransition(async () => {
+            await UpdateAccountDetails(data);
+        });
     }
 
     const { handleSubmit } = methods;
@@ -93,7 +100,14 @@ function FormComponent({
                 <h1 className="font-bold">
                     Change account settings
                 </h1>
-                { isPending && <p>Loading data...</p> }
+                
+                { isParentPending && <p>Loading data...</p> }
+                { <FormErrorComponent>{ errorMessage }</FormErrorComponent> }
+                { (isSuccess && !errorMessage) && (
+                    <p className="text-sm text-success-content">
+                        Settings changed successfully!
+                    </p>
+                ) }
 
                 <FieldSet
                     name="password"
@@ -139,5 +153,20 @@ function FormComponent({
             </div>
             </form>
         </FormProvider>
+    )
+}
+
+function FormErrorComponent({ children, className, ...rest }: React.ComponentPropsWithRef<'p'>) {
+    if (children === undefined || children === null) return null;
+    return (
+        <p
+            className={cn(
+                "text-sm text-error-content",
+                className
+            )}
+            {...rest}
+        >
+            { children }
+        </p>
     )
 }
