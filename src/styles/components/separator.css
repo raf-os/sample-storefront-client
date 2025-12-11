@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@utility separator {
+    &[data-orientation="vertical"] {
+        margin: 0.5rem 1rem;
+        width: 1px;
+    }
+
+    &[data-orientation="horizontal"] {
+        margin: 1rem 0.5rem;
+        width: 1px;
+    }
+}

@@ -623,6 +623,52 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/User/{Id}/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    Id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "image/webp": components["schemas"]["FileContentResult"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/User/my-data": {
         parameters: {
             query?: never;
@@ -696,8 +742,8 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description No Content */
-                204: {
+                /** @description OK */
+                200: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -868,6 +914,20 @@ export interface components {
             userId?: string;
             user?: components["schemas"]["UserPublicDTO"];
         };
+        EntityTagHeaderValue: {
+            tag?: components["schemas"]["StringSegment"];
+            isWeak?: boolean;
+        } | null;
+        FileContentResult: {
+            /** Format: byte */
+            fileContents?: string;
+            contentType?: string | null;
+            fileDownloadName?: string | null;
+            /** Format: date-time */
+            lastModified?: string | null;
+            entityTag?: components["schemas"]["EntityTagHeaderValue"];
+            enableRangeProcessing?: boolean;
+        };
         /** Format: binary */
         IFormFile: string;
         ImageUpload: {
@@ -1002,6 +1062,15 @@ export interface components {
             username?: string;
             password?: string;
             email?: string;
+        };
+        StringSegment: {
+            buffer?: string | null;
+            /** Format: int32 */
+            offset?: number;
+            /** Format: int32 */
+            length?: number;
+            value?: string | null;
+            hasValue?: boolean;
         };
         User: {
             /** Format: uuid */

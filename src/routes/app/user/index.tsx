@@ -2,8 +2,9 @@ import z from "zod";
 
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState } from "react";
-import { useAuth, useServerAction } from "@/hooks";
+import { useServerAction } from "@/hooks";
 import { GetUserPrivateData, UpdateAccountDetails } from "@/lib/actions/userAction";
+import { ServerImagePath } from "@/lib/serverRequest";
 import type { paths } from "@/api/schema";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +14,13 @@ import { FieldSet, Input } from "@/components/forms";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Button from "@/components/button";
+import Separator from "@/components/common/Separator";
+
+import {
+    Check as CheckIcon,
+    OctagonAlert as AlertIcon
+} from "lucide-react";
+import ImagePromise from "@/components/common/ImagePromise";
 
 export const Route = createFileRoute('/app/user/')({
     component: RouteComponent,
@@ -32,7 +40,7 @@ function RouteComponent() {
 
         startTransition(async () => {
             const data = await GetUserPrivateData();
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // await new Promise(resolve => setTimeout(resolve, 1000));
 
             setLoadedData(data);
         });
@@ -45,12 +53,22 @@ function RouteComponent() {
 
     return (
         <div
-            className="bg-base-200 rounded-box p-4"
+            className="flex justify-between bg-base-200 rounded-box p-4"
         >
-            <FormComponent
-                isPending={isPending}
-                data={loadedData}
-            />
+            <div className="grow-1 shrink-1">
+                <FormComponent
+                    isPending={isPending}
+                    data={loadedData}
+                />
+            </div>
+
+            <Separator orientation="vertical"/>
+
+            <div className="w-[320px]">
+                <FormImageUpload
+                    userId={loadedData?.id}
+                />
+            </div>
         </div>
     )
 }
@@ -104,10 +122,10 @@ function FormComponent({
                 { isParentPending && <p>Loading data...</p> }
                 { <FormErrorComponent>{ errorMessage }</FormErrorComponent> }
                 { (isSuccess && !errorMessage) && (
-                    <p className="text-sm text-success-content">
-                        Settings changed successfully!
-                    </p>
-                ) }
+                    <div className="flex gap-1 items-center bg-success border border-success-content/25 rounded-box px-2 py-1 text-sm text-success-content">
+                        <CheckIcon size={18} /> <p>Settings changed successfully!</p>
+                    </div>
+                )}
 
                 <FieldSet
                     name="password"
@@ -159,14 +177,46 @@ function FormComponent({
 function FormErrorComponent({ children, className, ...rest }: React.ComponentPropsWithRef<'p'>) {
     if (children === undefined || children === null) return null;
     return (
-        <p
+        <div
             className={cn(
-                "text-sm text-error-content",
+                "flex gap-1 items-center text-sm text-error-content bg-error border border-error-content/25 rounded-box px-2 py-1",
                 className
             )}
             {...rest}
         >
+            <AlertIcon size={18} />
             { children }
-        </p>
+        </div>
+    )
+}
+
+function FormImageUpload({
+    userId
+}: {
+    userId?: string
+}) {
+    return (
+        <div>
+            <h1>Profile picture</h1>
+
+            <div className="object-contain aspect-square overflow-hidden rounded-box">
+                { userId === undefined ? <FormImagePlaceHolder /> : (
+                    <ImagePromise
+                        src={ServerImagePath("/api/User/{Id}/avatar", { path: { Id: userId } })}
+                        loadingComponent={<FormImagePlaceHolder />}
+                        fallback="not found"
+                        alt="User avatar"
+                    />
+                )}
+            </div>
+        </div>
+    )
+}
+
+function FormImagePlaceHolder() {
+    return (
+        <div
+            className="shimmer size-full"
+        />
     )
 }

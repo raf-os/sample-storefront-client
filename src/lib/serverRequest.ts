@@ -160,3 +160,22 @@ export async function serverRequest<
 
     return response;
 }
+
+export type TServerImageEndpoints = {
+    [K in keyof paths]: paths[K] extends { get: { responses: { 200: { content: { "image/webp": any } } } } }
+        ? K
+        : never;
+}[keyof paths];
+
+export function ServerImagePath<Path extends TServerImageEndpoints>(
+    path: Path,
+    params?: {
+        path?: PathParams<Path, 'get'>,
+        query?: QueryParams<Path, 'get'>
+    }
+) {
+    let url = replacePath(String(path), params?.path as any);
+    url += serializeQuery(params?.query as any);
+
+    return `${GlobalConfig.ServerAddr}${url}`;
+}

@@ -5,6 +5,7 @@
 @import "./components/buttons.css";
 @import "./components/collapsible.css";
 @import "./components/table.css";
+@import "./components/separator.css";
 
 @font-face {
   font-family: "Roboto";
