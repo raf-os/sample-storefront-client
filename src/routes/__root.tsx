@@ -12,14 +12,15 @@ import TokenRefreshHandler from "@/handlers/TokenRefreshHandler";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 
 interface IRootRouteContext {
-	authData: TAuthData | null
+	authData: TAuthData | null,
+	authPromise: Promise<void>
 }
 
 const RootLayout = () => (
 	<TooltipProvider>
 		<HeadContent />
 		<AuthWrapper>
-			<div className='flex flex-col min-h-dvh'>
+			<div className='relative flex flex-col min-h-dvh z-0'>
 				<NavbarRoot />
 				
 				<div className="flex flex-col grow-1 shrink-1">
@@ -41,11 +42,14 @@ export const Route = createRootRouteWithContext<IRootRouteContext>()({
 			}
 		],
 	}),
-	beforeLoad: async () => {
-		const token = await AuthRefresh();
-		if (token) {
-			AuthSingleton.updateToken(token);
-			TokenRefreshHandler.updateExpireDate(token.exp * 1000);
-		}
+	beforeLoad: ({ context }) => {
+		const promise = AuthRefresh().then((token) => {
+			if (token) {
+				AuthSingleton.updateToken(token);
+				TokenRefreshHandler.updateExpireDate(token.exp * 1000);
+			}
+		});
+		context.authPromise = promise;
+		return;
 	}
 })

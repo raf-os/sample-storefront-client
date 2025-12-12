@@ -9,13 +9,10 @@ export type NavbarRootProps = React.ComponentPropsWithRef<'nav'>;
 export default function NavbarRoot({ className, ...rest }: NavbarRootProps) {
     return (
         <nav
-            className={cn(
-                "sticky",
-                className
-            )}
+            className="sticky top-0 z-1 bg-base-100"
             {...rest}
         >
-            <div className="mx-auto w-[1024px] h-24 flex gap-4 items-center justify-between text-base-content">
+            <div className={cn("mx-auto w-[1024px] h-24 flex gap-4 items-center justify-between text-base-content", className)}>
                 <Link
                     to="/"
                 >

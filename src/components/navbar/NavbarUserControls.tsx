@@ -7,9 +7,12 @@ import { useAuth } from "@/hooks";
 import { AuthContext } from "@/authContext";
 import { cn } from "@/lib/utils";
 
-import * as Popover from "@radix-ui/react-popover";
+import * as Dropdown from "@radix-ui/react-dropdown-menu";
+
+import { DropdownContent, DropdownItem as DropdownItemOriginal, DropdownSeparator } from "@/components/common/Dropdown";
 
 import { ShoppingBasket, Shield } from "lucide-react";
+import UserAvatar from "@/components/common/UserAvatar";
 
 type TMenuContext = {
     handleClose?: () => void,
@@ -52,52 +55,54 @@ export default function NavbarUserControls() {
                         )}
                     />
                 ) }
-                <p className="text-primary-300 font-bold">{ authData?.userName }</p>
+                { authData && (
+                    <p className="text-primary-300 font-bold">
+                        <Link to="/user/$userId" params={{ userId: authData.userId }}>
+                            { authData.userName }
+                        </Link>
+                    </p>
+                )}
             </div>
 
-            <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
-                <Popover.Trigger asChild>
-                    <button className="cursor-pointer">
-                        <img src="/images/defaultProfileIcon.webp" className="size-8 outline-2 outline-primary-300 outline-offset-2 rounded-full" />
+            <Dropdown.Root open={isOpen} onOpenChange={setIsOpen}>
+                <Dropdown.Trigger asChild>
+                    <button className="cursor-pointer rounded-full outline-2 outline-base-500 p-0.5 bg-base-100">
+                        <UserAvatar userId={authData?.userId} size={32} className="rounded-full" />
                     </button>
-                </Popover.Trigger>
+                </Dropdown.Trigger>
 
-                <Popover.Portal>
-                    <Popover.Content
-                        className="bg-base-200 border border-base-300 rounded-box shadow-sm"
+                <Dropdown.Portal>
+                    <DropdownContent
                         sideOffset={6}
                     >
                         <MenuContext.Provider value={ctx}>
-                        <ul className="flex flex-col gap-2 p-1">
-                            <MenuItem>
+                            <DropdownItem>
                                 <Link to="/app/user">Account settings</Link>
-                            </MenuItem>
+                            </DropdownItem>
 
-                            <MenuItem>
+                            <DropdownItem>
                                 <Link to="/app/user/products">View my listings</Link>
-                            </MenuItem>
+                            </DropdownItem>
 
-                            <div className="h-px bg-base-300" />
+                            <DropdownSeparator />
 
-                            <MenuItem>
+                            <DropdownItem variant="destructive">
                                 <button
                                     onClick={onLogoutRequest}
                                     className={cn(
-                                        "text-destructive-content",
                                         isLogoutPending ? "opacity-50 cursor-progress" : "cursor-pointer"
                                     )}
                                     disabled={isLogoutPending}
                                 >
                                     Log out
                                 </button>
-                            </MenuItem>
-                        </ul>
+                            </DropdownItem>
                         </MenuContext.Provider>
 
-                        <Popover.Arrow />
-                    </Popover.Content>
-                </Popover.Portal>
-            </Popover.Root>
+                        <Dropdown.Arrow />
+                    </DropdownContent>
+                </Dropdown.Portal>
+            </Dropdown.Root>
             
             <div className="relative flex size-8 items-center justify-center rounded-full outline-2 outline-base-500 bg-base-300 outline-offset-2">
                 <ShoppingBasket className="grow-0 shrink-0 text-base-500" />
@@ -106,29 +111,17 @@ export default function NavbarUserControls() {
     )
 }
 
-function MenuItem({
-    children,
-    onClick,
-    className,
-    ...rest
-}: ComponentPropsWithRef<'li'>) {
+function DropdownItem({onSelect, ...rest}: React.ComponentPropsWithRef<typeof DropdownItemOriginal>) {
     const { handleClose } = useContext(MenuContext);
 
-    const handleItemClick = (e: React.MouseEvent<HTMLLIElement>) => {
+    const handleClick = (e: Event) => {
+        e.preventDefault();
+        if (onSelect) {
+            onSelect(e);
+            return;
+        }
         handleClose?.();
-        onClick?.(e);
     }
 
-    return (
-        <li
-            onClick={handleItemClick}
-            className={cn(
-                "px-2 py-1",
-                className
-            )}
-            {...rest}
-        >
-            { children }
-        </li>
-    )
+    return <DropdownItemOriginal onSelect={handleClick} {...rest} />
 }

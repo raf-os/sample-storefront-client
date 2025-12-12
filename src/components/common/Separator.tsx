@@ -8,7 +8,7 @@ export default function Separator({
     return (
         <SeparatorPrimitive.Root
             className={cn(
-                "bg-base-300 separator",
+                "bg-base-400 separator",
                 className
             )}
             {...rest}

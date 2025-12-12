@@ -27,3 +27,13 @@ export async function UpdateAccountDetails(data: z.infer<typeof UserAccountForm>
     await serverRequest("post", "/api/User/update-profile", { body: parsed }, { useAuth: true });
     return;
 }
+
+export async function UploadImageAvatar(file: File) {
+    if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
+        throw new Error("Invalid file type.");
+    }
+    const formData = new FormData();
+    formData.append("image", file);
+    await serverRequest("post", "/api/User/profile-pic", { body: formData }, { useAuth: true });
+    return;
+}

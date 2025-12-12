@@ -1,18 +1,19 @@
 import z from "zod";
 
 import { createFileRoute } from '@tanstack/react-router';
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerAction } from "@/hooks";
-import { GetUserPrivateData, UpdateAccountDetails } from "@/lib/actions/userAction";
+import { GetUserPrivateData, UpdateAccountDetails, UploadImageAvatar } from "@/lib/actions/userAction";
 import { ServerImagePath } from "@/lib/serverRequest";
 import type { paths } from "@/api/schema";
-import { cn } from "@/lib/utils";
+import { cn, formatFileSize } from "@/lib/utils";
 
 import { UserAccountForm } from "@/models/schemas";
 import { createAwaitedFieldSet } from "@/components/forms/AwaitedFieldSet";
 import { FieldSet, Input } from "@/components/forms";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import UserAvatar from "@/components/common/UserAvatar";
 import Button from "@/components/button";
 import Separator from "@/components/common/Separator";
 
@@ -47,6 +48,10 @@ function RouteComponent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ loadedData ]);
 
+    const invalidateData = () => {
+        setLoadedData(null);
+    }
+
     if (errorMessage) {
         return <ErrorComponent>{ errorMessage }</ErrorComponent>
     }
@@ -64,11 +69,11 @@ function RouteComponent() {
 
             <Separator orientation="vertical"/>
 
-            <div className="w-[320px]">
-                <FormImageUpload
-                    userId={loadedData?.id}
-                />
-            </div>
+            <FormImageUpload
+                isPending={isPending}
+                userId={loadedData?.id}
+                dataInvalidateFn={invalidateData}
+            />
         </div>
     )
 }
@@ -190,24 +195,155 @@ function FormErrorComponent({ children, className, ...rest }: React.ComponentPro
     )
 }
 
-function FormImageUpload({
-    userId
-}: {
-    userId?: string
-}) {
-    return (
-        <div>
-            <h1>Profile picture</h1>
+type TImageUploadMetadata = {
+    file: File,
+    url?: string
+}
 
-            <div className="object-contain aspect-square overflow-hidden rounded-box">
-                { userId === undefined ? <FormImagePlaceHolder /> : (
-                    <ImagePromise
-                        src={ServerImagePath("/api/User/{Id}/avatar", { path: { Id: userId } })}
-                        loadingComponent={<FormImagePlaceHolder />}
-                        fallback="not found"
-                        alt="User avatar"
-                    />
-                )}
+function FormImageUpload({
+    userId,
+    isPending: isParentPending,
+    dataInvalidateFn,
+}: {
+    userId?: string,
+    isPending: boolean,
+    dataInvalidateFn: () => void
+}) {
+    const MAX_FILE_SIZE = 5 * 1024 * 1024;
+    const [ selectedImage, setSelectedImage ] = useState<TImageUploadMetadata | null>(null);
+    const inputFileRef = useRef<HTMLInputElement>(null);
+    const [ isPending, startTransition, errorMessage ] = useServerAction();
+    const [ stateKey, setStateKey ] = useState<number>(0);
+
+    const triggerFileSelection = () => {
+        if (!inputFileRef.current) return;
+
+        inputFileRef.current.click();
+    }
+
+    const freeImageMemory = () => {
+        if (selectedImage !== null && selectedImage.url !== undefined) {
+            URL.revokeObjectURL(selectedImage.url);
+        }
+    }
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (files === null || files.length === 0) return;
+        const file = files[0];
+
+        if (file.size > MAX_FILE_SIZE) {
+            alert(`File exceeds maximum allowed file size (${formatFileSize(MAX_FILE_SIZE)}).`);
+            return;
+        }
+
+        freeImageMemory();
+
+        const urlPreview = URL.createObjectURL(file);
+
+        setSelectedImage({
+            file: file,
+            url: urlPreview
+        });
+    }
+
+    const handleSubmit = () => {
+        if (isParentPending || isPending || selectedImage === null) return;
+
+        startTransition(async () => {
+            await UploadImageAvatar(selectedImage.file);
+            setSelectedImage(null);
+            freeImageMemory();
+            setStateKey(s => s+1);
+        });
+    }
+
+    useEffect(() => {
+        return () => freeImageMemory();
+    });
+
+    return (
+        <div
+            className="flex flex-col w-[256px]"
+        >
+            <div className="flex flex-col gap-2">
+                <h1
+                    className="font-bold"
+                >
+                    Profile image
+                </h1>
+
+                <UserAvatar userId={userId} size={256} cacheBust={stateKey} />
+            </div>
+
+            <Separator orientation="horizontal" />
+
+            <div className="flex flex-col gap-2">
+                <h1
+                    className="font-bold"
+                >
+                    Upload new profile image
+                </h1>
+
+                { <FormErrorComponent>{errorMessage}</FormErrorComponent> }
+
+                <p className="text-sm opacity-75">
+                    Accepted formats: .jpg, .jpeg, .png and .webp.
+                </p>
+
+                { selectedImage && (
+                    <div
+                        className="relative size-[256px] flex items-center justify-center bg-base-400 rounded-box overflow-hidden"
+                    >
+                        <ImagePromise
+                            src={selectedImage.url}
+                            fallback="Error loading image"
+                            className="size-full object-contain"
+                        />
+
+                        <div className="absolute top-2 left-2 rounded-box px-1 py-0.5 text-sm font-medium bg-base-200/75 text-base-500 shadow-xs">
+                            Preview
+                        </div>
+                    </div>
+                ) }
+
+                <div className="flex flex-col gap-2 w-full">
+                    <div
+                        className="flex items-center px-3 py-1 rounded-field grow-1 shrink-1 border border-base-300 self-stretch overflow-hidden text-sm"
+                    >
+                            { selectedImage === null ? (
+                                <p className="opacity-50">No file selected.</p>
+                            ) : (
+                                <p className="truncate">
+                                    <span className="sr-only">Selected file: </span>
+                                    {selectedImage.file.name}
+                                </p>
+                            )}
+                    </div>
+
+                    <Button
+                        onClick={triggerFileSelection}
+                        className="grow-0 shrink-0"
+                    >
+                        Select file...
+                    </Button>
+                </div>
+
+                <Button
+                    disabled={selectedImage === null || isParentPending === true}
+                    className="btn-primary"
+                    onClick={handleSubmit}
+                >
+                    Upload
+                </Button>
+
+                <input
+                    ref={inputFileRef}
+                    type="file"
+                    accept="image/jpeg, image/jpg, image/png, image/webp"
+                    style={{ display: "none" }}
+                    onChange={handleFileChange}
+                />
             </div>
         </div>
     )

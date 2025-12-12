@@ -2,12 +2,14 @@
 
 @utility separator {
     &[data-orientation="vertical"] {
-        margin: 0.5rem 1rem;
+        margin-left: 1rem;
+        margin-right: 1rem;
         width: 1px;
     }
 
     &[data-orientation="horizontal"] {
-        margin: 1rem 0.5rem;
-        width: 1px;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        height: 1px;
     }
 }

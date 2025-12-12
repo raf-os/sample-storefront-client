@@ -1,4 +1,5 @@
-import { createFileRoute, Navigate, Outlet, Link, useMatchRoute, type ValidateToPath } from '@tanstack/react-router';
+import { createFileRoute, Navigate, Outlet, Link, useMatchRoute, Await, type ValidateToPath } from '@tanstack/react-router';
+import { Suspense } from "react";
 import TokenRefreshHandler from "@/handlers/TokenRefreshHandler";
 
 import { composeTitle, cn } from "@/lib/utils";
@@ -10,7 +11,7 @@ export const Route = createFileRoute('/app/user')({
 	loader: async () => {
 		const isValid = await TokenRefreshHandler.validateToken();
 		return {
-			authorized: isValid
+			authorized: isValid,
 		}
 	},
 	head: () => ({
@@ -19,7 +20,7 @@ export const Route = createFileRoute('/app/user')({
 				title: composeTitle('User Panel')
 			}
 		]
-	})
+	}),
 });
 
 function RouteComponent() {
@@ -27,15 +28,14 @@ function RouteComponent() {
 	if (!data.authorized) return <Navigate to="/unauthorized" />
 
 	return (
-		<>
-			<PageSetup
-				mainContent={MainContent}
-			/>
-		</>
+		<PageSetup
+			mainContent={MainContent}
+		/>
 	)
 }
 
 function MainContent() {
+	const { authPromise } = Route.useRouteContext();
 	return (
 		<div className="flex gap-4 relative">
 			<div className="flex flex-col w-[240px] grow-0 shrink-0">
@@ -43,7 +43,11 @@ function MainContent() {
 			</div>
 
 			<div className="flex flex-col grow-1 shrink-1">
-				<Outlet />
+				<Suspense>
+					<Await promise={authPromise}>
+						{() => (<Outlet />)}
+					</Await>
+				</Suspense>
 			</div>
 		</div>
 	)

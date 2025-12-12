@@ -26,7 +26,7 @@ export function DropdownItem({ children, className, variant="default", ...rest }
     return (
         <Dropdown.Item
             className={cn(
-                "text-right rounded-box-inner px-2 py-1.5 leading-none",
+                "text-right rounded-box-inner px-2 py-1.5 leading-none outline-none",
                 "cursor-pointer data-[disabled]:opacity-50 data-[disabled]:cursor-default",
                 variantProps,
                 className

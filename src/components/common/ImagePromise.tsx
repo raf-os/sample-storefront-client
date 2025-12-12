@@ -21,8 +21,10 @@ export default function ImagePromise({
     const [ isSuccess, setIsSuccess ] = useState<boolean | null>(null);
 
     useEffect(() => {
-        if (src === undefined || src === null)
+        if (src === undefined || src === null) {
+            setIsSuccess(null);
             return;
+        }
 
         const img = new Image();
         img.src = src;
@@ -39,7 +41,7 @@ export default function ImagePromise({
             img.onload = null;
             img.onerror = null;
         }
-    }, [src, fallback]);
+    }, [src]);
 
     if (isSuccess === true)
         return (

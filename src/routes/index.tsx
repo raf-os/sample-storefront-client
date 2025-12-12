@@ -73,9 +73,9 @@ function PaletteTest({colName}:{colName:string}) {
 function HeroPresentation() {
 	return (
 		<div
-			className="relative flex flex-nowrap items-center justify-center w-full h-120 bg-base-200"
+			className="relative flex flex-nowrap items-center justify-center w-full h-120 bg-base-200 z-0"
 		>
-			<div className='flex flex-col px-4 xl:px-0 w-full xl:w-[1024px] h-3/4 lg:justify-center z-1'>
+			<div className='flex flex-col px-4 xl:px-0 w-full xl:w-[1024px] h-3/4 lg:justify-center'>
 				<h1
 					className="font-bold text-4xl mb-1"
 				>
