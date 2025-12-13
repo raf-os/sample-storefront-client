@@ -5,7 +5,7 @@ import PageSetup from "@/components/layout/PageSetup";
 import Button from "@/components/button";
 import ImagePromise from "@/components/common/ImagePromise";
 import ExpandableImage, { SuspenseThumbnail } from "@/components/images/ExpandableImage";
-import { cn } from "@/lib/utils";
+import { cn, PreventLayoutFlash } from "@/lib/utils";
 import { GetProductById, GetProductComments } from "@/lib/actions/productActions";
 import { useInView, useServerAction } from "@/hooks";
 import { AuthContext } from "@/authContext";
@@ -289,8 +289,9 @@ function ProductCommentSection() {
         if (isPaginationEnd || isPending) return;
 
         startTransition(async () => {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            const data = await GetProductComments(productId, paginationData?.lastIndex, paginationData?.lastDate);
+            const data = await PreventLayoutFlash(
+                GetProductComments(productId, paginationData?.lastIndex, paginationData?.lastDate)
+            );
 
             if (!data.success) {
                 // setLoadedComments([]);

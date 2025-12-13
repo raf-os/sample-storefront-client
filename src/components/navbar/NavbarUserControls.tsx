@@ -31,6 +31,7 @@ export default function NavbarUserControls() {
 
         startLogoutTransition(async () => {
             const res = await logout();
+            handleClose();
 
             if (res.success) {
                 window.location.reload();
@@ -111,7 +112,7 @@ export default function NavbarUserControls() {
     )
 }
 
-function DropdownItem({onSelect, ...rest}: React.ComponentPropsWithRef<typeof DropdownItemOriginal>) {
+function DropdownItem({onSelect, asChild: _, ...rest}: React.ComponentPropsWithRef<typeof DropdownItemOriginal>) {
     const { handleClose } = useContext(MenuContext);
 
     const handleClick = (e: Event) => {
@@ -123,5 +124,5 @@ function DropdownItem({onSelect, ...rest}: React.ComponentPropsWithRef<typeof Dr
         handleClose?.();
     }
 
-    return <DropdownItemOriginal onSelect={handleClick} {...rest} />
+    return <DropdownItemOriginal onSelect={handleClick} asChild {...rest} />
 }

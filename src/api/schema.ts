@@ -266,6 +266,52 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/files/avatar/{FileName}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    FileName: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "image/webp": components["schemas"]["FileContentResult"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/Product/page": {
         parameters: {
             query?: never;
@@ -481,7 +527,18 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "image/webp": components["schemas"]["FileContentResult"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
                 };
             };
         };
@@ -558,7 +615,18 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "image/webp": components["schemas"]["FileContentResult"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
                 };
             };
         };
@@ -909,7 +977,10 @@ export interface components {
             content?: string | null;
             /** Format: float */
             score?: number;
+            /** Format: uuid */
+            productId?: string | null;
             product?: components["schemas"]["ProductDTO2"];
+            productName?: string | null;
             /** Format: uuid */
             userId?: string;
             user?: components["schemas"]["UserPublicDTO"];
@@ -986,9 +1057,9 @@ export interface components {
             /** Format: uuid */
             userId?: string;
             user?: components["schemas"]["User"];
-            comments?: unknown;
-            productCategories?: unknown;
-            productImages?: unknown;
+            comments?: unknown[];
+            productCategories?: components["schemas"]["ProductCategory"][];
+            productImages?: components["schemas"]["ProductImage"][];
         };
         ProductCategory: {
             /** Format: uuid */
@@ -1083,7 +1154,7 @@ export interface components {
             isVerified?: boolean;
             role?: components["schemas"]["UserRole"];
             comments?: components["schemas"]["Comment"][];
-            products?: unknown;
+            products?: components["schemas"]["Product"][];
             avatar?: unknown;
         };
         UserAvatar: {
@@ -1118,7 +1189,8 @@ export interface components {
             signupDate?: string;
             comments?: components["schemas"]["CommentDTO"][] | null;
             products?: components["schemas"]["ProductDTO"][] | null;
-            avatar?: unknown;
+            /** Format: uuid */
+            avatarId?: string | null;
         } | null;
         UserPublicDTO2: {
             /** Format: uuid */
@@ -1129,7 +1201,8 @@ export interface components {
             signupDate?: string;
             comments?: components["schemas"]["CommentDTO"][] | null;
             products?: components["schemas"]["ProductDTO"][] | null;
-            avatar?: unknown;
+            /** Format: uuid */
+            avatarId?: string | null;
         };
         UserRole: number;
         UserUpdateSchemaRequest: {

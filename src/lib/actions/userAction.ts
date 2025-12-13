@@ -5,7 +5,11 @@ import { UserAccountForm } from "@/models/schemas";
 export async function GetUserPageById(uid: string) {
     const data = await serverRequest("get", "/api/User/{Id}", {
         params: {
-            path: { Id: uid }
+            path: { Id: uid },
+            query: {
+                comments: true,
+                products: true
+            }
         }
     });
 

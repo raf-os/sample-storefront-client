@@ -1,11 +1,21 @@
 @import "tailwindcss";
 
 @utility shimmer {
-    --prop-bg-col: var(--shimmer-background, var(--color-base-300));
-    --prop-fg-col: var(--shimmer-foreground, var(--color-base-400));
-    background-image: linear-gradient(-45deg, var(--prop-bg-col) 30%, color-mix(in oklab, var(--prop-fg-col) 30%, var(--prop-bg-col)) 50%, var(--prop-bg-col) 70%);
-    background-size: 400% 100%;
+    --prop-bg-col: var(--shimmer-background, var(--color-base-100));
+    --prop-fg-col: var(--shimmer-foreground, var(--color-base-300));
+    background-image: linear-gradient(-45deg, var(--prop-bg-col) 40%, var(--prop-fg-col) 50%, var(--prop-bg-col) 60%);
+    background-size: 500% 100%;
     animation: animateShimmer 2s infinite linear;
+    position: relative;
+
+    &::before {
+        content: '';
+        position: absolute;
+        background-color: red;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
 }
 
 @theme {
@@ -35,10 +45,10 @@
     }
 
     @keyframes animateShimmer {
-        0%, 75% {
+        0% {
             background-position-x: 0%;
         }
-        100% {
+        25%, 100% {
             background-position-x: 100%;
         }
     }

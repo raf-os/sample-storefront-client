@@ -52,7 +52,7 @@ type PathParams<Path extends keyof paths, Method extends keyof paths[Path]> =
     paths[Path][Method] extends { parameters: { path: infer P } } ? P : never;
 
 type QueryParams<Path extends keyof paths, Method extends keyof paths[Path]> = 
-    paths[Path][Method] extends { parameters: { query: infer Q } } ? Q : never;
+    paths[Path][Method] extends { parameters: { query?: infer Q } } ? Q : never;
 
 type RequestBody<Path extends keyof paths, Method extends keyof paths[Path]> =
     paths[Path][Method] extends { requestBody: { content: infer Q } }

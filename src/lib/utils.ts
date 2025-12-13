@@ -83,3 +83,35 @@ export const ServerPathHelper = {
 		return `${GlobalConfig.ServerEndpoints.ProductImages}/${productId}`;
 	}
 }
+
+export function roleToString(role?: number) {
+	switch (role) {
+		case 0:
+			return "User";
+		
+		case 1:
+			return "Moderator";
+		
+		case 2:
+			return "Administrator"
+		
+		default:
+			return "Invalid role";
+	}
+}
+
+/**
+ * Adds a small delay when fetching data so if the operation is too fast.
+ * @param {Promise} promise - The actual fetch operation
+ * @param {Object} [options] - Options
+ * @returns The value of the initial promise
+ */
+export async function PreventLayoutFlash<T>(
+	promise: Promise<T>,
+	options?: {
+		minDelay?: number
+	}
+): Promise<T> {
+	const delayPromise = new Promise(resolve => setTimeout(resolve, options?.minDelay ?? 250));
+	return Promise.all([promise, delayPromise]).then(values => { return values[0] });
+}
