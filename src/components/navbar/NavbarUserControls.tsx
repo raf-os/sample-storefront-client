@@ -1,9 +1,9 @@
 // TODO: This
 
-import { useState, useTransition, useContext, createContext, type ComponentPropsWithRef } from "react";
+import { useState, useTransition, useContext, createContext, useEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 
-import { useAuth } from "@/hooks";
+import { useAuth, useServerAction } from "@/hooks";
 import { AuthContext } from "@/authContext";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +13,9 @@ import { DropdownContent, DropdownItem as DropdownItemOriginal, DropdownSeparato
 
 import { ShoppingBasket, Shield } from "lucide-react";
 import UserAvatar from "@/components/common/UserAvatar";
+import { createQueryObserver } from "@/lib/serverRequest";
+import { GetUserCartSize } from "@/lib/actions/userAction";
+import { useQuery, type QueryObserver } from "@tanstack/react-query";
 
 type TMenuContext = {
     handleClose?: () => void,
@@ -105,9 +108,7 @@ export default function NavbarUserControls() {
                 </Dropdown.Portal>
             </Dropdown.Root>
             
-            <div className="relative flex size-8 items-center justify-center rounded-full outline-2 outline-base-500 bg-base-300 outline-offset-2">
-                <ShoppingBasket className="grow-0 shrink-0 text-base-500" />
-            </div>
+            <UserCartControls />
         </div>
     )
 }
@@ -125,4 +126,37 @@ function DropdownItem({onSelect, asChild: _, ...rest}: React.ComponentPropsWithR
     }
 
     return <DropdownItemOriginal onSelect={handleClick} asChild {...rest} />
+}
+
+function UserCartControls() {
+    const [ isPending, startTransition ] = useServerAction();
+    const [ cartSize, setCartSize ] = useState<number | null>(null);
+
+    useEffect(() => {
+        // TODO: Make it so this can be invalidated app-wide. Tanstack query is not being extremely useful.
+        // Especially when it comes to using the generated query keys.
+        startTransition(async () => {
+            const data = await GetUserCartSize();
+            setCartSize(data);
+        });
+    }, []);
+
+    return (
+        <div className="relative">
+            <div className="flex items-center justify-center rounded-full border-2 border-base-500 bg-base-100 p-[2px] size-10">
+                <ShoppingBasket className="size-full text-base-500 bg-base-300 rounded-full p-[2px]" />
+
+                
+            </div>
+
+            <div
+                className={cn(
+                    "flex items-center justify-center absolute bottom-0 right-0 select-none leading-none font-bold text-xs bg-base-500 text-base-200 size-4 rounded-full",
+
+                )}
+            >
+                { cartSize === null ? "-" : cartSize }
+            </div>
+        </div>
+    )
 }

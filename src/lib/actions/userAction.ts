@@ -1,5 +1,5 @@
 import type z from "zod";
-import { serverRequest } from "@/lib/serverRequest";
+import { serverCachedRequest, serverRequest } from "@/lib/serverRequest";
 import { UserAccountForm } from "@/models/schemas";
 
 export async function GetUserPageById(uid: string) {
@@ -18,6 +18,11 @@ export async function GetUserPageById(uid: string) {
 
 export async function GetUserPrivateData() {
     const data = await serverRequest("get", "/api/User/my-data", {}, { useAuth: true });
+    return data;
+}
+
+export async function GetUserCartSize() {
+    const data = await serverCachedRequest("get", "/api/User/cart/size", {}, { useAuth: true });
     return data;
 }
 
