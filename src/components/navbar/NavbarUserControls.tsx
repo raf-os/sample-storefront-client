@@ -1,9 +1,9 @@
 // TODO: This
 
-import { useState, useTransition, useContext, createContext, useEffect, useRef } from "react";
+import { useState, useTransition, useContext, createContext } from "react";
 import { Link } from "@tanstack/react-router";
 
-import { useAuth, useServerAction } from "@/hooks";
+import { useAuth } from "@/hooks";
 import { AuthContext } from "@/authContext";
 import { cn } from "@/lib/utils";
 
@@ -13,9 +13,10 @@ import { DropdownContent, DropdownItem as DropdownItemOriginal, DropdownSeparato
 
 import { ShoppingBasket, Shield } from "lucide-react";
 import UserAvatar from "@/components/common/UserAvatar";
-import { createQueryObserver } from "@/lib/serverRequest";
+import { queryClient } from "@/lib/serverRequest";
 import { GetUserCartSize } from "@/lib/actions/userAction";
-import { useQuery, type QueryObserver } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { QueryKeys } from "@/lib/queryKeys";
 
 type TMenuContext = {
     handleClose?: () => void,
@@ -113,6 +114,7 @@ export default function NavbarUserControls() {
     )
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function DropdownItem({onSelect, asChild: _, ...rest}: React.ComponentPropsWithRef<typeof DropdownItemOriginal>) {
     const { handleClose } = useContext(MenuContext);
 
@@ -129,17 +131,14 @@ function DropdownItem({onSelect, asChild: _, ...rest}: React.ComponentPropsWithR
 }
 
 function UserCartControls() {
-    const [ isPending, startTransition ] = useServerAction();
-    const [ cartSize, setCartSize ] = useState<number | null>(null);
-
-    useEffect(() => {
-        // TODO: Make it so this can be invalidated app-wide. Tanstack query is not being extremely useful.
-        // Especially when it comes to using the generated query keys.
-        startTransition(async () => {
-            const data = await GetUserCartSize();
-            setCartSize(data);
-        });
-    }, []);
+    const { data: cartSize, isSuccess, isError } = useQuery({
+        queryKey: QueryKeys.User.CartSize,
+        queryFn: async() => {
+            console.log("we fetching!")
+            const d = await GetUserCartSize();
+            return d;
+        },
+    }, queryClient);
 
     return (
         <div className="relative">
@@ -152,10 +151,15 @@ function UserCartControls() {
             <div
                 className={cn(
                     "flex items-center justify-center absolute bottom-0 right-0 select-none leading-none font-bold text-xs bg-base-500 text-base-200 size-4 rounded-full",
-
+                    isError && "bg-error text-error-content"
                 )}
             >
-                { cartSize === null ? "-" : cartSize }
+                { isSuccess
+                    ? cartSize
+                    : isError
+                        ? "!"
+                        : "-"
+                }
             </div>
         </div>
     )

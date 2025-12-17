@@ -978,15 +978,19 @@ export interface paths {
         };
         put: {
             parameters: {
-                query?: {
-                    ProductId?: string;
-                    Amount?: number;
-                };
+                query?: never;
                 header?: never;
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody: {
+                content: {
+                    "application/json-patch+json": components["schemas"]["AddProductToCartRequest"];
+                    "application/json": components["schemas"]["AddProductToCartRequest"];
+                    "text/json": components["schemas"]["AddProductToCartRequest"];
+                    "application/*+json": components["schemas"]["AddProductToCartRequest"];
+                };
+            };
             responses: {
                 /** @description OK */
                 200: {
@@ -1082,6 +1086,12 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AddProductToCartRequest: {
+            /** Format: uuid */
+            productId: string;
+            /** Format: int32 */
+            amount?: number;
+        };
         CartItemDTO: {
             /** Format: uuid */
             id?: string;

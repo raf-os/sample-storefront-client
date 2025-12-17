@@ -23,7 +23,7 @@ function LayoutMain({
     return (
         <div
             className={cn(
-                "flex flex-col grow-1 shrink-1 px-2 py-6 gap-4",
+                "flex flex-col grow-1 shrink-1 px-2 py-6 gap-4 w-[calc(100%-512px)]",
                 className
             )}
         >

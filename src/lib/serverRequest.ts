@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 import GlobalConfig from "@/lib/globalConfig";
-import type { HttpMethod, PathsWithMethod, SuccessResponseJSON, ErrorResponseJSON } from "openapi-typescript-helpers";
+import type { HttpMethod, PathsWithMethod, SuccessResponseJSON, ErrorResponseJSON, RequiredKeysOf } from "openapi-typescript-helpers";
 import type { paths } from "@/api/schema";
 import { QueryClient, QueryObserver } from "@tanstack/react-query";
 
@@ -12,9 +13,6 @@ import { CustomResponseError } from "@/classes/errors";
 */
 
 export const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {}
-    }
 });
 
 function replacePath(path: string, params?: Record<string, string | number>): string {
@@ -63,9 +61,6 @@ type RequestBody<Path extends keyof paths, Method extends keyof paths[Path]> =
                 : never
         : never;
 
-type MaybeOptionalBody<Path extends keyof paths, Method extends keyof paths[Path]> = RequestBody<Path, Method> extends never
-    ? never : RequestBody<Path, Method>;
-
 export class CustomResponse<
     Method extends HttpMethod,
     Path extends PathsWithMethod<paths, Method>,
@@ -88,8 +83,17 @@ export class CustomResponse<
             }
         }
 
+        let data;
         const text = await res.text();
-        const data = (!text || text.trim() === "") ? undefined : await JSON.parse(text);
+        if (!text || text.trim() === "") {
+            data = undefined;
+        } else {
+            try {
+                data = JSON.parse(text);
+            } catch {
+                data = text;
+            }
+        }
 
         if (res.ok) {
             return data;
@@ -103,14 +107,28 @@ export interface IRequestMetadata {
     useAuth?: boolean
 }
 
-type TServerRequestOptions<Method extends HttpMethod, Path extends PathsWithMethod<paths, Method>> = {
-    params?: {
-        path?: PathParams<Path, Method>,
-        query?: QueryParams<Path, Method>
-    },
-    body?: MaybeOptionalBody<Path, Method>,
-    headers?: HeadersInit
-}
+// type TServerRequestOptions<Method extends HttpMethod, Path extends PathsWithMethod<paths, Method>> = {
+//     params?: {
+//         path?: PathParams<Path, Method>,
+//         query?: QueryParams<Path, Method>
+//     },
+//     body?: RequestBody<Path, Method>,
+//     headers?: HeadersInit
+// };
+
+type TServerRequestOptions<Method extends HttpMethod, Path extends PathsWithMethod<paths, Method>> =
+    & (RequiredKeysOf<PathParams<Path, Method>> extends never
+        ? { path?: PathParams<Path, Method>}
+        : { path: PathParams<Path, Method>})
+    & (RequiredKeysOf<QueryParams<Path, Method>> extends never
+        ? { query?: QueryParams<Path, Method>}
+        : { query: QueryParams<Path, Method>})
+    & (RequiredKeysOf<RequestBody<Path, Method>> extends never
+        ? { body?: RequestBody<Path, Method> }
+        : { body: RequestBody<Path, Method> })
+    & {
+        headers?: HeadersInit
+    }
 
 export async function serverCachedRequest<
     Method extends HttpMethod,
@@ -122,7 +140,7 @@ export async function serverCachedRequest<
     metadata?: IRequestMetadata
 ) {
     const cachedResponse = await queryClient.fetchQuery({
-        queryKey: [ method, path, options?.params ],
+        queryKey: [ method, path, options?.query, options?.path ],
         queryFn: () => serverRequest(method, path, options, metadata),
     });
 
@@ -140,8 +158,8 @@ export async function serverRequest<
 ): Promise<SuccessResponseJSON<paths[Path][Method] & Record<string | number, any>>> {
     const baseUrl = GlobalConfig.ServerAddr;
 
-    let url = replacePath(String(path), options?.params?.path as any);
-    url += serializeQuery(options?.params?.query as any);
+    let url = replacePath(String(path), options?.path as any);
+    url += serializeQuery(options?.query as any);
 
     const headers = { ...options?.headers };
 
@@ -151,7 +169,7 @@ export async function serverRequest<
     }
 
     if (options?.body && ['POST', 'PUT', 'PATCH'].includes(String(method).toUpperCase())) {
-        if (options.body && (options.body as unknown) instanceof FormData) fetchOptions.body = options.body as FormData;
+        if (options.body && (options.body as unknown) instanceof FormData) fetchOptions.body = options.body as any;
         else {
             fetchOptions.body = JSON.stringify(options.body);
             fetchOptions.headers = { ...fetchOptions.headers, "Content-Type": "application/json" }

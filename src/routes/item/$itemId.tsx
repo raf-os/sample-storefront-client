@@ -1,4 +1,4 @@
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useContext, useRef, useState } from "react";
 import { createFileRoute, Link, type ErrorComponentProps } from "@tanstack/react-router";
 import * as Dropdown from "@radix-ui/react-dropdown-menu";
 import PageSetup from "@/components/layout/PageSetup";
@@ -17,12 +17,20 @@ import GlobalConfig from "@/lib/globalConfig";
 import { DropdownContent, DropdownItem, DropdownSeparator } from "@/components/common/Dropdown";
 
 import {
+    Plus as PlusIcon,
+    Minus as MinusIcon
+} from "lucide-react";
+
+import {
     LoaderCircle,
     Ellipsis,
     ShoppingCart,
     Star,
     Wallet,
 } from "lucide-react";
+import { AddProductToCart } from "@/lib/actions/userAction";
+import { queryClient } from "@/lib/serverRequest";
+import { QueryKeys } from "@/lib/queryKeys";
 
 export const Route = createFileRoute('/item/$itemId')({
     loader: async ({ params }) => {
@@ -69,6 +77,9 @@ function PageContent() {
     const product = data;
 
     const { authData } = useContext(AuthContext);
+    const [ isPending, startTransition, errorMessage ] = useServerAction();
+
+    const customSelectorRef = useRef<HTMLDivElement>(null);
 
     if (product.discount === undefined) product.discount = 0;
 
@@ -90,6 +101,20 @@ function PageContent() {
             ? (product.price * (100 - product.discount) / 100)
             : product.price
         : 0;
+    
+    const handleAddToCard = () => {
+        console.log("call")
+        if (isPending) return;
+        const amt = customSelectorRef.current?.dataset.value;
+        const pId = data.id;
+
+        startTransition(async () => {
+            const data = await AddProductToCart(pId, amt);
+            console.info(data);
+
+            await queryClient.invalidateQueries({ queryKey: QueryKeys.User.CartSize });
+        });
+    }
 
     return (product===undefined) ? (
         <span className="text-muted">
@@ -160,13 +185,26 @@ function PageContent() {
                 </div>
 
                 <div className="flex flex-col gap-4 mt-2">
-                    <Button>
+                    <div>
+                        <label
+                            className="text-sm font-bold"
+                        >
+                            Quantity
+                        </label>
+                        <CustomQuantitySelector ref={customSelectorRef} />
+                    </div>
+
+                    <Button
+                        disabled={isPending}
+                        onClick={handleAddToCard}
+                    >
                         <ShoppingCart />
                         Add to cart
                     </Button>
 
                     <Button
                         className="btn-primary"
+                        disabled={isPending}
                     >
                         <Wallet />
                         Buy now
@@ -177,6 +215,68 @@ function PageContent() {
 
         <ProductCommentSection />
         </>
+    )
+}
+
+function CustomQuantitySelector({
+    ref
+}: React.ComponentPropsWithRef<'div'>) {
+    const [ value, setValue ] = useState<number>(1);
+
+    const handleValueChange = (newValue: string | number) => {
+        let parsedValue = newValue;
+
+        if (typeof parsedValue === "string") {
+            parsedValue = parsedValue.replace(/[^0-9]/g, "");
+            parsedValue = Number(parsedValue);
+        }
+
+        parsedValue = Math.min(99, Math.max(1, parsedValue));
+        setValue(parsedValue);
+    }
+
+    function InnerButton({ children, className, ...rest }: React.ComponentPropsWithRef<'button'>) {
+        return (
+            <button
+                className={cn(
+                    "flex grow-0 shrink-0 items-center justify-center bg-base-300 text-base-500 w-12 h-full [&_svg]:size-4 outline-0",
+                    "hover:bg-base-400 focus:bg-primary-400 transition-colors",
+                    className
+                )}
+                {...rest}
+            >
+                { children }
+            </button>
+        )
+    }
+
+    return (
+        <div
+            className="flex overflow-hidden rounded-field shadow-xs border border-base-300 h-9"
+            ref={ref}
+            data-value={value}
+        >
+            <InnerButton
+                onClick={() => {handleValueChange(value - 1)}}
+            >
+                <MinusIcon />
+            </InnerButton>
+
+            <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                className="grow-1 shrink-1 px-1 py-2 h-9 leading-none outline-none text-center bg-base-200"
+                onChange={e => handleValueChange(e.target.value)}
+                value={value}
+            />
+
+            <InnerButton
+                onClick={() => handleValueChange(value + 1) }
+            >
+                <PlusIcon />
+            </InnerButton>
+        </div>
     )
 }
 

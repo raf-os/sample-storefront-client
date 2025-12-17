@@ -96,4 +96,15 @@
         color: var(--color-base-500);
         background-color: var(--color-base-100);
     }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type=number] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+    }
 }

@@ -4,12 +4,10 @@ import { UserAccountForm } from "@/models/schemas";
 
 export async function GetUserPageById(uid: string) {
     const data = await serverRequest("get", "/api/User/{Id}", {
-        params: {
-            path: { Id: uid },
-            query: {
-                comments: true,
-                products: true
-            }
+        path: { Id: uid },
+        query: {
+            comments: true,
+            products: true
         }
     });
 
@@ -22,7 +20,14 @@ export async function GetUserPrivateData() {
 }
 
 export async function GetUserCartSize() {
-    const data = await serverCachedRequest("get", "/api/User/cart/size", {}, { useAuth: true });
+    const data = await serverRequest("get", "/api/User/cart/size", {}, { useAuth: true });
+    return data;
+}
+
+export async function AddProductToCart(productId: string, amount?: string | number) {
+    const amt = amount === undefined ? undefined : Number(amount);
+
+    const data = await serverRequest("put", "/api/User/cart", { body: { productId: productId, amount: amt } }, { useAuth: true });
     return data;
 }
 
