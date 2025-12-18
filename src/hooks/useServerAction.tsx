@@ -17,7 +17,7 @@ export default function useServerAction() {
                     const message = err.message ?? "Unknown error occurred.";
                     setErrorMessage(message);
                     onError?.(message);
-                    console.error(message);
+                    console.error("Error caught in useServerAction hook: ", message);
                 } else {
                     console.error("Unknown error caught in useServerAction hook: ", err);
                 }

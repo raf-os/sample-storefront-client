@@ -312,6 +312,52 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/files/thumbnails/product/{FileName}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    FileName: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "image/webp": components["schemas"]["FileContentResult"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/Product/page": {
         parameters: {
             query?: never;
@@ -945,7 +991,10 @@ export interface paths {
         };
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    offset?: number;
+                    isPreview?: boolean;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -1222,6 +1271,7 @@ export interface components {
             discount?: number | null;
             categories?: unknown[];
             imageIds?: string[];
+            thumbnailUrl?: string | null;
         } | null;
         ProductMetadata: {
             /** Format: int32 */

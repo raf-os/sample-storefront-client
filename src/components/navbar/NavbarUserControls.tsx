@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import * as Dropdown from "@radix-ui/react-dropdown-menu";
 
 import { DropdownContent, DropdownItem as DropdownItemOriginal, DropdownSeparator } from "@/components/common/Dropdown";
+import NavbarCart from "@/components/navbar/NavbarCart";
 
 import { ShoppingBasket, Shield } from "lucide-react";
 import UserAvatar from "@/components/common/UserAvatar";
@@ -134,7 +135,6 @@ function UserCartControls() {
     const { data: cartSize, isSuccess, isError } = useQuery({
         queryKey: QueryKeys.User.CartSize,
         queryFn: async() => {
-            console.log("we fetching!")
             const d = await GetUserCartSize();
             return d;
         },
@@ -142,11 +142,11 @@ function UserCartControls() {
 
     return (
         <div className="relative">
-            <div className="flex items-center justify-center rounded-full border-2 border-base-500 bg-base-100 p-[2px] size-10">
-                <ShoppingBasket className="size-full text-base-500 bg-base-300 rounded-full p-[2px]" />
-
-                
-            </div>
+            <NavbarCart cartSize={cartSize ?? 0} asChild>
+                <button className="flex items-center justify-center rounded-full border-2 border-base-500 bg-base-100 p-[2px] size-10 cursor-pointer">
+                    <ShoppingBasket className="size-full text-base-500 bg-base-300 rounded-full p-[2px]" />
+                </button>
+            </NavbarCart>
 
             <div
                 className={cn(

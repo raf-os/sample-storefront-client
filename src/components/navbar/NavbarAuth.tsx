@@ -11,7 +11,7 @@ import { Link } from "@tanstack/react-router";
 import Button from "@/components/button";
 import { Input } from "@/components/forms";
 
-import NavbarUserControls from "@/components/navbar/NavbarUserControls";
+import NavbarUserControls from "./NavbarUserControls";
 
 const LoginRequestSchema = z.object({
     username: z.string().min(3, "Username must be at least 3 characters long.").max(30, "Username is too long!"),

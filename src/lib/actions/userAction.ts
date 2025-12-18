@@ -24,6 +24,11 @@ export async function GetUserCartSize() {
     return data;
 }
 
+export async function GetUserCartPreview() {
+    const data = await serverRequest("get", "/api/User/cart", { query: { isPreview: true } }, { useAuth: true });
+    return data;
+}
+
 export async function AddProductToCart(productId: string, amount?: string | number) {
     const amt = amount === undefined ? undefined : Number(amount);
 
