@@ -20,7 +20,7 @@ export async function GetUserPrivateData() {
 }
 
 export async function GetUserCartSize() {
-    const data = await serverRequest("get", "/api/User/cart/size", {}, { useAuth: true });
+    const data = await serverCachedRequest("get", "/api/User/cart/size", {}, { useAuth: true });
     return data;
 }
 
@@ -30,7 +30,7 @@ export async function GetUserCartPreview() {
 }
 
 export async function GetUserCart(offset?: number) {
-    const data = await serverRequest("get", "/api/User/cart", { query: { offset: offset } }, { useAuth: true });
+    const data = await serverCachedRequest("get", "/api/User/cart", { query: { offset: offset } }, { useAuth: true, staleTime: 1 * 1000 });
     return data;
 }
 

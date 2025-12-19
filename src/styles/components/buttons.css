@@ -15,7 +15,7 @@
     white-space: nowrap;
     @apply text-sm px-4 py-2 gap-2 transition-colors;
 
-    svg {
+    & svg {
         flex-shrink: 0;
         pointer-events: none;
 

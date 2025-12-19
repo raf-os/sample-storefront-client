@@ -11,26 +11,31 @@ import TokenRefreshHandler from "@/handlers/TokenRefreshHandler";
 
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 
+import { queryClient } from "@/lib/serverRequest";
+import { QueryClientProvider} from "@tanstack/react-query";
+
 interface IRootRouteContext {
 	authData: TAuthData | null,
 	authPromise: Promise<void>
 }
 
 const RootLayout = () => (
-	<TooltipProvider>
-		<HeadContent />
-		<AuthWrapper>
-			<div className='relative flex flex-col min-h-dvh z-0'>
-				<NavbarRoot />
-				
-				<div className="flex flex-col grow-1 shrink-1">
-					<Outlet />
+	<QueryClientProvider client={queryClient}>
+		<TooltipProvider>
+			<HeadContent />
+			<AuthWrapper>
+				<div className='relative flex flex-col min-h-dvh z-0'>
+					<NavbarRoot />
+					
+					<div className="flex flex-col grow-1 shrink-1">
+						<Outlet />
+					</div>
+					
+					<TanStackRouterDevtools />
 				</div>
-				
-				<TanStackRouterDevtools />
-			</div>
-		</AuthWrapper>
-	</TooltipProvider>
+			</AuthWrapper>
+		</TooltipProvider>
+	</QueryClientProvider>
 )
 
 export const Route = createRootRouteWithContext<IRootRouteContext>()({

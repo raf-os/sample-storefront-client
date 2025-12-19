@@ -107,6 +107,10 @@ export interface IRequestMetadata {
     useAuth?: boolean
 }
 
+export interface ICachedRequestMetadata extends IRequestMetadata {
+    staleTime?: number
+}
+
 // type TServerRequestOptions<Method extends HttpMethod, Path extends PathsWithMethod<paths, Method>> = {
 //     params?: {
 //         path?: PathParams<Path, Method>,
@@ -137,11 +141,12 @@ export async function serverCachedRequest<
     method: Method,
     path: Path,
     options?: TServerRequestOptions<Method, Path>,
-    metadata?: IRequestMetadata
+    metadata?: ICachedRequestMetadata
 ) {
     const cachedResponse = await queryClient.fetchQuery({
         queryKey: [ method, path, options?.query, options?.path ],
         queryFn: () => serverRequest(method, path, options, metadata),
+        staleTime: metadata?.staleTime
     });
 
     return cachedResponse;

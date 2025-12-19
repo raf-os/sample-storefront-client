@@ -1,25 +1,31 @@
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import z from "zod";
 import { createFileRoute, Link } from '@tanstack/react-router';
 import PageSetup from "@/components/layout/PageSetup";
 import { useServerAction } from "@/hooks";
 import type { paths } from "@/api/schema";
 import type { Flatten } from "@/types/utilities";
-import { GetUserCart } from "@/lib/actions/userAction";
+import { GetUserCart, GetUserCartSize } from "@/lib/actions/userAction";
 import { cn, formatCurrency, PreventLayoutFlash } from "@/lib/utils";
 
 import SectionCard from "@/components/common/SectionCard";
 import ImagePromise from "@/components/common/ImagePromise";
-import { ServerImagePath } from "@/lib/serverRequest";
+import { queryClient, ServerImagePath } from "@/lib/serverRequest";
+import PaginationComponent from "@/components/common/PaginationComponent";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { QueryKeys } from "@/lib/queryKeys";
+
 import {
-    CameraOff as ThumbnailNotFoundIcon
+	Loader as LoaderIcon,
+    CameraOff as ThumbnailNotFoundIcon,
+	Info as InfoIcon,
+	DollarSign as ProceedToCheckoutItem,
+	X as XIcon,
 } from "lucide-react";
 
 const cartSearchSchema = z.object({
 	offset: z.number().min(1).optional()
 });
-
-type CartSearch = z.infer<typeof cartSearchSchema>;
 
 export const Route = createFileRoute('/cart/')({
 	component: RouteComponent,
@@ -37,30 +43,77 @@ function RouteComponent() {
 type TData = Required<paths['/api/User/cart']['get']['responses']['200']['content']['application/json']>;
 type TDataItems = Required<TData>['items'];
 
+type TCartPageContext = {
+	isActionPending: boolean
+};
+
+const CartPageContext = createContext<TCartPageContext>({
+	isActionPending: false
+});
+
+function useCartSize() {
+	return useSuspenseQuery({
+        queryKey: QueryKeys.User.CartSize,
+        queryFn: async() => {
+            const d = await GetUserCartSize();
+            return d;
+        },
+    }, queryClient);
+}
+
 function MainContent() {
 	const [ isPending, startTransition, errorMessage ] = useServerAction();
 	const [ data, setData ] = useState<TData | null>(null);
 	const search = Route.useSearch();
 
+	const { data: cartSize } = useCartSize();
+
 	useEffect(() => {
 		startTransition(async () => {
 			const data = await PreventLayoutFlash(GetUserCart(search.offset));
-			console.log(data);
 			setData(data as TData);
 		});
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [search.offset]);
 
+	const ctx: TCartPageContext = {
+		isActionPending: isPending
+	}
+
+	if (data !== null && cartSize < 1) {
+		return (
+			<SectionCard className="grow-0 shrink-1 self-center">
+				<p>Your cart is currently empty.</p>
+			</SectionCard>
+		)
+	}
+
 	return (
-		<div>
-			{
-				isPending
-				? (<div>Loading...</div>)
-				: errorMessage
-					? (<div>Error</div>)
-					: data && <CartComponent data={data} />
-			}
-		</div>
+		<CartPageContext.Provider value={ctx}>
+			<div>
+				{
+					(isPending && data === null)
+					? (
+						<SectionCard>
+							Loading...
+						</SectionCard>
+					)
+					: errorMessage
+						? (
+							<div className="bg-error text-error-content border border-error-content/25 px-3 py-2 rounded-box">
+								<h1 className="font-bold">
+									Error fetching cart:
+								</h1>
+
+								<p>
+									{ errorMessage } lorem ipsum
+								</p>
+							</div>
+						)
+						: data && <CartComponent data={data} />
+				}
+			</div>
+		</CartPageContext.Provider>
 	)
 }
 
@@ -73,16 +126,28 @@ function CartComponent({
 	const isDiscount = (data.totalCost ?? 0) !== (data.discountedCost ?? 0);
 	const formattedDiscount = isDiscount ? formatCurrency(data.discountedCost ?? 0) : null;
 
+	const { isActionPending } = useContext(CartPageContext);
+
 	return (
 		<div className="flex gap-4 items-start">
-			<SectionCard>
+			<SectionCard
+				className="relative p-4"
+			>
 				<ItemList
 					items={data.items}
 				/>
+
+				{ isActionPending && (
+					<div
+						className="absolute top-0 left-0 size-full flex items-center justify-center bg-black/50 rounded-box"
+					>
+						<LoaderIcon className="animate-spin stroke-base-200 size-24" />
+					</div>
+				)}
 			</SectionCard>
 
 			<SectionCard
-				className="grow-0 shrink-0 w-96 px-3 py-2"
+				className="flex flex-col grow-0 shrink-0 w-96 p-4"
 			>
 				<div>
 					<h2 className="font-medium">
@@ -105,6 +170,19 @@ function CartComponent({
 						</p>
 					</div>
 				)}
+
+				<div className="flex flex-col gap-4 mt-4">
+					<Link className="btn" to="/">
+						Continue shopping
+					</Link>
+
+					<span
+						className="btn btn-primary"
+					>
+						<ProceedToCheckoutItem />
+						Proceed to checkout
+					</span>
+				</div>
 			</SectionCard>
 		</div>
 	)
@@ -115,6 +193,20 @@ function ItemList({
 }: {
 	items: TDataItems
 }) {
+	const { offset } = Route.useSearch();
+	const [ delayedOffset, setDelayedOffset ] = useState<number | undefined>(offset);
+
+	const { data: cartSize } = useCartSize();
+
+	const { isActionPending } = useContext(CartPageContext);
+
+	useEffect(() => {
+		if (isActionPending === false) {
+			setDelayedOffset(offset);
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [isActionPending]);
+
 	return (
 		<div>
 			<h1 className="text-lg font-bold mb-4">
@@ -128,6 +220,25 @@ function ItemList({
 						data={item as any}
 					/>
 				)) }
+
+				{ items.length === 0 && (
+					<div className="flex items-center grow-1 shrink-1">
+						<InfoIcon
+							className="stroke-base-200 fill-base-300 size-12 mr-4"
+						/>
+						<p>
+							No items found.
+						</p>
+					</div>
+				)}
+
+				<PaginationComponent
+					currentOffset={delayedOffset}
+					totalPages={Math.ceil((cartSize ?? 1) / 10)}
+					disabled={isActionPending}
+				>
+					<PaginationComponent.Label />
+				</PaginationComponent>
 			</div>
 		</div>
 	)
@@ -162,7 +273,8 @@ function ShoppingCartItem({
 			<Link
 				to="/item/$itemId"
 				params={{ itemId: product?.id ?? "undefined" }}
-				className="text-primary-300"
+				className="text-primary-300 outline-0"
+				tabIndex={-1}
 			>
 				{ children }
 			</Link>
@@ -173,13 +285,21 @@ function ShoppingCartItem({
 		<div className="flex gap-4">
 			<LinkWrapper>
 				<div
-					className="size-24 overflow-hidden rounded-box"
+					className="relative size-24 overflow-hidden rounded-box group"
+					tabIndex={0}
 				>
 					{ product?.thumbnailUrl ? (
 						<ImagePromise
 							src={ServerImagePath("/files/thumbnails/product/{FileName}", { path: { FileName: product?.thumbnailUrl } })}
 						/>
 					): <FallbackElement /> }
+
+					<button
+						className="flex items-center justify-center p-px opacity-25 group-hover:opacity-100 focus:ring-4 cursor-pointer absolute top-1 right-1 bg-destructive-content text-destructive rounded-full"
+						tabIndex={0}
+					>
+						<XIcon />
+					</button>
 				</div>
 			</LinkWrapper>
 
@@ -188,10 +308,6 @@ function ShoppingCartItem({
 					<LinkWrapper>
 						{ product?.name }
 					</LinkWrapper>
-
-					{ quantity > 1 && (
-						<span className="text-sm opacity-75"> (x { quantity })</span>
-					)}
 				</h2>
 
 				<p
@@ -211,6 +327,19 @@ function ShoppingCartItem({
 						{ formattedDiscount }
 					</p>
 				)}
+			</div>
+
+			<div
+				className="flex flex-col grow-0 shrink-0 text-right self-center items-end"
+			>
+				<div>
+					<label className="text-sm font-bold">
+						Quantity
+					</label>
+					<div>
+						{ data.quantity }
+					</div>
+				</div>
 			</div>
 		</div>
 	)
