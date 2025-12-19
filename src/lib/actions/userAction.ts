@@ -29,6 +29,11 @@ export async function GetUserCartPreview() {
     return data;
 }
 
+export async function GetUserCart(offset?: number) {
+    const data = await serverRequest("get", "/api/User/cart", { query: { offset: offset } }, { useAuth: true });
+    return data;
+}
+
 export async function AddProductToCart(productId: string, amount?: string | number) {
     const amt = amount === undefined ? undefined : Number(amount);
 

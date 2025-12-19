@@ -15,9 +15,8 @@ import {
     CameraOff as ThumbnailNotFoundIcon
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import Button from "@/components/button";
 
-type TCartItemAlias = Required<Omit<Flatten<paths['/api/User/cart']['get']['responses']['200']['content']['application/json']>, "user">>;
+type TCartItemAlias = Required<Omit<Flatten<Required<paths['/api/User/cart']['get']['responses']['200']['content']['application/json']>['items']>, 'user'>>;
 
 export default function NavbarCart({
     children,
@@ -41,6 +40,8 @@ export default function NavbarCart({
         setIsOpen(false);
     }
 
+    const cartOverflow = Math.max(cartSize - 5, 0);
+
     return (
         <Popover.Root
             open={isOpen}
@@ -54,6 +55,7 @@ export default function NavbarCart({
 
             <Popover.Portal>
                 <Popover.Content
+                    onOpenAutoFocus={e => e.preventDefault()}
                     sideOffset={6}
                     className="flex flex-col w-96 overflow-clip gap-2 bg-base-200 border border-base-300 shadow-xs rounded-box p-1 data-[state=open]:animate-slideUpAndFade"
                 >
@@ -75,25 +77,31 @@ export default function NavbarCart({
                                         <div
                                             className="flex flex-col gap-2 p-1"
                                         >
-                                            { cartItems.map((item, idx) => (
+                                            { cartItems.items?.map((item, idx) => (
                                                 <NavbarCartItem
                                                     data={item as TCartItemAlias}
                                                     key={item.id}
                                                     popoverCloseFn={handlePopoverClose}
                                                 />
                                             )) }
+
+                                            { cartOverflow > 0 && (
+                                                <p className="text-sm text-base-500/75 text-center">
+                                                    ... and { cartOverflow } extra items.
+                                                </p>
+                                            )}
                                         </div>
                                     )
                                 )
                         )
                     }
 
-                    <Button
-                        className="btn-primary rounded-box-inner"
-                        type="button"
+                    <Link
+                        className="btn btn-primary rounded-box-inner"
+                        to="/cart"
                     >
                         View my cart
-                    </Button>
+                    </Link>
                     <Popover.Arrow className="fill-base-500" />
                 </Popover.Content>
             </Popover.Portal>

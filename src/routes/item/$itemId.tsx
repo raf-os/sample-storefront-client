@@ -29,7 +29,7 @@ import {
     Wallet,
 } from "lucide-react";
 import { AddProductToCart } from "@/lib/actions/userAction";
-import { queryClient } from "@/lib/serverRequest";
+import { queryClient, ServerImagePath } from "@/lib/serverRequest";
 import { QueryKeys } from "@/lib/queryKeys";
 
 export const Route = createFileRoute('/item/$itemId')({
@@ -343,8 +343,8 @@ function ProductImageViewer({
         <>
             <div className="flex justify-center max-h-128 object-contain">
                 <ExpandableImage
-                    imgSrc={`${GlobalConfig.ServerEndpoints.ProductImages}/${productImages[selectedImg]}`}
-                    imgThumbnailSrc={`${GlobalConfig.ServerEndpoints.ProductImageThumbnails}/${productImages[selectedImg]}`}
+                    imgSrc={ServerImagePath("/api/Product/image/{imageId}", { path: { imageId: productImages[selectedImg] }})}
+                    imgThumbnailSrc={ServerImagePath("/api/Product/thumbnail/{thumbId}", { path: { thumbId: productImages[selectedImg] }})}
                     className="cursor-pointer"
                 />
             </div>

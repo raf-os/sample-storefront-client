@@ -20,7 +20,7 @@ export default function ExpandableImage({
             <Dialog.Trigger asChild>
                 <ImagePromise
                     src={imgSrc}
-                    alt={imgThumbnailSrc}
+                    alt={alt}
                     className={className}
                     fallback="error"
                     loadingComponent={SuspenseThumbnail({ className })}

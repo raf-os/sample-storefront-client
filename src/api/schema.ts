@@ -1007,9 +1007,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["CartItemDTO"][];
-                        "application/json": components["schemas"]["CartItemDTO"][];
-                        "text/json": components["schemas"]["CartItemDTO"][];
+                        "text/plain": components["schemas"]["CartDataReturn"];
+                        "application/json": components["schemas"]["CartDataReturn"];
+                        "text/json": components["schemas"]["CartDataReturn"];
                     };
                 };
                 /** @description Unauthorized */
@@ -1140,6 +1140,13 @@ export interface components {
             productId: string;
             /** Format: int32 */
             amount?: number;
+        };
+        CartDataReturn: {
+            items?: components["schemas"]["CartItemDTO"][];
+            /** Format: float */
+            totalCost?: number;
+            /** Format: float */
+            discountedCost?: number;
         };
         CartItemDTO: {
             /** Format: uuid */
