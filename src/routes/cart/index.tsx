@@ -1,11 +1,11 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import z from "zod";
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import PageSetup from "@/components/layout/PageSetup";
 import { useServerAction } from "@/hooks";
 import type { paths } from "@/api/schema";
 import type { Flatten } from "@/types/utilities";
-import { GetUserCart, GetUserCartSize } from "@/lib/actions/userAction";
+import { ClearUserCart, GetUserCart, GetUserCartSize } from "@/lib/actions/userAction";
 import { cn, formatCurrency, PreventLayoutFlash } from "@/lib/utils";
 
 import SectionCard from "@/components/common/SectionCard";
@@ -17,11 +17,17 @@ import { QueryKeys } from "@/lib/queryKeys";
 
 import {
 	Loader as LoaderIcon,
+	LoaderCircle,
     CameraOff as ThumbnailNotFoundIcon,
 	Info as InfoIcon,
-	DollarSign as ProceedToCheckoutItem,
+	Receipt as ProceedToCheckoutItem,
 	X as XIcon,
+	Undo2 as ReturnIcon
 } from "lucide-react";
+import { NumberButtonInput } from "@/components/forms";
+import Separator from "@/components/common/Separator";
+import * as AlertDialog from "@radix-ui/react-alert-dialog";
+import Button from "@/components/button";
 
 const cartSearchSchema = z.object({
 	offset: z.number().min(1).optional()
@@ -173,6 +179,7 @@ function CartComponent({
 
 				<div className="flex flex-col gap-4 mt-4">
 					<Link className="btn" to="/">
+						<ReturnIcon />
 						Continue shopping
 					</Link>
 
@@ -183,8 +190,95 @@ function CartComponent({
 						Proceed to checkout
 					</span>
 				</div>
+
+				<Separator orientation="horizontal" />
+
+				<CartClearDialog>
+					<button className="btn btn-destructive">
+						<XIcon />
+						Clear cart
+					</button>
+				</CartClearDialog>
 			</SectionCard>
 		</div>
+	)
+}
+
+function CartClearDialog({ children }: { children: React.ReactNode }) {
+	const navigate = useNavigate();
+	const { isActionPending } = useContext(CartPageContext);
+	const [ isOpen, setIsOpen ] = useState<boolean>(false);
+	const [ isPending, startTransition, errorMessage ] = useServerAction();
+
+	const handleDialogTrigger = (newVal: boolean) => {
+		if (isOpen && isPending) return;
+		if (!isOpen && isActionPending) return;
+		setIsOpen(newVal);
+	}
+
+	const handleClearUserCart = () => {
+		if (isPending || isActionPending) return;
+		startTransition(async () => {
+			await ClearUserCart();
+			navigate({ to: ".", reloadDocument: true });
+		});
+	}
+
+	return (
+		<AlertDialog.Root open={isOpen} onOpenChange={handleDialogTrigger}>
+			<AlertDialog.Trigger asChild>
+				{ children }
+			</AlertDialog.Trigger>
+
+			<AlertDialog.Portal>
+				<AlertDialog.Overlay className="fixed inset-0 bg-black/25">
+					<AlertDialog.Content
+						className={cn(
+							"fixed left-1/2 top-1/2 max-w-[90vw] w-[600px] -translate-y-1/2 -translate-x-1/2 bg-base-200 text-base-500 rounded-box",
+							"shadow-md p-4 relative animate-dialogEntry"
+						)}
+					>
+						<AlertDialog.Title className="text-lg font-medium mb-2">
+							Are you sure?
+						</AlertDialog.Title>
+
+						<AlertDialog.Description>
+							<p>
+								This will remove all of your items from your cart.
+								This action is irreversible.
+							</p>
+						</AlertDialog.Description>
+
+						<AlertDialog.Cancel className="absolute top-2 right-2" asChild>
+							<button className="text-base-500 cursor-pointer">
+								<XIcon size={24} strokeWidth={3} />
+							</button>
+						</AlertDialog.Cancel>
+
+						<div className="flex gap-4 w-full mt-4 justify-end">
+							<AlertDialog.Cancel asChild>
+								<Button
+									disabled={isPending}
+								>
+									Cancel
+								</Button>
+							</AlertDialog.Cancel>
+
+							<AlertDialog.Action asChild>
+								<Button
+									className="btn-destructive"
+									disabled={isPending || isActionPending}
+									onClick={handleClearUserCart}
+								>
+									{ isPending && <LoaderCircle className="animate-spin" /> }
+									Understood, proceed
+								</Button>
+							</AlertDialog.Action>
+						</div>
+					</AlertDialog.Content>
+				</AlertDialog.Overlay>
+			</AlertDialog.Portal>
+		</AlertDialog.Root>
 	)
 }
 
@@ -336,9 +430,10 @@ function ShoppingCartItem({
 					<label className="text-sm font-bold">
 						Quantity
 					</label>
-					<div>
-						{ data.quantity }
-					</div>
+
+					<NumberButtonInput
+						defaultValue={data.quantity}
+					/>
 				</div>
 			</div>
 		</div>

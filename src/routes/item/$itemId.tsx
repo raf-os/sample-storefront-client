@@ -18,7 +18,8 @@ import { DropdownContent, DropdownItem, DropdownSeparator } from "@/components/c
 
 import {
     Plus as PlusIcon,
-    Minus as MinusIcon
+    Minus as MinusIcon,
+    TriangleAlert
 } from "lucide-react";
 
 import {
@@ -184,6 +185,8 @@ function PageContent() {
                     </p>
                 </div>
 
+                
+
                 <div className="flex flex-col gap-4 mt-2">
                     <div>
                         <label
@@ -193,6 +196,15 @@ function PageContent() {
                         </label>
                         <CustomQuantitySelector ref={customSelectorRef} />
                     </div>
+
+                    { product.isInCart === true && (
+                        <div className="flex gap-2 items-center text-primary-200 text-sm border border-primary-300 bg-primary-500 rounded-box p-2">
+                            <TriangleAlert
+                                className="text-primary-300 size-6"
+                            />
+                            <p>This product is already in your cart.</p>
+                        </div>
+                    )}
 
                     <Button
                         disabled={isPending}

@@ -34,6 +34,12 @@ export async function GetUserCart(offset?: number) {
     return data;
 }
 
+export async function ClearUserCart() {
+    const deletedAmount = await serverRequest("delete", "/api/User/cart/clear", {}, { useAuth: true });
+    console.info(`Removed ${deletedAmount} items from cart`);
+    return deletedAmount;
+}
+
 export async function AddProductToCart(productId: string, amount?: string | number) {
     const amt = amount === undefined ? undefined : Number(amount);
 

@@ -22,7 +22,8 @@ export type TProduct = {
     rating: TProductRating
     tags?: string[],
     imageIds?: string[],
-    metadata: TProductMetadata
+    metadata: TProductMetadata,
+    isInCart?: boolean,
 
     userId: string,
     user?: TUser,
@@ -40,6 +41,7 @@ export type TProductListItem = {
     name: string,
     price: number,
     discount?: number,
+    isInCart?: boolean,
     imageIds?: string[],
 
     categories?: TCategoryDTO[],

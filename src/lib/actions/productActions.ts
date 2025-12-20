@@ -4,7 +4,7 @@ import { requestToJson, toFormData } from "@/lib/utils";
 import TokenRefreshHandler from "@/handlers/TokenRefreshHandler";
 import GlobalConfig from "@/lib/globalConfig";
 import type { StandardJsonResponse } from "@/types/StandardJsonResponse";
-import type { TComment, TProduct, TProductListItem } from "@/models";
+import type { TProduct, TProductListItem } from "@/models";
 
 import AuthSingleton from "@/classes/AuthSingleton";
 import * as RESPONSES from "@/lib/jsonResponses";
@@ -12,7 +12,6 @@ import type { WithRequired } from "@/types/utilities";
 import { ProductPatchSchema, NewProductSchema } from "@/models/schemas";
 import { PatchBuilder } from "@/lib/patchBuilder";
 import type { TCommentPayload } from "@/models/Comment";
-import { serverRequest } from "@/lib/serverRequest";
 
 export async function AddProductAction(request: z.input<typeof NewProductSchema>): Promise<StandardJsonResponse<string>> {
     const tokenCheck = await TokenRefreshHandler.validateToken();
@@ -57,7 +56,12 @@ export async function AddProductAction(request: z.input<typeof NewProductSchema>
 
 export async function GetProductById(id: string) {
     try {
-        const res = await fetch(GlobalConfig.ServerProductEndpoint + `/item/${id}`);
+        await TokenRefreshHandler.validateToken();
+        const token = AuthSingleton.getJwtToken();
+
+        const res = await fetch(GlobalConfig.ServerProductEndpoint + `/item/${id}`, {
+            headers: token ? { 'Authorization': `Bearer ${token}` } : undefined
+        });
 
         if (!res.ok) {
             return new RESPONSES.NotFound();

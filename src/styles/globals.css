@@ -53,7 +53,7 @@
 }
 
 :root {
-    --col-primary-100: oklch(35% 0.05 235);
+    --col-primary-100: oklch(35% 0.1 235);
     --col-primary-200: oklch(54% 0.17 242);
     --col-primary-300: oklch(62% 0.22 252);
     --col-primary-400: oklch(70% 0.15 256);

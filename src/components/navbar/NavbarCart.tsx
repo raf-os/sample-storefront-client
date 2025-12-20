@@ -99,6 +99,7 @@ export default function NavbarCart({
                     <Link
                         className="btn btn-primary rounded-box-inner"
                         to="/cart"
+                        onClick={handlePopoverClose}
                     >
                         View my cart
                     </Link>

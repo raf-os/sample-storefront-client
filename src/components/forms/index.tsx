@@ -5,6 +5,7 @@ import Checkbox from "./Checkbox";
 import FieldSet from "./FieldSet";
 import { StarRatingComponent } from "./StarRating";
 import FileUploadInput from "./FileUpload";
+import NumberButtonInput from "@/components/forms/NumberButtonInput";
 
 export {
     Input,
@@ -14,4 +15,5 @@ export {
     FieldSet,
     StarRatingComponent,
     FileUploadInput,
+    NumberButtonInput
 }
