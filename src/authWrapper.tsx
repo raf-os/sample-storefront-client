@@ -38,10 +38,6 @@ export function AuthWrapper({ children }: { children?: React.ReactNode }) {
     const logout = async () => {
         const res = await AuthLogout();
 
-        // if (res.success) {
-        //     _updateAuth(null);
-        // }
-
         return res;
     }
 
