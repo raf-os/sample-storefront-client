@@ -103,6 +103,10 @@ function PageContent() {
             : (product.price || 0)
         : 0;
 
+    const isProductInStock =
+        product.isInStock === true
+        || (product.stockAmount && product.stockAmount > 0);
+
     const handleAddToCard = () => {
         console.log("call")
         if (isPending) return;
@@ -193,7 +197,16 @@ function PageContent() {
                         </p>
                     </div>
 
-
+                    <div className="text-sm">
+                        {isProductInStock ? (<>
+                            <span className="text-success-content">Product is currently in stock!</span>
+                            {product.stockAmount !== undefined && (
+                                <span className="text-base-500/75">{product.stockAmount} remaining.</span>
+                            )}
+                        </>) : (
+                            <span className="text-error-content">Product is not in stock at the moment.</span>
+                        )}
+                    </div>
 
                     <div className="flex flex-col gap-4 mt-2">
                         <div>
@@ -215,7 +228,7 @@ function PageContent() {
                         )}
 
                         <Button
-                            disabled={isPending}
+                            disabled={isPending || !isProductInStock}
                             onClick={handleAddToCard}
                         >
                             <ShoppingCart />
@@ -224,7 +237,7 @@ function PageContent() {
 
                         <Button
                             className="btn-primary"
-                            disabled={isPending}
+                            disabled={isPending || !isProductInStock}
                         >
                             <Wallet />
                             Buy now
