@@ -1364,6 +1364,9 @@ export interface components {
             tags?: string[];
             metadata?: components["schemas"]["ProductMetadata"];
             isInCart?: boolean | null;
+            isInStock?: boolean;
+            /** Format: int32 */
+            stockAmount?: number | null;
             imageIds?: string[];
             /** Format: uuid */
             userId?: string;
@@ -1386,6 +1389,9 @@ export interface components {
             tags?: string[];
             metadata?: unknown;
             isInCart?: boolean | null;
+            isInStock?: boolean;
+            /** Format: int32 */
+            stockAmount?: number | null;
             imageIds?: string[];
             /** Format: uuid */
             userId?: string;
@@ -1407,6 +1413,7 @@ export interface components {
             imageIds?: string[];
             thumbnailUrl?: string | null;
             isInCart?: boolean | null;
+            isInStock?: boolean;
         } | null;
         ProductMetadata: {
             /** Format: int32 */

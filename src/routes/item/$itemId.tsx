@@ -67,7 +67,7 @@ function ErrorContent({ error }: ErrorComponentProps) {
             <div
                 className="border border-base-300 bg-base-200 rounded-box p-4"
             >
-                { error.message }
+                {error.message}
             </div>
         </div>
     )
@@ -78,7 +78,7 @@ function PageContent() {
     const product = data;
 
     const { authData } = useContext(AuthContext);
-    const [ isPending, startTransition, errorMessage ] = useServerAction();
+    const [isPending, startTransition, errorMessage] = useServerAction();
 
     const customSelectorRef = useRef<HTMLDivElement>(null);
 
@@ -90,24 +90,27 @@ function PageContent() {
     });
 
     const formattedScore =
-        product.rating.value === undefined
-        ? "-"
-        : new Intl.NumberFormat('en-US', {
-            maximumFractionDigits: 2,
-            minimumFractionDigits: 0
-        }).format(product.rating.value);
+        product.rating?.value === undefined
+            ? "-"
+            : new Intl.NumberFormat('en-US', {
+                maximumFractionDigits: 2,
+                minimumFractionDigits: 0
+            }).format(product.rating.value || 0);
 
     const finalPrice = product
-        ? (product.discount > 0)
-            ? (product.price * (100 - product.discount) / 100)
-            : product.price
+        ? (product.discount && product.discount > 0)
+            ? ((product.price || 0) * (100 - product.discount) / 100)
+            : (product.price || 0)
         : 0;
-    
+
     const handleAddToCard = () => {
         console.log("call")
         if (isPending) return;
         const amt = customSelectorRef.current?.dataset.value;
         const pId = data.id;
+        if (pId == undefined) {
+            throw new Error("Product ID is undefined!");
+        }
 
         startTransition(async () => {
             const data = await AddProductToCart(pId, amt);
@@ -117,115 +120,120 @@ function PageContent() {
         });
     }
 
-    return (product===undefined) ? (
+    return (product === undefined) ? (
         <span className="text-muted">
             No product with provided ID found.
         </span>
     ) : (
         <>
-        <div
-            className="flex gap-4"
-        >
             <div
-                className="flex flex-col gap-4 w-2/3 h-full p-4 bg-base-200 rounded-box"
+                className="flex gap-4"
             >
-                { (product.imageIds && product.imageIds.length !== 0) ? (
-                    <ProductImageViewer
-                        imageList={product.imageIds}
-                    />
-                ) : (
-                    <>
-                        No images available.
-                    </>
-                )}
-            </div>
-
-            <div
-                className="relative grow-1 shrink-1 flex flex-col h-full bg-base-200 rounded-box p-4"
-            >
-                <div className="flex justify-between items-start">
-                    <div>
-                        <h1 className="font-bold text-lg">
-                            { product.name }
-                        </h1>
-
-                        <div
-                            className="flex items-end gap-2 py-2"
-                        >
-                            { (product.discount > 0) && (
-                                <span
-                                    className="text-muted line-through leading-none"
-                                >
-                                    {formatter.format(product.price)}
-                                </span>
-                            ) }
-                            <span
-                                className="font-bold text-primary-300 text-xl leading-none"
-                            >
-                                {formatter.format(finalPrice)}
-                            </span>
-                        </div>
-                    </div>
-
-                { authData?.userId === product.userId && <ListingUserActions /> }
-                </div>
-
-                <div>
-                    <h2>Sold by:</h2>
-                    <p>
-                        <Link to="/user/$userId" params={{ userId: product.user.id }}>
-                            { product.user.name }
-                        </Link>
-                    </p>
-
-                    <h2>Score:</h2>
-                    <p>
-                        { formattedScore } / 5
-                        ({product.rating.amount} votes)
-                    </p>
-                </div>
-
-                
-
-                <div className="flex flex-col gap-4 mt-2">
-                    <div>
-                        <label
-                            className="text-sm font-bold"
-                        >
-                            Quantity
-                        </label>
-                        <CustomQuantitySelector ref={customSelectorRef} />
-                    </div>
-
-                    { product.isInCart === true && (
-                        <div className="flex gap-2 items-center text-primary-200 text-sm border border-primary-300 bg-primary-500 rounded-box p-2">
-                            <TriangleAlert
-                                className="text-primary-300 size-6"
-                            />
-                            <p>This product is already in your cart.</p>
-                        </div>
+                <div
+                    className="flex flex-col gap-4 w-2/3 h-full p-4 bg-base-200 rounded-box"
+                >
+                    {(product.imageIds && product.imageIds.length !== 0) ? (
+                        <ProductImageViewer
+                            imageList={product.imageIds}
+                        />
+                    ) : (
+                        <>
+                            No images available.
+                        </>
                     )}
+                </div>
 
-                    <Button
-                        disabled={isPending}
-                        onClick={handleAddToCard}
-                    >
-                        <ShoppingCart />
-                        Add to cart
-                    </Button>
+                <div
+                    className="relative grow-1 shrink-1 flex flex-col h-full bg-base-200 rounded-box p-4"
+                >
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <h1 className="font-bold text-lg">
+                                {product.name}
+                            </h1>
 
-                    <Button
-                        className="btn-primary"
-                        disabled={isPending}
-                    >
-                        <Wallet />
-                        Buy now
-                    </Button>
+                            <div
+                                className="flex items-end gap-2 py-2"
+                            >
+                                {(product.discount && product.discount > 0) && (
+                                    <span
+                                        className="text-muted line-through leading-none"
+                                    >
+                                        {formatter.format(product.price || 0)}
+                                    </span>
+                                )}
+                                <span
+                                    className="font-bold text-primary-300 text-xl leading-none"
+                                >
+                                    {formatter.format(finalPrice)}
+                                </span>
+
+                                <span>
+                                </span>
+                            </div>
+                        </div>
+
+                        {authData?.userId === product.userId && <ListingUserActions />}
+                    </div>
+
+                    <div>
+                        {product.user && (<>
+                            <h2>Sold by:</h2>
+                            <p>
+                                <Link to="/user/$userId" params={{ userId: product.user.id as string }}>
+                                    {product.user.name}
+                                </Link>
+                            </p>
+                        </>)}
+
+                        <h2>Score:</h2>
+                        <p>
+                            {formattedScore} / 5
+                            ({product.rating?.amount || 0} votes)
+                        </p>
+                    </div>
+
+
+
+                    <div className="flex flex-col gap-4 mt-2">
+                        <div>
+                            <label
+                                className="text-sm font-bold"
+                            >
+                                Quantity
+                            </label>
+                            <CustomQuantitySelector ref={customSelectorRef} />
+                        </div>
+
+                        {product.isInCart === true && (
+                            <div className="flex gap-2 items-center text-primary-200 text-sm border border-primary-300 bg-primary-500 rounded-box p-2">
+                                <TriangleAlert
+                                    className="text-primary-300 size-6"
+                                />
+                                <p>This product is already in your cart.</p>
+                            </div>
+                        )}
+
+                        <Button
+                            disabled={isPending}
+                            onClick={handleAddToCard}
+                        >
+                            <ShoppingCart />
+                            Add to cart
+                        </Button>
+
+                        <Button
+                            className="btn-primary"
+                            disabled={isPending}
+                        >
+                            <Wallet />
+                            Buy now
+                        </Button>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <ProductCommentSection />
+            <ProductCommentSection />
         </>
     )
 }
@@ -233,7 +241,7 @@ function PageContent() {
 function CustomQuantitySelector({
     ref
 }: React.ComponentPropsWithRef<'div'>) {
-    const [ value, setValue ] = useState<number>(1);
+    const [value, setValue] = useState<number>(1);
 
     const handleValueChange = (newValue: string | number) => {
         let parsedValue = newValue;
@@ -257,7 +265,7 @@ function CustomQuantitySelector({
                 )}
                 {...rest}
             >
-                { children }
+                {children}
             </button>
         )
     }
@@ -269,7 +277,7 @@ function CustomQuantitySelector({
             data-value={value}
         >
             <InnerButton
-                onClick={() => {handleValueChange(value - 1)}}
+                onClick={() => { handleValueChange(value - 1) }}
             >
                 <MinusIcon />
             </InnerButton>
@@ -284,7 +292,7 @@ function CustomQuantitySelector({
             />
 
             <InnerButton
-                onClick={() => handleValueChange(value + 1) }
+                onClick={() => handleValueChange(value + 1)}
             >
                 <PlusIcon />
             </InnerButton>
@@ -339,12 +347,12 @@ function ProductImageViewer({
     displayImage?: string,
     imageList?: string[]
 }) {
-    const [ selectedImg, setSelectedImg ] = useState<number>(0);
+    const [selectedImg, setSelectedImg] = useState<number>(0);
 
     let productImages = [];
     if (displayImage) productImages.push(displayImage);
     if (imageList.length > 0) {
-        productImages = [ ...productImages, ...imageList ];
+        productImages = [...productImages, ...imageList];
     }
 
     const handleImageSelection = (index: number) => {
@@ -355,8 +363,8 @@ function ProductImageViewer({
         <>
             <div className="flex justify-center max-h-128 object-contain">
                 <ExpandableImage
-                    imgSrc={ServerImagePath("/api/Product/image/{imageId}", { path: { imageId: productImages[selectedImg] }})}
-                    imgThumbnailSrc={ServerImagePath("/api/Product/thumbnail/{thumbId}", { path: { thumbId: productImages[selectedImg] }})}
+                    imgSrc={ServerImagePath("/api/Product/image/{imageId}", { path: { imageId: productImages[selectedImg] } })}
+                    imgThumbnailSrc={ServerImagePath("/api/Product/thumbnail/{thumbId}", { path: { thumbId: productImages[selectedImg] } })}
                     className="cursor-pointer"
                 />
             </div>
@@ -364,7 +372,7 @@ function ProductImageViewer({
             <div
                 className="flex gap-4 h-28 bg-base-100 p-4 rounded-box"
             >
-                { productImages.map((i, idx) => (
+                {productImages.map((i, idx) => (
                     <ImagePromise
                         src={`${GlobalConfig.ServerEndpoints.ProductImageThumbnails}/${i}`}
                         loadingComponent={<SuspenseThumbnail className="w-24" />}
@@ -376,7 +384,7 @@ function ProductImageViewer({
                         )}
                         onClick={() => handleImageSelection(idx)}
                     />
-                )) }
+                ))}
             </div>
         </>
     )
@@ -388,17 +396,18 @@ type TPaginationData = {
 }
 
 function ProductCommentSection() {
-    const [ isPending, startTransition, errorMessage ] = useServerAction();
-    const [ paginationData, setPaginationData ] = useState<TPaginationData | null>(null);
-    const [ isPaginationEnd, setIsPaginationEnd ] = useState<boolean>(false);
-    const [ userHasCommented, setUserHasCommented ] = useState<boolean>(false);
-    const [ loadedComments, setLoadedComments ] = useState<WithRequired<TComment, 'user'>[] | null>(null);
+    const [isPending, startTransition, errorMessage] = useServerAction();
+    const [paginationData, setPaginationData] = useState<TPaginationData | null>(null);
+    const [isPaginationEnd, setIsPaginationEnd] = useState<boolean>(false);
+    const [userHasCommented, setUserHasCommented] = useState<boolean>(false);
+    const [loadedComments, setLoadedComments] = useState<WithRequired<TComment, 'user'>[] | null>(null);
     const productId = Route.useLoaderData().id;
 
     const triggerRef = useInView<HTMLDivElement>(() => onComponentVisible(), {}, [isPending, isPaginationEnd]);
 
     const onComponentVisible = useCallback(() => {
         if (isPaginationEnd || isPending) return;
+        if (productId == undefined) return;
 
         startTransition(async () => {
             const data = await PreventLayoutFlash(
@@ -409,7 +418,7 @@ function ProductCommentSection() {
                 // setLoadedComments([]);
                 throw new Error(data.message);
             }
-            
+
             const comments = data.data?.comments;
             setLoadedComments(prev => {
                 const newComments = comments ?? [];
@@ -432,29 +441,29 @@ function ProductCommentSection() {
                 });
             }
         });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isPending, isPaginationEnd, paginationData?.lastDate, paginationData?.lastIndex]);
 
     return (
         <div
             className="flex flex-col gap-4"
         >
-            { (errorMessage !== null && loadedComments === null) && (
+            {(errorMessage !== null && loadedComments === null) && (
                 <FetchErrorMessage>
-                    { errorMessage }
+                    {errorMessage}
                 </FetchErrorMessage>
             )}
 
-            { loadedComments && (
-                    <>
-                    { userHasCommented === false && (<NewReviewForm productId={productId} disabled={!!errorMessage} />) }
+            {loadedComments && productId && (
+                <>
+                    {userHasCommented === false && (<NewReviewForm productId={productId} disabled={!!errorMessage} />)}
 
                     <div className="flex flex-col gap-4 rounded-box bg-base-200 p-4">
                         <h1 className="text-lg font-semibold">
                             User reviews
                         </h1>
 
-                        { (loadedComments.length > 0)
+                        {(loadedComments.length > 0)
                             ? loadedComments?.map(comment => (
                                 <ProductComment
                                     comment={comment}
@@ -467,17 +476,17 @@ function ProductCommentSection() {
                             )
                         }
 
-                        { errorMessage && (
+                        {errorMessage && (
                             <FetchErrorMessage>
-                                { errorMessage }
+                                {errorMessage}
                             </FetchErrorMessage>
                         )}
                     </div>
-                    </>
-                )
+                </>
+            )
             }
 
-            { (errorMessage === null && isPaginationEnd === false) && (
+            {(errorMessage === null && isPaginationEnd === false) && (
                 <div
                     className="flex gap-2 border border-base-300 text-base-400 rounded-box p-2"
                     ref={triggerRef}
@@ -493,7 +502,7 @@ function ProductCommentSection() {
 function FetchErrorMessage({ children }: { children?: React.ReactNode }) {
     return (
         <div className="text-error-content border border-error-content rounded-box bg-error px-4 py-2">
-            { children }
+            {children}
         </div>
     )
 }
@@ -506,8 +515,8 @@ function ProductComment({
     const CategoryElement = ({ header, content }: { header: string, content: React.ReactNode }) => {
         return (
             <div className="flex flex-col gap-1 items-start">
-                <h1 className="text-sm font-bold">{ header }</h1>
-                { content }
+                <h1 className="text-sm font-bold">{header}</h1>
+                {content}
             </div>
         )
     }
@@ -523,44 +532,44 @@ function ProductComment({
                     header={"Reviewer"}
                     content={(
                         <p>
-                            { comment.user.name }
+                            {comment.user.name}
                         </p>
                     )}
                 />
 
-               <CategoryElement
+                <CategoryElement
                     header={"Score"}
                     content={(
                         <>
-                        <div className="inline-flex gap-1 px-2 py-1 bg-base-100 border border-base-300 shadow-xs rounded-box grow-0 shrink-0">
-                            { [...Array(5)].map((_, idx) => (
-                                <Star
-                                    key={idx}
-                                    size={18}
-                                    className={cn(
-                                        "stroke-1 stroke-base-500/50",
-                                        idx >= comment.score
-                                            ? "fill-base-400"
-                                            : "fill-amber-400"
-                                    )}
-                                />
-                            )) }
-                        </div>
+                            <div className="inline-flex gap-1 px-2 py-1 bg-base-100 border border-base-300 shadow-xs rounded-box grow-0 shrink-0">
+                                {[...Array(5)].map((_, idx) => (
+                                    <Star
+                                        key={idx}
+                                        size={18}
+                                        className={cn(
+                                            "stroke-1 stroke-base-500/50",
+                                            idx >= comment.score
+                                                ? "fill-base-400"
+                                                : "fill-amber-400"
+                                        )}
+                                    />
+                                ))}
+                            </div>
 
-                        <p className="sr-only">
-                            { comment.score } out of 5 stars
-                        </p>
+                            <p className="sr-only">
+                                {comment.score} out of 5 stars
+                            </p>
                         </>
                     )}
                 />
             </div>
 
             <div className="grow-1 shrink-1 p-4">
-                { comment.content ? (
+                {comment.content ? (
                     <p>
-                        { comment.content }
+                        {comment.content}
                     </p>
-                ): (
+                ) : (
                     <p
                         className="text-base-400 text-sm italic"
                     >

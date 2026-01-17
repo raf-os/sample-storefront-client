@@ -12,6 +12,7 @@ import type { WithRequired } from "@/types/utilities";
 import { ProductPatchSchema, NewProductSchema } from "@/models/schemas";
 import { PatchBuilder } from "@/lib/patchBuilder";
 import type { TCommentPayload } from "@/models/Comment";
+import type { paths } from "@/api/schema";
 
 export async function AddProductAction(request: z.input<typeof NewProductSchema>): Promise<StandardJsonResponse<string>> {
     const tokenCheck = await TokenRefreshHandler.validateToken();
@@ -42,16 +43,16 @@ export async function AddProductAction(request: z.input<typeof NewProductSchema>
         const data = await requestToJson<{ id: string }>(res);
 
         if (!res.ok) {
-            if (res.status===400) return new RESPONSES.BadRequest();
-            else if (res.status===401) return new RESPONSES.UnauthorizedRequest();
+            if (res.status === 400) return new RESPONSES.BadRequest();
+            else if (res.status === 401) return new RESPONSES.UnauthorizedRequest();
             else return { success: false }
         }
 
         return { success: true, data: data?.id }
-    } catch(err) {
+    } catch (err) {
         console.error(err);
         return new RESPONSES.ServerFetchError();
-    } 
+    }
 }
 
 export async function GetProductById(id: string) {
@@ -67,12 +68,17 @@ export async function GetProductById(id: string) {
             return new RESPONSES.NotFound();
         }
 
-        const data = await requestToJson<WithRequired<TProduct, 'user'>>(res);
+        const data = await requestToJson<
+            WithRequired<
+                paths['/api/Product/item/{id}']['get']['responses']['200']['content']['application/json'],
+                'user'
+            >
+        >(res);
 
         if (!data) return new RESPONSES.NotFound();
 
         return new RESPONSES.Ok<typeof data>({ data });
-    } catch(err) {
+    } catch (err) {
         console.error(err);
         return new RESPONSES.ServerFetchError();
     }
@@ -118,7 +124,7 @@ export async function GetProductListPage(params: TFetchProductListParams = {}): 
         if (!data) return new RESPONSES.ServerFetchError();
 
         return new RESPONSES.Ok<TProductListPageResponse>({ data });
-    } catch(err) {
+    } catch (err) {
         console.error(err);
         return new RESPONSES.ServerFetchError();
     }
@@ -148,7 +154,7 @@ export async function GetProductComments(productId: string, lastId?: string, las
         if (!data) return new RESPONSES.ServerFetchError();
 
         return new RESPONSES.Ok<typeof data>({ data });
-    } catch(err) {
+    } catch (err) {
         console.error(err);
         return new RESPONSES.ServerFetchError();
     }
@@ -198,7 +204,7 @@ export async function PatchDocumentById(
             else if (res.status === 401) return new RESPONSES.UnauthorizedRequest();
             else return new RESPONSES.NotFound();
         }
-        
+
         if (Array.isArray(successMessages))
             successMessages?.push("Fields were updated successfully.");
     }
