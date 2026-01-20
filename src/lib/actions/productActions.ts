@@ -4,7 +4,7 @@ import { requestToJson, toFormData } from "@/lib/utils";
 import TokenRefreshHandler from "@/handlers/TokenRefreshHandler";
 import GlobalConfig from "@/lib/globalConfig";
 import type { StandardJsonResponse } from "@/types/StandardJsonResponse";
-import type { TProduct, TProductListItem } from "@/models";
+import type { TProduct } from "@/models";
 
 import AuthSingleton from "@/classes/AuthSingleton";
 import * as RESPONSES from "@/lib/jsonResponses";
@@ -68,12 +68,7 @@ export async function GetProductById(id: string) {
             return new RESPONSES.NotFound();
         }
 
-        const data = await requestToJson<
-            WithRequired<
-                paths['/api/Product/item/{id}']['get']['responses']['200']['content']['application/json'],
-                'user'
-            >
-        >(res);
+        const data = await requestToJson<WithRequired<TProduct, 'user'>>(res);
 
         if (!data) return new RESPONSES.NotFound();
 
@@ -84,13 +79,7 @@ export async function GetProductById(id: string) {
     }
 }
 
-export type TProductListPageResponse = {
-    items: {
-        product: TProductListItem,
-        commentCount: number
-    }[],
-    totalPages: number
-}
+export type TProductListPageResponse = paths['/api/Product/page']['get']['responses']['200']['content']['application/json'];
 
 export const FetchProductListSchema = z.object({
     category: z.string().optional(),

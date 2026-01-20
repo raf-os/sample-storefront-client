@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState, useContext, createContext } from "rea
 import { GetProductListPage, type TProductListPageResponse } from "@/lib/actions/productActions";
 import { useServerAction } from "@/hooks";
 import { cn } from "@/lib/utils";
-import type { TProductListItem } from "@/models";
 import type { Flatten } from "@/types/utilities";
 import { Link } from "@tanstack/react-router";
 
@@ -24,8 +23,8 @@ const ProductListContext = createContext({
 export default function ProductListRenderer({
     offset
 }: ProductListRendererProps) {
-    const [ productListData, setProductListData ] = useState<TProductListPageResponse | null>(null);
-    const [ isPending, startTransition, errorMessage ] = useServerAction();
+    const [productListData, setProductListData] = useState<TProductListPageResponse | null>(null);
+    const [isPending, startTransition, errorMessage] = useServerAction();
 
     useEffect(() => {
         startTransition(async () => {
@@ -35,8 +34,8 @@ export default function ProductListRenderer({
 
             setProductListData(data.data ?? null);
         });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ offset ]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [offset]);
 
     const ctx = {
         isPending
@@ -45,14 +44,14 @@ export default function ProductListRenderer({
     return (
         <ProductListContext value={ctx}>
             <div className="flex flex-col gap-4">
-                { errorMessage && (
+                {errorMessage && (
                     <p className="text-sm text-destructive-content">
-                        { errorMessage }
+                        {errorMessage}
                     </p>
                 )}
                 <ProductList items={productListData?.items} />
 
-                { (productListData?.totalPages !== undefined) && <PaginationComponent currentOffset={offset} totalPages={productListData.totalPages} /> }
+                {(productListData?.totalPages !== undefined) && <PaginationComponent currentOffset={offset} totalPages={productListData.totalPages} />}
             </div>
         </ProductListContext>
     )
@@ -69,23 +68,23 @@ function ProductList({
         <ul
             className="grid grid-cols-4 gap-4"
         >
-            { (items === undefined || items === null)
+            {(items === undefined || items === null)
                 ? (
                     <LoadingFallback />
                 )
                 : items.map((item) => (
                     <ItemRender
                         data={item}
-                        key={item.product.id}
+                        key={item.product?.id || "ID-ERROR"}
                     />
                 ))
             }
 
-            { (items && items.length === 0) && (
+            {(items && items.length === 0) && (
                 <p>
                     No items found.
                 </p>
-            ) }
+            )}
         </ul>
     )
 }
@@ -93,9 +92,9 @@ function ProductList({
 function LoadingFallback() {
     return (
         <>
-            { [...Array(DEFAULT_LIST_SIZE)].map((_, idx) => (
+            {[...Array(DEFAULT_LIST_SIZE)].map((_, idx) => (
                 <ItemLoadingFallback key={idx} />
-            )) }
+            ))}
         </>
     )
 }
@@ -109,21 +108,23 @@ function ItemLoadingFallback() {
 }
 
 type ItemRenderProps = {
-    data: Flatten<TProductListPageResponse['items']>
+    data: Flatten<Required<TProductListPageResponse>['items']>,
 }
 
 function ItemRender({
     data
 }: ItemRenderProps) {
     const { product, commentCount } = data;
+    if (product === undefined) return null;
     return (
         <>
             <ShopItemCard
-                itemId={ product.id }
-                itemLabel={ product.name }
-                itemPrice={ product.price }
-                itemDiscount={ product.discount }
-                itemImage={ (product.imageIds && product.imageIds.length !== 0) ? product.imageIds.at(0) : undefined }
+                itemId={product.id as string}
+                itemLabel={product.name as string}
+                itemPrice={product.price as number}
+                itemDiscount={product.discount as (number | undefined)}
+                itemImage={(product.imageIds && product.imageIds.length !== 0) ? product.imageIds.at(0) : undefined}
+                itemCommentAmount={commentCount}
             />
         </>
     )
@@ -151,7 +152,7 @@ function PaginationItemRender({
                     isPending && "opacity-25"
                 )}
             >
-                { selectionId }
+                {selectionId}
             </li>
         </Link>
     )
@@ -173,7 +174,7 @@ function PaginationItemSkip({
                 isPending && "opacity-25"
             )}
             >
-                { children }
+                {children}
             </li>
         </Link>
     )
@@ -192,7 +193,7 @@ function PaginationComponent({
     const pages = totalPages;
 
     const PaginationElements = useCallback(() => {
-        const elementList: React.ReactElement[]  = [];
+        const elementList: React.ReactElement[] = [];
         const lowestPage = Math.max(
             Math.min(
                 currentOffset - _pagesMidpoint,
@@ -207,7 +208,7 @@ function PaginationComponent({
         );
 
         for (let i = lowestPage; i <= highestPage; i++) {
-            if (i === lowestPage && i> 1)
+            if (i === lowestPage && i > 1)
                 elementList.push(<PaginationItemSkip to={1}><ChevronsLeft /></PaginationItemSkip>);
 
             elementList.push(<PaginationItemRender key={i} selectionId={i} currentSelection={currentOffset} />);
@@ -217,13 +218,13 @@ function PaginationComponent({
         }
 
         return elementList;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ currentOffset ]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentOffset]);
 
     return (
         <nav className="w-full flex justify-center items-center">
             <ol className="flex gap-2 items-center">
-                { PaginationElements() }
+                {PaginationElements()}
             </ol>
         </nav>
     )

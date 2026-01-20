@@ -383,7 +383,11 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "text/plain": components["schemas"]["PageFetchResult"];
+                        "application/json": components["schemas"]["PageFetchResult"];
+                        "text/json": components["schemas"]["PageFetchResult"];
+                    };
                 };
             };
         };
@@ -1277,7 +1281,7 @@ export interface components {
             user?: components["schemas"]["UserDTO2"];
             /** Format: uuid */
             productId?: string;
-            product?: components["schemas"]["ProductListItemDTO"];
+            product?: components["schemas"]["ProductListItemDTO2"];
             /** Format: int32 */
             quantity?: number;
             /** Format: date-time */
@@ -1324,6 +1328,11 @@ export interface components {
         };
         /** Format: binary */
         IFormFile: string;
+        ItemsResult: {
+            product?: components["schemas"]["ProductListItemDTO"];
+            /** Format: int32 */
+            commentCount?: number;
+        };
         LoginRequest: {
             username: string;
             password: string;
@@ -1336,6 +1345,11 @@ export interface components {
             from?: string | null;
         };
         OperationType: number;
+        PageFetchResult: {
+            items?: components["schemas"]["ItemsResult"][];
+            /** Format: int32 */
+            totalPages?: number;
+        };
         PostCommentRequest: {
             /** Format: float */
             rating: number;
@@ -1400,6 +1414,22 @@ export interface components {
             categories?: components["schemas"]["CategoryDTO"][];
         } | null;
         ProductListItemDTO: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: date-time */
+            creationDate?: string;
+            name?: string;
+            /** Format: float */
+            price?: number;
+            /** Format: float */
+            discount?: number | null;
+            categories?: components["schemas"]["CategoryDTO"][];
+            imageIds?: string[];
+            thumbnailUrl?: string | null;
+            isInCart?: boolean | null;
+            isInStock?: boolean;
+        };
+        ProductListItemDTO2: {
             /** Format: uuid */
             id?: string;
             /** Format: date-time */
