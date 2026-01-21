@@ -7,14 +7,17 @@ import AuthSingleton from "@/classes/AuthSingleton";
 import TokenRefreshHandler from "@/handlers/TokenRefreshHandler";
 
 export function AuthWrapper({ children }: { children?: React.ReactNode }) {
-    const [ authData, setAuthData ] = useState<TAuthData | null>(null);
+    const [authData, setAuthData] = useState<TAuthData | null>(null);
+    const [token, setToken] = useState<string | null>(null);
 
     const _updateAuth = (token?: TJwtToken | null) => {
         AuthSingleton.updateToken(token);
         if (token === undefined || token === null) {
             setAuthData(null);
+            setToken(null);
             TokenRefreshHandler.updateExpireDate(0);
         } else {
+            setToken(token.jwt);
             setAuthData({
                 userName: token.unique_name,
                 userId: token.sub,
@@ -73,12 +76,13 @@ export function AuthWrapper({ children }: { children?: React.ReactNode }) {
         authData,
         login,
         logout,
-        register
+        register,
+        token
     };
 
     return (
         <AuthContext.Provider value={ctx}>
-            { children }
+            {children}
         </AuthContext.Provider>
     )
 }

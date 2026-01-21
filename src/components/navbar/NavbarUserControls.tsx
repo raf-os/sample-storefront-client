@@ -26,8 +26,8 @@ type TMenuContext = {
 const MenuContext = createContext<TMenuContext>({});
 
 export default function NavbarUserControls() {
-    const [ isOpen, setIsOpen ] = useState<boolean>(false);
-    const [ isLogoutPending, startLogoutTransition ] = useTransition();
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [isLogoutPending, startLogoutTransition] = useTransition();
     const { authData, isAuthModerator, isAuthAdmin } = useAuth();
     const { logout } = useContext(AuthContext);
 
@@ -53,18 +53,18 @@ export default function NavbarUserControls() {
     return (
         <div className="flex gap-4 items-center">
             <div className="flex gap-1 items-center">
-                { isAuthModerator() && (
+                {isAuthModerator() && (
                     <Shield
                         className={cn(
                             "fill-primary-300 stroke-0 size-5",
                             isAuthAdmin() && "fill-amber-400"
                         )}
                     />
-                ) }
-                { authData && (
+                )}
+                {authData && (
                     <p className="text-primary-300 font-bold">
                         <Link to="/user/$userId" params={{ userId: authData.userId }}>
-                            { authData.userName }
+                            {authData.userName}
                         </Link>
                     </p>
                 )}
@@ -109,14 +109,14 @@ export default function NavbarUserControls() {
                     </DropdownContent>
                 </Dropdown.Portal>
             </Dropdown.Root>
-            
+
             <UserCartControls />
         </div>
     )
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function DropdownItem({onSelect, asChild: _, ...rest}: React.ComponentPropsWithRef<typeof DropdownItemOriginal>) {
+function DropdownItem({ onSelect, asChild: _, ...rest }: React.ComponentPropsWithRef<typeof DropdownItemOriginal>) {
     const { handleClose } = useContext(MenuContext);
 
     const handleClick = (e: Event) => {
@@ -132,12 +132,14 @@ function DropdownItem({onSelect, asChild: _, ...rest}: React.ComponentPropsWithR
 }
 
 function UserCartControls() {
+    const { token } = useContext(AuthContext);
     const { data: cartSize, isSuccess, isError } = useQuery({
         queryKey: QueryKeys.User.CartSize,
-        queryFn: async() => {
+        queryFn: async () => {
             const d = await GetUserCartSize();
             return d;
         },
+        enabled: () => { return token !== undefined && token !== null; },
     }, queryClient);
 
     return (
@@ -154,7 +156,7 @@ function UserCartControls() {
                     isError && "bg-error text-error-content"
                 )}
             >
-                { isSuccess
+                {isSuccess
                     ? cartSize
                     : isError
                         ? "!"

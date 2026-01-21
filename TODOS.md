@@ -1,6 +1,7 @@
 A way to better keep track of features that need to be developed or need to change.
 
-Items in progress are in italics and preceded by the :o: emoji.
+Items in progress or deferred for later are marked with \[\-\], or a clock emoji, which is at least how
+it appears on neovim.
 
 > [!NOTE]
 > This list itself is subject to change. Items with a question mark at the end need further elaboration.
@@ -10,7 +11,8 @@ Items in progress are in italics and preceded by the :o: emoji.
 ## Products
 - [ ] Promo codes
 - [ ] Custom tags for personalized SEO
-- [ ] :o: *Add explicit stock quantity (+ changes when checking out and maybe when adding to cart)*
+- [x] Add explicit stock quantity (+ changes when checking out and maybe when adding to cart)
+  - [-] Update the quantity on checkout, and prevent from adding an out of stock item to cart
 - [ ] Search feature
   - [ ] Search filters
 - [ ] Fix main image selection (currently it's simply the latest one added)
@@ -31,6 +33,7 @@ Items in progress are in italics and preceded by the :o: emoji.
 
 ## Users
 - [ ] Disable sign-ups with disposable e-mails if possible
+- [x] Fix cart size not re-fetching as soon as user login, without reloading the page
 - [ ] Wishlist functionality
   - [ ] Email + inbox alert when product goes on sale (?)
 - [ ] Password recovery

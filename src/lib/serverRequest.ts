@@ -17,7 +17,7 @@ export const queryClient = new QueryClient({
 
 function replacePath(path: string, params?: Record<string, string | number>): string {
     if (!params) return path;
-    
+
     let result = path;
     for (const [key, value] of Object.entries(params)) {
         result = result.replace(`{${key}}`, encodeURIComponent(String(value)));
@@ -27,12 +27,12 @@ function replacePath(path: string, params?: Record<string, string | number>): st
 
 function serializeQuery(params?: Record<string, any>): string {
     if (!params) return '';
-    
+
     const searchParams = new URLSearchParams();
-    
+
     for (const [key, value] of Object.entries(params)) {
         if (value === undefined || value === null) continue;
-        
+
         if (Array.isArray(value)) {
             value.forEach(v => searchParams.append(key, String(v)));
         } else if (typeof value === 'object') {
@@ -41,25 +41,25 @@ function serializeQuery(params?: Record<string, any>): string {
             searchParams.append(key, String(value));
         }
     }
-    
+
     const query = searchParams.toString();
     return query ? `?${query}` : '';
 }
 
-type PathParams<Path extends keyof paths, Method extends keyof paths[Path]> = 
+type PathParams<Path extends keyof paths, Method extends keyof paths[Path]> =
     paths[Path][Method] extends { parameters: { path: infer P } } ? P : never;
 
-type QueryParams<Path extends keyof paths, Method extends keyof paths[Path]> = 
+type QueryParams<Path extends keyof paths, Method extends keyof paths[Path]> =
     paths[Path][Method] extends { parameters: { query?: infer Q } } ? Q : never;
 
 type RequestBody<Path extends keyof paths, Method extends keyof paths[Path]> =
     paths[Path][Method] extends { requestBody: { content: infer Q } }
-        ? Q extends { "application/json": infer R }
-            ? R
-            : Q extends { "application/x-www-form-urlencoded": any }
-                ? FormData
-                : never
-        : never;
+    ? Q extends { "application/json": infer R }
+    ? R
+    : Q extends { "application/x-www-form-urlencoded": any }
+    ? FormData
+    : never
+    : never;
 
 export class CustomResponse<
     Method extends HttpMethod,
@@ -108,7 +108,8 @@ export interface IRequestMetadata {
 }
 
 export interface ICachedRequestMetadata extends IRequestMetadata {
-    staleTime?: number
+    staleTime?: number,
+    customKey?: any[] // TODO: Type this out correctly
 }
 
 // type TServerRequestOptions<Method extends HttpMethod, Path extends PathsWithMethod<paths, Method>> = {
@@ -122,11 +123,11 @@ export interface ICachedRequestMetadata extends IRequestMetadata {
 
 type TServerRequestOptions<Method extends HttpMethod, Path extends PathsWithMethod<paths, Method>> =
     & (RequiredKeysOf<PathParams<Path, Method>> extends never
-        ? { path?: PathParams<Path, Method>}
-        : { path: PathParams<Path, Method>})
+        ? { path?: PathParams<Path, Method> }
+        : { path: PathParams<Path, Method> })
     & (RequiredKeysOf<QueryParams<Path, Method>> extends never
-        ? { query?: QueryParams<Path, Method>}
-        : { query: QueryParams<Path, Method>})
+        ? { query?: QueryParams<Path, Method> }
+        : { query: QueryParams<Path, Method> })
     & (RequiredKeysOf<RequestBody<Path, Method>> extends never
         ? { body?: RequestBody<Path, Method> }
         : { body: RequestBody<Path, Method> })
@@ -144,7 +145,7 @@ export async function serverCachedRequest<
     metadata?: ICachedRequestMetadata
 ) {
     const cachedResponse = await queryClient.fetchQuery({
-        queryKey: [ method, path, options?.query, options?.path ],
+        queryKey: metadata?.customKey ? metadata.customKey : [method, path, options?.query, options?.path],
         queryFn: () => serverRequest(method, path, options, metadata),
         staleTime: metadata?.staleTime
     });
@@ -209,8 +210,8 @@ export async function serverRequest<
 
 export type TServerImageEndpoints = {
     [K in keyof paths]: paths[K] extends { get: { responses: { 200: { content: { "image/webp": any } } } } }
-        ? K
-        : never;
+    ? K
+    : never;
 }[keyof paths];
 
 export function ServerImagePath<Path extends TServerImageEndpoints>(

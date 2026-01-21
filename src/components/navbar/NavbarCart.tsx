@@ -7,9 +7,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 import type { Flatten } from "@/types/utilities";
-import { cn, formatCurrency, PreventLayoutFlash } from "@/lib/utils";
+import { formatCurrency, PreventLayoutFlash } from "@/lib/utils";
 import ImagePromise from "@/components/common/ImagePromise";
-import { useAuth } from "@/hooks";
+// import { useAuth } from "@/hooks";
 
 import {
     CameraOff as ThumbnailNotFoundIcon
@@ -23,8 +23,8 @@ export default function NavbarCart({
     cartSize,
     ...rest
 }: React.ComponentPropsWithRef<typeof Popover.Trigger> & { cartSize: number }) {
-    const [ isOpen, setIsOpen ] = useState<boolean>(false);
-    const { authData } = useAuth();
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+    // const { authData } = useAuth();
 
     const { data: cartItems, isPending, isError, isSuccess } = useQuery({
         queryKey: QueryKeys.User.CartPreview,
@@ -50,7 +50,7 @@ export default function NavbarCart({
             <Popover.Trigger
                 {...rest}
             >
-                { children }
+                {children}
             </Popover.Trigger>
 
             <Popover.Portal>
@@ -59,7 +59,7 @@ export default function NavbarCart({
                     sideOffset={6}
                     className="flex flex-col w-96 overflow-clip gap-2 bg-base-200 border border-base-300 shadow-xs rounded-box p-1 data-[state=open]:animate-slideUpAndFade"
                 >
-                    { isPending
+                    {isPending
                         ? (
                             <div>
                                 Loading...
@@ -77,17 +77,17 @@ export default function NavbarCart({
                                         <div
                                             className="flex flex-col gap-2 p-1"
                                         >
-                                            { cartItems.items?.map((item, idx) => (
+                                            {cartItems.items?.map((item, _) => (
                                                 <NavbarCartItem
                                                     data={item as TCartItemAlias}
                                                     key={item.id}
                                                     popoverCloseFn={handlePopoverClose}
                                                 />
-                                            )) }
+                                            ))}
 
-                                            { cartOverflow > 0 && (
+                                            {cartOverflow > 0 && (
                                                 <p className="text-sm text-base-500/75 text-center">
-                                                    ... and { cartOverflow } extra items.
+                                                    ... and {cartOverflow} extra items.
                                                 </p>
                                             )}
                                         </div>
@@ -140,15 +140,15 @@ function NavbarCartItem({
         <div className="flex gap-2 items-center group">
             <Link
                 to={"/item/$itemId"}
-                params={{itemId: product?.id as string}}
+                params={{ itemId: product?.id as string }}
                 onClick={popoverCloseFn}
             >
                 <div className="flex rounded-full overflow-hidden size-14">
-                    { product?.thumbnailUrl ? (
+                    {product?.thumbnailUrl ? (
                         <ImagePromise
                             src={product?.thumbnailUrl ? ServerImagePath("/files/thumbnails/product/{FileName}", { path: { FileName: product?.thumbnailUrl as string } }) : undefined}
                             fallback={<FallbackElement />}
-                        /> )
+                        />)
                         : <FallbackElement />
                     }
                 </div>
@@ -158,20 +158,20 @@ function NavbarCartItem({
                 <h1 className="font-semibold text-primary-300 w-full truncate">
                     <Link
                         to={"/item/$itemId"}
-                        params={{itemId: product?.id as string}}
+                        params={{ itemId: product?.id as string }}
                         onClick={popoverCloseFn}
                     >
-                        { product?.name }
+                        {product?.name}
                     </Link>
                 </h1>
 
                 <div className="text-sm">
                     <p>
-                        { formattedPrice } { discountAmount > 0 && <span className="text-success-content">(-{discountAmount}%)</span> }
+                        {formattedPrice} {discountAmount > 0 && <span className="text-success-content">(-{discountAmount}%)</span>}
                     </p>
 
                     <p>
-                        Quantity: { data.quantity }
+                        Quantity: {data.quantity}
                     </p>
                 </div>
             </div>

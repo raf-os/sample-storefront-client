@@ -33,7 +33,7 @@ export async function AuthRefresh(): Promise<TJwtToken | null> {
         const token = jwtDecode<TJwtToken>(data);
 
         return { ...token, jwt: data };
-    } catch(error) {
+    } catch (error) {
         console.log(error);
         return null;
     }
@@ -71,12 +71,13 @@ export async function AuthLogin(props: AuthLoginProps): Promise<StandardJsonResp
         if (!data) { throw new Error("ERROR - Invalid login fetch response.") }
 
         const token = jwtDecode<TJwtToken>(data);
+        token.jwt = data;
 
         return {
             success: true,
             data: token
         }
-    } catch(err) {
+    } catch (err) {
         console.log(err);
         return {
             success: false,
@@ -124,7 +125,7 @@ export async function AuthRegister(props: AuthRegisterProps): Promise<StandardJs
             success: true,
             message: data?.message,
         }
-    } catch(err) {
+    } catch (err) {
         console.log("Server error: ", err);
 
         return {
@@ -136,7 +137,7 @@ export async function AuthRegister(props: AuthRegisterProps): Promise<StandardJs
 
 export async function AuthLogout(): Promise<StandardJsonResponse> {
     try {
-        const res = await fetch(GlobalConfig.ServerAuthEndpoint+ "/logout", {
+        const res = await fetch(GlobalConfig.ServerAuthEndpoint + "/logout", {
             method: "GET",
             headers: {
                 "Content-Type": "application/json"

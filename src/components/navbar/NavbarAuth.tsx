@@ -24,26 +24,26 @@ export default function NavbarAuth() {
 
     return (
         <div className="flex items-center gap-2 relative">
-            { isLoggedIn ? (
+            {isLoggedIn ? (
                 <NavbarUserControls />
             ) : (
                 <>
-                <LoginComponent />
+                    <LoginComponent />
 
-                <Link to="/sign-up"><Button className="btn-primary">
-                    Sign up
-                </Button></Link>
+                    <Link to="/sign-up"><Button className="btn-primary">
+                        Sign up
+                    </Button></Link>
                 </>
-            ) }
+            )}
         </div>
     )
 }
 
 function LoginComponent() {
     const { login } = useContext(AuthContext);
-    const [ isPending, startTransition ] = useTransition();
-    const [ formMessage, setFormMessage ] = useState<string | undefined | null>(null);
-    const [ isOpen, setIsOpen ] = useState<boolean>();
+    const [isPending, startTransition] = useTransition();
+    const [formMessage, setFormMessage] = useState<string | undefined | null>(null);
+    const [isOpen, setIsOpen] = useState<boolean>();
 
     const formMethods = useForm<z.infer<typeof LoginRequestSchema>>({
         resolver: zodResolver(LoginRequestSchema),
@@ -51,7 +51,7 @@ function LoginComponent() {
 
     const {
         handleSubmit,
-        formState: { errors }
+        // formState: { errors }
     } = formMethods;
 
     const onSubmit = (data: z.infer<typeof LoginRequestSchema>) => {
@@ -84,7 +84,7 @@ function LoginComponent() {
                 >
                     <FormProvider {...formMethods}><form onSubmit={handleSubmit(onSubmit)}>
                         <div className="flex flex-col gap-4">
-                            { formMessage && (
+                            {formMessage && (
                                 <p className="text-red-500 text-sm">
                                     {formMessage}
                                 </p>
@@ -142,18 +142,18 @@ function FieldSet<T extends React.ElementType = "input">({
             className="flex flex-col gap-2"
         >
             <label className="font-bold text-sm">
-                { label }
+                {label}
             </label>
-            { errors[name] && (
+            {errors[name] && (
                 <p className="text-red-500 text-sm">
-                    { String(errors[name].message) }
+                    {String(errors[name].message)}
                 </p>
-            ) }
+            )}
             <Component
                 {...register(name)}
                 {...rest}
             />
-            { children }
+            {children}
         </fieldset>
     )
 }
