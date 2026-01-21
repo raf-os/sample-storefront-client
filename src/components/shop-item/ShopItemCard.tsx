@@ -1,6 +1,10 @@
 import ImagePromise from "@/components/common/ImagePromise";
 import GlobalConfig from "@/lib/globalConfig";
+import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
+import {
+    CameraOff as PictureUnavailableIcon
+} from "lucide-react";
 
 export type ShopItemCardProps = {
     itemId: string,
@@ -9,6 +13,7 @@ export type ShopItemCardProps = {
     itemDiscount?: number,
     itemImage?: string,
     itemCommentAmount?: number,
+    itemIsInStock?: boolean,
 };
 
 export default function ShopItemCard({
@@ -16,7 +21,8 @@ export default function ShopItemCard({
     itemLabel,
     itemPrice,
     itemImage,
-    itemDiscount = 0
+    itemDiscount = 0,
+    itemIsInStock,
 }: ShopItemCardProps) {
 
     const formatter = Intl.NumberFormat('en-us', {
@@ -40,11 +46,25 @@ export default function ShopItemCard({
                 role="button"
             >
                 <div className="relative grow-0 shrink-0 bg-base-200 w-full aspect-square rounded-box-inner cursor-pointer overflow-hidden">
-                    {itemImage && (
-                        <ImagePromise
-                            src={`${GlobalConfig.ServerEndpoints.ProductImageThumbnails}/${itemImage}`}
-                            className="object-contain object-center w-full h-full"
-                        />
+                    <div
+                        className={cn("flex items-center justify-center size-full", itemIsInStock === false && "opacity-50")}
+                    >
+                        {itemImage ? (
+                            <ImagePromise
+                                src={`${GlobalConfig.ServerEndpoints.ProductImageThumbnails}/${itemImage}`}
+                                className="object-contain object-center w-full h-full"
+                            />
+                        ) : (
+                            <PictureUnavailableIcon
+                                className="size-24 stroke-base-400"
+                            />
+                        )}
+                    </div>
+
+                    {itemIsInStock === false && (
+                        <div className="absolute flex top-1/2 -translate-y-1/2 self-center justify-center w-full py-4 text-xl font-semibold text-center bg-error/50 text-base-500">
+                            <span>Out of stock</span>
+                        </div>
                     )}
                 </div>
 

@@ -4,11 +4,9 @@ import { requestToJson, toFormData } from "@/lib/utils";
 import TokenRefreshHandler from "@/handlers/TokenRefreshHandler";
 import GlobalConfig from "@/lib/globalConfig";
 import type { StandardJsonResponse } from "@/types/StandardJsonResponse";
-import type { TProduct } from "@/models";
 
 import AuthSingleton from "@/classes/AuthSingleton";
 import * as RESPONSES from "@/lib/jsonResponses";
-import type { WithRequired } from "@/types/utilities";
 import { ProductPatchSchema, NewProductSchema } from "@/models/schemas";
 import { PatchBuilder } from "@/lib/patchBuilder";
 import type { TCommentPayload } from "@/models/Comment";
@@ -68,7 +66,7 @@ export async function GetProductById(id: string) {
             return new RESPONSES.NotFound();
         }
 
-        const data = await requestToJson<WithRequired<TProduct, 'user'>>(res);
+        const data = await requestToJson<paths['/api/Product/item/{id}']['get']['responses']['200']['content']['application/json']>(res);
 
         if (!data) return new RESPONSES.NotFound();
 

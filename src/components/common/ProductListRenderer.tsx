@@ -125,6 +125,7 @@ function ItemRender({
                 itemDiscount={product.discount as (number | undefined)}
                 itemImage={(product.imageIds && product.imageIds.length !== 0) ? product.imageIds.at(0) : undefined}
                 itemCommentAmount={commentCount}
+                itemIsInStock={product.isInStock}
             />
         </>
     )
