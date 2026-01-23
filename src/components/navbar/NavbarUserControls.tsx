@@ -12,7 +12,7 @@ import * as Dropdown from "@radix-ui/react-dropdown-menu";
 import { DropdownContent, DropdownItem as DropdownItemOriginal, DropdownSeparator } from "@/components/common/Dropdown";
 import NavbarCart from "@/components/navbar/NavbarCart";
 
-import { ShoppingBasket, Shield } from "lucide-react";
+import { ShoppingBasket, Shield, Mail } from "lucide-react";
 import UserAvatar from "@/components/common/UserAvatar";
 import { queryClient } from "@/lib/serverRequest";
 import { GetUserCartSize } from "@/lib/actions/userAction";
@@ -110,6 +110,24 @@ export default function NavbarUserControls() {
                 </Dropdown.Portal>
             </Dropdown.Root>
 
+            <Dropdown.Root>
+                <Dropdown.Trigger asChild>
+                    <button
+                        className="cursor-pointer rounded-full outline-2 outline-base-500 p-0.5 bg-base-100"
+                    >
+                        <Mail
+                        />
+                    </button>
+                </Dropdown.Trigger>
+
+                <Dropdown.Portal>
+                    <DropdownContent
+                        sideOffset={6}
+                    >
+                        content here
+                    </DropdownContent>
+                </Dropdown.Portal>
+            </Dropdown.Root>
             <UserCartControls />
         </div>
     )

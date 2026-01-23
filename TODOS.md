@@ -55,6 +55,7 @@ it appears on neovim.
   - [ ] User feedback (?)
 - [ ] Mod tools
 - [ ] Simple private messaging system
+  - [-] PM button on navbar
   - [ ] Buyer + seller communication
   - [ ] Mod to user communication
   - [ ] Specific system messages
