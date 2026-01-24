@@ -21,190 +21,192 @@ import { useQuery } from "@tanstack/react-query";
 import { QueryKeys } from "@/lib/queryKeys";
 
 type TMenuContext = {
-    handleClose?: () => void,
+  handleClose?: () => void,
 }
 
 const MenuContext = createContext<TMenuContext>({});
 
 export default function NavbarUserControls() {
-    const [isOpen, setIsOpen] = useState<boolean>(false);
-    const [isLogoutPending, startLogoutTransition] = useTransition();
-    const { authData, isAuthModerator, isAuthAdmin } = useAuth();
-    const { logout } = useContext(AuthContext);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isLogoutPending, startLogoutTransition] = useTransition();
+  const { authData, isAuthModerator, isAuthAdmin } = useAuth();
+  const { logout } = useContext(AuthContext);
 
-    const onLogoutRequest = () => {
-        if (isLogoutPending) return;
+  const onLogoutRequest = () => {
+    if (isLogoutPending) return;
 
-        startLogoutTransition(async () => {
-            const res = await logout();
-            handleClose();
+    startLogoutTransition(async () => {
+      const res = await logout();
+      handleClose();
 
-            if (res.success) {
-                window.location.reload();
-            }
-        });
-    }
+      if (res.success) {
+        window.location.reload();
+      }
+    });
+  }
 
-    const handleClose = () => {
-        setIsOpen(false);
-    }
+  const handleClose = () => {
+    setIsOpen(false);
+  }
 
-    const ctx = { handleClose };
+  const ctx = { handleClose };
 
-    return (
-        <div className="flex gap-2 items-center">
-            <div className="flex gap-1 items-center">
-                {isAuthModerator() && (
-                    <Shield
-                        className={cn(
-                            "fill-primary-300 stroke-0 size-5",
-                            isAuthAdmin() && "fill-amber-400"
-                        )}
-                    />
-                )}
-                {authData && (
-                    <p className="text-primary-300 font-bold">
-                        <Link to="/user/$userId" params={{ userId: authData.userId }}>
-                            {authData.userName}
-                        </Link>
-                    </p>
-                )}
-            </div>
+  return (
+    <div className="flex gap-2 items-center">
+      <div className="flex gap-1 items-center">
+        {isAuthModerator() && (
+          <Shield
+            className={cn(
+              "fill-primary-300 stroke-0 size-5",
+              isAuthAdmin() && "fill-amber-400"
+            )}
+          />
+        )}
+        {authData && (
+          <p className="text-primary-300 font-bold">
+            <Link to="/user/$userId" params={{ userId: authData.userId }}>
+              {authData.userName}
+            </Link>
+          </p>
+        )}
+      </div>
 
-            <Dropdown.Root open={isOpen} onOpenChange={setIsOpen}>
-                <Dropdown.Trigger asChild>
-                    <button className="cursor-pointer rounded-full outline-2 outline-base-500 p-0.5 bg-base-100">
-                        <UserAvatar userId={authData?.userId} size={32} className="rounded-full" />
-                    </button>
-                </Dropdown.Trigger>
+      <Dropdown.Root open={isOpen} onOpenChange={setIsOpen}>
+        <Dropdown.Trigger asChild>
+          <button className="cursor-pointer rounded-full outline-2 outline-base-500 p-0.5 bg-base-100">
+            <UserAvatar userId={authData?.userId} size={32} className="rounded-full" />
+          </button>
+        </Dropdown.Trigger>
 
-                <Dropdown.Portal>
-                    <DropdownContent
-                        sideOffset={6}
-                    >
-                        <MenuContext.Provider value={ctx}>
-                            <DropdownItem>
-                                <Link to="/app/user">Account settings</Link>
-                            </DropdownItem>
+        <Dropdown.Portal>
+          <DropdownContent
+            sideOffset={6}
+          >
+            <MenuContext.Provider value={ctx}>
+              <DropdownItem>
+                <Link to="/app/user">Account settings</Link>
+              </DropdownItem>
 
-                            <DropdownItem>
-                                <Link to="/app/user/products">View my listings</Link>
-                            </DropdownItem>
+              <DropdownItem>
+                <Link to="/app/user/products">View my listings</Link>
+              </DropdownItem>
 
-                            <DropdownSeparator />
+              <DropdownSeparator />
 
-                            <DropdownItem variant="destructive">
-                                <button
-                                    onClick={onLogoutRequest}
-                                    className={cn(
-                                        isLogoutPending ? "opacity-50 cursor-progress" : "cursor-pointer"
-                                    )}
-                                    disabled={isLogoutPending}
-                                >
-                                    Log out
-                                </button>
-                            </DropdownItem>
-                        </MenuContext.Provider>
+              <DropdownItem variant="destructive">
+                <button
+                  onClick={onLogoutRequest}
+                  className={cn(
+                    isLogoutPending ? "opacity-50 cursor-progress" : "cursor-pointer"
+                  )}
+                  disabled={isLogoutPending}
+                >
+                  Log out
+                </button>
+              </DropdownItem>
+            </MenuContext.Provider>
 
-                        <Dropdown.Arrow />
-                    </DropdownContent>
-                </Dropdown.Portal>
-            </Dropdown.Root>
+            <Dropdown.Arrow />
+          </DropdownContent>
+        </Dropdown.Portal>
+      </Dropdown.Root>
 
-            <UserCartControls />
+      <UserCartControls />
 
-            <UserMailControls />
-        </div>
-    )
+      <UserMailControls />
+    </div>
+  )
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function DropdownItem({ onSelect, asChild: _, ...rest }: React.ComponentPropsWithRef<typeof DropdownItemOriginal>) {
-    const { handleClose } = useContext(MenuContext);
+  const { handleClose } = useContext(MenuContext);
 
-    const handleClick = (e: Event) => {
-        e.preventDefault();
-        if (onSelect) {
-            onSelect(e);
-            return;
-        }
-        handleClose?.();
+  const handleClick = (e: Event) => {
+    e.preventDefault();
+    if (onSelect) {
+      onSelect(e);
+      return;
     }
+    handleClose?.();
+  }
 
-    return <DropdownItemOriginal onSelect={handleClick} asChild {...rest} />
+  return <DropdownItemOriginal onSelect={handleClick} asChild {...rest} />
 }
 
 function UserCartControls() {
-    const { token } = useContext(AuthContext);
-    const { data: cartSize, isSuccess, isError } = useQuery({
-        queryKey: QueryKeys.User.CartSize,
-        queryFn: async () => {
-            const d = await GetUserCartSize();
-            return d;
-        },
-        enabled: () => { return token !== undefined && token !== null; },
-    }, queryClient);
+  const { token } = useContext(AuthContext);
+  const { data: cartSize, isSuccess, isError } = useQuery({
+    queryKey: QueryKeys.User.CartSize,
+    queryFn: async () => {
+      const d = await GetUserCartSize();
+      return d;
+    },
+    enabled: () => { return token !== undefined && token !== null; },
+  }, queryClient);
 
-    return (
-        <div className="relative">
-            <NavbarCart cartSize={cartSize ?? 0} asChild>
-                <button className="flex items-center justify-center rounded-full border-2 border-base-500 bg-base-100 p-[2px] size-10 cursor-pointer">
-                    <ShoppingBasket className="size-full text-base-500 bg-base-300 rounded-full p-[2px]" />
-                </button>
-            </NavbarCart>
+  return (
+    <div className="relative">
+      <NavbarCart cartSize={cartSize ?? 0} asChild>
+        <button className="flex items-center justify-center rounded-full border-2 border-base-500 bg-base-100 p-[2px] size-10 cursor-pointer">
+          <ShoppingBasket className="size-full text-base-500 bg-base-300 rounded-full p-[2px]" />
+        </button>
+      </NavbarCart>
 
-            <div
-                className={cn(
-                    "flex items-center justify-center absolute bottom-0 right-0 select-none leading-none font-bold text-xs bg-base-500 text-base-200 size-4 rounded-full",
-                    isError && "bg-error text-error-content"
-                )}
-            >
-                {isSuccess
-                    ? cartSize
-                    : isError
-                        ? "!"
-                        : "-"
-                }
-            </div>
-        </div>
-    )
+      <div
+        className={cn(
+          "flex items-center justify-center absolute bottom-0 right-0 select-none leading-none font-bold text-xs bg-base-500 text-base-200 size-4 rounded-full",
+          isError && "bg-error text-error-content"
+        )}
+      >
+        {isSuccess
+          ? cartSize
+          : isError
+            ? "!"
+            : "-"
+        }
+      </div>
+    </div>
+  )
 }
 
 export function UserMailControls() {
-    const { token } = useContext(AuthContext);
-    const { data: inboxSize, isSuccess } = useQuery({
-        queryKey: QueryKeys.User.InboxSize,
-        queryFn: async () => {
-            return await GetUserInboxSize({ unreadOnly: true });
-        },
-        enabled: () => { return token !== undefined && token !== null },
-    }, queryClient);
+  const { token } = useContext(AuthContext);
+  const { data: inboxSize, isSuccess } = useQuery({
+    queryKey: QueryKeys.User.InboxPreviewSize,
+    queryFn: async () => {
+      return await GetUserInboxSize({ unreadOnly: true });
+    },
+    enabled: () => { return token !== undefined && token !== null },
+  }, queryClient);
 
-    return (
-        <div className="relative">
-            <NavbarInbox inboxSize={inboxSize ?? 0} asChild>
-                <button
-                    className="flex items-center justify-center rounded-full border-2 border-base-500 bg-base-100 p-[2px] size-10 cursor-pointer"
-                >
-                    <Mail
-                        className={cn(
-                            "size-full stroke-base-500 rounded-full",
-                            "bg-base-300 p-[2px]",
-                            ((inboxSize ?? 0) > 0) && "stroke-primary-300"
-                        )}
-                    />
-                </button>
-            </NavbarInbox>
+  return (
+    <div className="relative">
+      <NavbarInbox inboxSize={inboxSize ?? 0} asChild>
+        <button
+          className="flex items-center justify-center rounded-full border-2 border-base-500 bg-base-100 p-[2px] size-10 cursor-pointer"
+        >
+          <Mail
+            className={cn(
+              "size-full stroke-base-500 rounded-full",
+              "bg-base-300 p-[2px]",
+              ((inboxSize ?? 0) > 0) && "stroke-primary-300"
+            )}
+          />
+        </button>
+      </NavbarInbox>
 
-            {isSuccess && (<div
-                className={cn(
-                    "flex items-center justify-center absolute bottom-0 right-0",
-                    "text-xs bg-base-500 text-base-100 font-bold leading-none select-none rounded-full size-4",
-                    inboxSize > 0 && "bg-primary-300"
-                )}
-            >
-                {inboxSize}
-            </div>)}
+      {isSuccess && (
+        <div
+          className={cn(
+            "flex items-center justify-center absolute bottom-0 right-0",
+            "text-xs bg-base-500 text-base-100 font-bold leading-none select-none rounded-full size-4",
+            inboxSize > 0 && "bg-primary-300"
+          )}
+        >
+          {inboxSize}
         </div>
-    )
+      )}
+    </div>
+  )
 }

@@ -2,7 +2,8 @@ export const QueryKeys = {
   User: {
     CartSize: ['User.CartSize'],
     CartPreview: ['User.CartPreview'],
-    InboxSize: ['User.InboxSize'],
-    InboxPreview: ['User.InboxPreview']
+    InboxPreviewSize: ['User.InboxPreviewSize'],
+    InboxPreview: ['User.InboxPreview'],
+    InboxSize: ['User.InboxSize']
   }
 }

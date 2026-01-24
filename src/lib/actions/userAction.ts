@@ -41,6 +41,13 @@ export async function ClearUserCart() {
   return deletedAmount;
 }
 
+export async function AddProductToCart(productId: string, amount?: string | number) {
+  const amt = amount === undefined ? undefined : Number(amount);
+
+  const data = await serverRequest("put", "/api/User/cart", { body: { productId: productId, amount: amt } }, { useAuth: true });
+  return data;
+}
+
 export async function GetUserInboxSize(
   opts?: {
     unreadOnly?: boolean
@@ -53,14 +60,18 @@ export async function GetUserInboxSize(
 }
 
 export async function GetUserInboxPreview() {
-  const data = await serverRequest("get", "/api/Mail/inbox/preview", {}, { useAuth: true });
+  const data = await serverCachedRequest("get", "/api/Mail/inbox/preview", {}, { useAuth: true });
   return data;
 }
 
-export async function AddProductToCart(productId: string, amount?: string | number) {
-  const amt = amount === undefined ? undefined : Number(amount);
-
-  const data = await serverRequest("put", "/api/User/cart", { body: { productId: productId, amount: amt } }, { useAuth: true });
+export async function GetUserInboxPage(opts?: {
+  offset?: number
+}) {
+  const data = await serverRequest("get", "/api/Mail/inbox", {
+    query: {
+      Offset: opts?.offset,
+    }
+  }, { useAuth: true });
   return data;
 }
 

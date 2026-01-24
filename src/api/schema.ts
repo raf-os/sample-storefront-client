@@ -383,9 +383,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["MailDTO"][];
-                        "application/json": components["schemas"]["MailDTO"][];
-                        "text/json": components["schemas"]["MailDTO"][];
+                        "text/plain": components["schemas"]["MailPreviewDTO"][];
+                        "application/json": components["schemas"]["MailPreviewDTO"][];
+                        "text/json": components["schemas"]["MailPreviewDTO"][];
                     };
                 };
                 /** @description Unauthorized */

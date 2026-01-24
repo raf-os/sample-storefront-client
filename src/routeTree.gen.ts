@@ -19,6 +19,8 @@ import { Route as ItemItemIdRouteImport } from './routes/item/$itemId'
 import { Route as AppUserRouteRouteImport } from './routes/app/user/route'
 import { Route as AppUserIndexRouteImport } from './routes/app/user/index'
 import { Route as AppUserProductsIndexRouteImport } from './routes/app/user/products/index'
+import { Route as AppUserInboxIndexRouteImport } from './routes/app/user/inbox/index'
+import { Route as AppUserInboxComposeRouteImport } from './routes/app/user/inbox/compose'
 import { Route as AppUserProductsNewIndexRouteImport } from './routes/app/user/products/new/index'
 import { Route as AppUserProductsEditItemIdRouteImport } from './routes/app/user/products/edit/$itemId'
 
@@ -72,6 +74,16 @@ const AppUserProductsIndexRoute = AppUserProductsIndexRouteImport.update({
   path: '/products/',
   getParentRoute: () => AppUserRouteRoute,
 } as any)
+const AppUserInboxIndexRoute = AppUserInboxIndexRouteImport.update({
+  id: '/inbox/',
+  path: '/inbox/',
+  getParentRoute: () => AppUserRouteRoute,
+} as any)
+const AppUserInboxComposeRoute = AppUserInboxComposeRouteImport.update({
+  id: '/inbox/compose',
+  path: '/inbox/compose',
+  getParentRoute: () => AppUserRouteRoute,
+} as any)
 const AppUserProductsNewIndexRoute = AppUserProductsNewIndexRouteImport.update({
   id: '/products/new/',
   path: '/products/new/',
@@ -94,6 +106,8 @@ export interface FileRoutesByFullPath {
   '/cart': typeof CartIndexRoute
   '/listings': typeof ListingsIndexRoute
   '/app/user/': typeof AppUserIndexRoute
+  '/app/user/inbox/compose': typeof AppUserInboxComposeRoute
+  '/app/user/inbox': typeof AppUserInboxIndexRoute
   '/app/user/products': typeof AppUserProductsIndexRoute
   '/app/user/products/edit/$itemId': typeof AppUserProductsEditItemIdRoute
   '/app/user/products/new': typeof AppUserProductsNewIndexRoute
@@ -107,6 +121,8 @@ export interface FileRoutesByTo {
   '/cart': typeof CartIndexRoute
   '/listings': typeof ListingsIndexRoute
   '/app/user': typeof AppUserIndexRoute
+  '/app/user/inbox/compose': typeof AppUserInboxComposeRoute
+  '/app/user/inbox': typeof AppUserInboxIndexRoute
   '/app/user/products': typeof AppUserProductsIndexRoute
   '/app/user/products/edit/$itemId': typeof AppUserProductsEditItemIdRoute
   '/app/user/products/new': typeof AppUserProductsNewIndexRoute
@@ -122,6 +138,8 @@ export interface FileRoutesById {
   '/cart/': typeof CartIndexRoute
   '/listings/': typeof ListingsIndexRoute
   '/app/user/': typeof AppUserIndexRoute
+  '/app/user/inbox/compose': typeof AppUserInboxComposeRoute
+  '/app/user/inbox/': typeof AppUserInboxIndexRoute
   '/app/user/products/': typeof AppUserProductsIndexRoute
   '/app/user/products/edit/$itemId': typeof AppUserProductsEditItemIdRoute
   '/app/user/products/new/': typeof AppUserProductsNewIndexRoute
@@ -138,6 +156,8 @@ export interface FileRouteTypes {
     | '/cart'
     | '/listings'
     | '/app/user/'
+    | '/app/user/inbox/compose'
+    | '/app/user/inbox'
     | '/app/user/products'
     | '/app/user/products/edit/$itemId'
     | '/app/user/products/new'
@@ -151,6 +171,8 @@ export interface FileRouteTypes {
     | '/cart'
     | '/listings'
     | '/app/user'
+    | '/app/user/inbox/compose'
+    | '/app/user/inbox'
     | '/app/user/products'
     | '/app/user/products/edit/$itemId'
     | '/app/user/products/new'
@@ -165,6 +187,8 @@ export interface FileRouteTypes {
     | '/cart/'
     | '/listings/'
     | '/app/user/'
+    | '/app/user/inbox/compose'
+    | '/app/user/inbox/'
     | '/app/user/products/'
     | '/app/user/products/edit/$itemId'
     | '/app/user/products/new/'
@@ -253,6 +277,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppUserProductsIndexRouteImport
       parentRoute: typeof AppUserRouteRoute
     }
+    '/app/user/inbox/': {
+      id: '/app/user/inbox/'
+      path: '/inbox'
+      fullPath: '/app/user/inbox'
+      preLoaderRoute: typeof AppUserInboxIndexRouteImport
+      parentRoute: typeof AppUserRouteRoute
+    }
+    '/app/user/inbox/compose': {
+      id: '/app/user/inbox/compose'
+      path: '/inbox/compose'
+      fullPath: '/app/user/inbox/compose'
+      preLoaderRoute: typeof AppUserInboxComposeRouteImport
+      parentRoute: typeof AppUserRouteRoute
+    }
     '/app/user/products/new/': {
       id: '/app/user/products/new/'
       path: '/products/new'
@@ -272,6 +310,8 @@ declare module '@tanstack/react-router' {
 
 interface AppUserRouteRouteChildren {
   AppUserIndexRoute: typeof AppUserIndexRoute
+  AppUserInboxComposeRoute: typeof AppUserInboxComposeRoute
+  AppUserInboxIndexRoute: typeof AppUserInboxIndexRoute
   AppUserProductsIndexRoute: typeof AppUserProductsIndexRoute
   AppUserProductsEditItemIdRoute: typeof AppUserProductsEditItemIdRoute
   AppUserProductsNewIndexRoute: typeof AppUserProductsNewIndexRoute
@@ -279,6 +319,8 @@ interface AppUserRouteRouteChildren {
 
 const AppUserRouteRouteChildren: AppUserRouteRouteChildren = {
   AppUserIndexRoute: AppUserIndexRoute,
+  AppUserInboxComposeRoute: AppUserInboxComposeRoute,
+  AppUserInboxIndexRoute: AppUserInboxIndexRoute,
   AppUserProductsIndexRoute: AppUserProductsIndexRoute,
   AppUserProductsEditItemIdRoute: AppUserProductsEditItemIdRoute,
   AppUserProductsNewIndexRoute: AppUserProductsNewIndexRoute,
