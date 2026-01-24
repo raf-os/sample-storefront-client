@@ -358,6 +358,280 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/Mail/inbox": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    Offset?: number;
+                    Source?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["MailDTO"][];
+                        "application/json": components["schemas"]["MailDTO"][];
+                        "text/json": components["schemas"]["MailDTO"][];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/Mail/inbox/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["MailPreviewDTO"][];
+                        "application/json": components["schemas"]["MailPreviewDTO"][];
+                        "text/json": components["schemas"]["MailPreviewDTO"][];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/Mail/inbox/{Id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    Id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["MailDTO"];
+                        "application/json": components["schemas"]["MailDTO"];
+                        "text/json": components["schemas"]["MailDTO"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/Mail/send/{Id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    Id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json-patch+json": components["schemas"]["SendMailRequest"];
+                    "application/json": components["schemas"]["SendMailRequest"];
+                    "text/json": components["schemas"]["SendMailRequest"];
+                    "application/*+json": components["schemas"]["SendMailRequest"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/Mail/inbox/size": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    unreadOnly?: boolean;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": number;
+                        "application/json": number;
+                        "text/json": number;
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/Product/page": {
         parameters: {
             query?: never;
@@ -423,9 +697,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["ProductDTO"];
-                        "application/json": components["schemas"]["ProductDTO"];
-                        "text/json": components["schemas"]["ProductDTO"];
+                        "text/plain": components["schemas"]["ProductDTO2"];
+                        "application/json": components["schemas"]["ProductDTO2"];
+                        "text/json": components["schemas"]["ProductDTO2"];
                     };
                 };
                 /** @description Not Found */
@@ -1306,7 +1580,7 @@ export interface components {
             score?: number;
             /** Format: uuid */
             productId?: string | null;
-            product?: components["schemas"]["ProductDTO2"];
+            product?: components["schemas"]["ProductDTO"];
             productName?: string | null;
             /** Format: uuid */
             userId?: string;
@@ -1336,6 +1610,31 @@ export interface components {
         LoginRequest: {
             username: string;
             password: string;
+        };
+        MailDTO: {
+            /** Format: uuid */
+            id?: string;
+            title?: string | null;
+            content?: string;
+            /** Format: date-time */
+            sendDate?: string;
+            isRead?: boolean;
+            /** Format: uuid */
+            senderId?: string;
+            sender?: components["schemas"]["UserPublicDTO"];
+            /** Format: uuid */
+            recipientId?: string;
+            recipient?: components["schemas"]["UserPublicDTO"];
+        };
+        MailPreviewDTO: {
+            /** Format: uuid */
+            id?: string;
+            title?: string | null;
+            /** Format: date-time */
+            sendDate?: string;
+            /** Format: uuid */
+            senderId?: string;
+            senderName?: string;
         };
         Operation: {
             value?: unknown;
@@ -1387,7 +1686,7 @@ export interface components {
             user?: components["schemas"]["UserPublicDTO"];
             comments?: unknown[] | null;
             categories?: components["schemas"]["CategoryDTO"][];
-        };
+        } | null;
         ProductDTO2: {
             /** Format: uuid */
             id?: string;
@@ -1400,19 +1699,19 @@ export interface components {
             discount?: number | null;
             description?: string | null;
             rating?: unknown;
-            tags?: string[];
+            tags?: unknown;
             metadata?: unknown;
             isInCart?: boolean | null;
             isInStock?: boolean;
             /** Format: int32 */
             stockAmount?: number | null;
-            imageIds?: string[];
+            imageIds?: unknown;
             /** Format: uuid */
             userId?: string;
             user?: unknown;
             comments?: unknown[] | null;
             categories?: components["schemas"]["CategoryDTO"][];
-        } | null;
+        };
         ProductListItemDTO: {
             /** Format: uuid */
             id?: string;
@@ -1459,6 +1758,10 @@ export interface components {
             username?: string;
             password?: string;
             email?: string;
+        };
+        SendMailRequest: {
+            title?: string | null;
+            content: string;
         };
         StringSegment: {
             buffer?: string | null;
@@ -1528,7 +1831,7 @@ export interface components {
             /** Format: date-time */
             signupDate?: string;
             comments?: components["schemas"]["CommentDTO"][] | null;
-            products?: components["schemas"]["ProductDTO"][] | null;
+            products?: components["schemas"]["ProductDTO2"][] | null;
             /** Format: uuid */
             avatarId?: string | null;
         } | null;
@@ -1540,7 +1843,7 @@ export interface components {
             /** Format: date-time */
             signupDate?: string;
             comments?: components["schemas"]["CommentDTO"][] | null;
-            products?: components["schemas"]["ProductDTO"][] | null;
+            products?: components["schemas"]["ProductDTO2"][] | null;
             /** Format: uuid */
             avatarId?: string | null;
         };

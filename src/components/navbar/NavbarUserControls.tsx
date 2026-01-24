@@ -10,12 +10,13 @@ import { cn } from "@/lib/utils";
 import * as Dropdown from "@radix-ui/react-dropdown-menu";
 
 import { DropdownContent, DropdownItem as DropdownItemOriginal, DropdownSeparator } from "@/components/common/Dropdown";
-import NavbarCart from "@/components/navbar/NavbarCart";
+import NavbarCart from "./NavbarCart";
+import NavbarInbox from "./NavbarInbox";
 
 import { ShoppingBasket, Shield, Mail } from "lucide-react";
 import UserAvatar from "@/components/common/UserAvatar";
 import { queryClient } from "@/lib/serverRequest";
-import { GetUserCartSize } from "@/lib/actions/userAction";
+import { GetUserCartSize, GetUserInboxSize } from "@/lib/actions/userAction";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKeys } from "@/lib/queryKeys";
 
@@ -51,7 +52,7 @@ export default function NavbarUserControls() {
     const ctx = { handleClose };
 
     return (
-        <div className="flex gap-4 items-center">
+        <div className="flex gap-2 items-center">
             <div className="flex gap-1 items-center">
                 {isAuthModerator() && (
                     <Shield
@@ -110,25 +111,9 @@ export default function NavbarUserControls() {
                 </Dropdown.Portal>
             </Dropdown.Root>
 
-            <Dropdown.Root>
-                <Dropdown.Trigger asChild>
-                    <button
-                        className="cursor-pointer rounded-full outline-2 outline-base-500 p-0.5 bg-base-100"
-                    >
-                        <Mail
-                        />
-                    </button>
-                </Dropdown.Trigger>
-
-                <Dropdown.Portal>
-                    <DropdownContent
-                        sideOffset={6}
-                    >
-                        content here
-                    </DropdownContent>
-                </Dropdown.Portal>
-            </Dropdown.Root>
             <UserCartControls />
+
+            <UserMailControls />
         </div>
     )
 }
@@ -181,6 +166,45 @@ function UserCartControls() {
                         : "-"
                 }
             </div>
+        </div>
+    )
+}
+
+export function UserMailControls() {
+    const { token } = useContext(AuthContext);
+    const { data: inboxSize, isSuccess } = useQuery({
+        queryKey: QueryKeys.User.InboxSize,
+        queryFn: async () => {
+            return await GetUserInboxSize({ unreadOnly: true });
+        },
+        enabled: () => { return token !== undefined && token !== null },
+    }, queryClient);
+
+    return (
+        <div className="relative">
+            <NavbarInbox inboxSize={inboxSize ?? 0} asChild>
+                <button
+                    className="flex items-center justify-center rounded-full border-2 border-base-500 bg-base-100 p-[2px] size-10 cursor-pointer"
+                >
+                    <Mail
+                        className={cn(
+                            "size-full stroke-base-500 rounded-full",
+                            "bg-base-300 p-[2px]",
+                            ((inboxSize ?? 0) > 0) && "stroke-primary-300"
+                        )}
+                    />
+                </button>
+            </NavbarInbox>
+
+            {isSuccess && (<div
+                className={cn(
+                    "flex items-center justify-center absolute bottom-0 right-0",
+                    "text-xs bg-base-500 text-base-100 font-bold leading-none select-none rounded-full size-4",
+                    inboxSize > 0 && "bg-primary-300"
+                )}
+            >
+                {inboxSize}
+            </div>)}
         </div>
     )
 }
