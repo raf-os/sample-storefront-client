@@ -4,6 +4,13 @@ export const QueryKeys = {
     CartPreview: ['User.CartPreview'],
     InboxPreviewSize: ['User.InboxPreviewSize'],
     InboxPreview: ['User.InboxPreview'],
-    InboxSize: ['User.InboxSize']
+    InboxSize: ['User.InboxSize'],
+    UserSearch: (name?: string) => {
+      if (name !== undefined) {
+        return ['User.NameSearch', name]
+      } else {
+        return ['InvalidQuery']
+      }
+    }
   }
 }

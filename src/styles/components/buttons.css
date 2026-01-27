@@ -1,82 +1,92 @@
 @import "tailwindcss";
 
 @utility btn {
-    display: inline-flex;
-    height: calc(var(--spacing) * 9);
+  display: inline-flex;
+  height: calc(var(--spacing) * 9);
+  flex-shrink: 0;
+  outline: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-field);
+  background-color: var(--color-base-100);
+  color: var(--color-base-content);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  white-space: nowrap;
+  @apply text-sm px-4 py-2 gap-2 transition-colors;
+
+  & svg {
     flex-shrink: 0;
-    outline: none;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-field);
-    background-color: var(--color-base-100);
-    color: var(--color-base-content);
-    font-weight: var(--font-weight-medium);
-    cursor: pointer;
-    white-space: nowrap;
-    @apply text-sm px-4 py-2 gap-2 transition-colors;
+    pointer-events: none;
 
-    & svg {
-        flex-shrink: 0;
-        pointer-events: none;
+    &:not([class*="size-"]) {
+      @apply size-4;
+    }
+  }
 
-        &:not([class*='size-']) {
-            @apply size-4;
-        }
+  &:disabled {
+    cursor: default;
+    opacity: 50%;
+  }
+
+  &:not(:disabled) {
+    &:focus {
+      @apply ring-2 ring-base-500;
     }
 
-    &:disabled {
-        cursor: default;
-        opacity: 50%;
+    &:hover,
+    &:active {
+      background-color: var(--color-base-300);
     }
 
-    &:not(:disabled) {
-        &:focus {
-            @apply ring-2 ring-base-500;
-        }
+    &.btn-primary {
+      background-color: var(--color-primary-300);
+      color: var(--color-primary-500);
+      outline: none;
 
-        &:hover, &:active {
-            background-color: var(--color-base-300);
-        }
-
-        &.btn-primary {
-            background-color: var(--color-primary-300);
-            color: var(--color-primary-500);
-            outline: none;
-
-            &:hover, &:active {
-                background-color: var(--color-primary-200);
-            }
-        }
-
-        &.btn-outline {
-            background-color: transparent;
-            outline: 1px solid var(--color-base-500);
-
-            &:hover, &:active {
-                background-color: var(--color-base-300);
-                outline: 1px solid var(--color-base-300);
-            }
-        }
-
-        &.btn-ghost {
-            background-color: transparent;
-
-            &:hover, &:active {
-                color: var(--color-primary-300);
-            }
-        }
-
-        &.btn-destructive {
-            background-color: var(--color-destructive);
-            color: var(--color-destructive-content);
-
-            &:hover, &:active {
-                background-color: color-mix(in oklab, var(--color-destructive) 80%, var(--color-destructive-content));
-            }
-
-            &:focus {
-                @apply ring-destructive-content;
-            }
-        }
+      &:hover,
+      &:active {
+        background-color: var(--color-primary-200);
+      }
     }
+
+    &.btn-outline {
+      background-color: transparent;
+      outline: 1px solid var(--color-base-500);
+
+      &:hover,
+      &:active {
+        background-color: var(--color-base-300);
+        outline: 1px solid var(--color-base-300);
+      }
+    }
+
+    &.btn-ghost {
+      background-color: transparent;
+
+      &:hover,
+      &:active {
+        color: var(--color-primary-300);
+      }
+    }
+
+    &.btn-destructive {
+      background-color: var(--color-destructive);
+      color: var(--color-destructive-content);
+
+      &:hover,
+      &:active {
+        background-color: color-mix(
+          in oklab,
+          var(--color-destructive) 80%,
+          var(--color-destructive-content)
+        );
+      }
+
+      &:focus {
+        @apply ring-destructive-content;
+      }
+    }
+  }
 }
+

@@ -6,6 +6,8 @@
 @import "./components/collapsible.css";
 @import "./components/table.css";
 @import "./components/separator.css";
+@import "./components/dropdown.css";
+@import "./components/input.css";
 
 @font-face {
   font-family: "Roboto";
@@ -13,98 +15,98 @@
 }
 
 @font-face {
-    font-family: "Inter";
-    src: url("/fonts/Inter.ttf");
+  font-family: "Inter";
+  src: url("/fonts/Inter.ttf");
 }
 
 @theme inline {
-    --color-primary-100: var(--col-primary-100);
-    --color-primary-200: var(--col-primary-200);
-    --color-primary-300: var(--col-primary-300);
-    --color-primary-400: var(--col-primary-400);
-    --color-primary-500: var(--col-primary-500);
-    --color-primary-content: var(--col-primary-content);
+  --color-primary-100: var(--col-primary-100);
+  --color-primary-200: var(--col-primary-200);
+  --color-primary-300: var(--col-primary-300);
+  --color-primary-400: var(--col-primary-400);
+  --color-primary-500: var(--col-primary-500);
+  --color-primary-content: var(--col-primary-content);
 
-    --color-base-100: var(--col-base-100);
-    --color-base-200: var(--col-base-200);
-    --color-base-300: var(--col-base-300);
-    --color-base-400: var(--col-base-400);
-    --color-base-500: var(--col-base-500);
+  --color-base-100: var(--col-base-100);
+  --color-base-200: var(--col-base-200);
+  --color-base-300: var(--col-base-300);
+  --color-base-400: var(--col-base-400);
+  --color-base-500: var(--col-base-500);
 
-    --color-warning: var(--col-warning-300);
-    --color-warning-content: var(--col-warning-content);
+  --color-warning: var(--col-warning-300);
+  --color-warning-content: var(--col-warning-content);
 
-    --color-destructive: var(--col-destructive-500);
-    --color-destructive-content: var(--col-destructive-content);
+  --color-destructive: var(--col-destructive-500);
+  --color-destructive-content: var(--col-destructive-content);
 
-    --color-error: var(--col-error);
-    --color-error-content: var(--col-error-content);
+  --color-error: var(--col-error);
+  --color-error-content: var(--col-error-content);
 
-    --color-success: var(--col-success);
-    --color-success-content: var(--col-success-content);
+  --color-success: var(--col-success);
+  --color-success-content: var(--col-success-content);
 
-    --color-base-content: var(--col-base-content);
-    --color-muted: var(--col-muted);
+  --color-base-content: var(--col-base-content);
+  --color-muted: var(--col-muted);
 
-    --radius-field: 1rem;
-    --radius-field-inner: 0.75rem;
-    --radius-box: 0.5rem;
-    --radius-box-inner: 0.375rem;
+  --radius-field: 1rem;
+  --radius-field-inner: 0.75rem;
+  --radius-box: 0.5rem;
+  --radius-box-inner: 0.375rem;
 }
 
 :root {
-    --col-primary-100: oklch(35% 0.1 235);
-    --col-primary-200: oklch(54% 0.17 242);
-    --col-primary-300: oklch(62% 0.22 252);
-    --col-primary-400: oklch(70% 0.15 256);
-    --col-primary-500: oklch(91% 0.05 262);
-    --col-primary-content: var(--col-primary-500);
+  --col-primary-100: oklch(35% 0.1 235);
+  --col-primary-200: oklch(54% 0.17 242);
+  --col-primary-300: oklch(62% 0.22 252);
+  --col-primary-400: oklch(70% 0.15 256);
+  --col-primary-500: oklch(91% 0.05 262);
+  --col-primary-content: var(--col-primary-500);
 
-    --col-base-100: oklch(93% 0.005 245);
-    --col-base-200: oklch(98% 0.0055 210);
-    --col-base-300: oklch(89% 0.01 260);
-    --col-base-400: oklch(79% 0.007 270);
-    --col-base-500: oklch(25% 0.01 290);
-    --col-base-content: var(--col-base-500);
+  --col-base-100: oklch(93% 0.005 245);
+  --col-base-200: oklch(98% 0.0055 210);
+  --col-base-300: oklch(89% 0.01 260);
+  --col-base-400: oklch(79% 0.007 270);
+  --col-base-500: oklch(25% 0.01 290);
+  --col-base-content: var(--col-base-500);
 
-    --col-warning-100: oklch(40% 0.15 60);
-    --col-warning-200: oklch(70% 0.18 75);
-    --col-warning-300: oklch(85% 0.2 87);
-    --col-warning-400: oklch(90% 0.15 90);
-    --col-warning-500: oklch(95% 0.05 95);
-    --col-warning-content: var(--col-warning-100);
+  --col-warning-100: oklch(40% 0.15 60);
+  --col-warning-200: oklch(70% 0.18 75);
+  --col-warning-300: oklch(85% 0.2 87);
+  --col-warning-400: oklch(90% 0.15 90);
+  --col-warning-500: oklch(95% 0.05 95);
+  --col-warning-content: var(--col-warning-100);
 
-    --col-destructive-100: oklch(37% 0.125 15);
-    --col-destructive-200: oklch(49% 0.2 20);
-    --col-destructive-300: oklch(60% 0.22 25);
-    --col-destructive-400: oklch(83% 0.15 37);
-    --col-destructive-500: oklch(89% 0.1 40);
-    --col-destructive-content: oklch(63% 0.23 30);
+  --col-destructive-100: oklch(37% 0.125 15);
+  --col-destructive-200: oklch(49% 0.2 20);
+  --col-destructive-300: oklch(60% 0.22 25);
+  --col-destructive-400: oklch(83% 0.15 37);
+  --col-destructive-500: oklch(89% 0.1 40);
+  --col-destructive-content: oklch(63% 0.23 30);
 
-    --col-error: oklch(94% 0.08 25);
-    --col-error-content: oklch(53% 0.23 25);
+  --col-error: oklch(94% 0.08 25);
+  --col-error-content: oklch(53% 0.23 25);
 
-    --col-success: oklch(96% 0.09 122);
-    --col-success-content: oklch(49% 0.19 140);
+  --col-success: oklch(96% 0.09 122);
+  --col-success-content: oklch(49% 0.19 140);
 
-    --col-muted: var(--col-base-400);
+  --col-muted: var(--col-base-400);
 }
 
 @layer base {
-    body {
-        font-family: "Inter";
-        color: var(--color-base-500);
-        background-color: var(--color-base-100);
-    }
+  body {
+    font-family: "Inter";
+    color: var(--color-base-500);
+    background-color: var(--color-base-100);
+  }
 
-    input::-webkit-outer-spin-button,
-    input::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
 
-    input[type=number] {
-        -moz-appearance: textfield;
-        appearance: textfield;
-    }
+  input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
 }
