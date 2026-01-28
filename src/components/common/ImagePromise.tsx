@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 
-export type TImageProps = React.ComponentPropsWithRef<'img'> & {
-    fallback?: React.ReactNode,
-    loadingComponent?: React.ReactNode,
+export type TImageProps = Omit<React.ComponentPropsWithRef<'img'>, "src"> & {
+  src?: string | undefined | null,
+  fallback?: React.ReactNode,
+  loadingComponent?: React.ReactNode,
 }
 
 /**
@@ -13,42 +14,42 @@ export type TImageProps = React.ComponentPropsWithRef<'img'> & {
  * *loading*: Shown while the GET request is being made
  */
 export default function ImagePromise({
-    src,
-    fallback,
-    loadingComponent,
-    ...rest
+  src,
+  fallback,
+  loadingComponent,
+  ...rest
 }: TImageProps) {
-    const [ isSuccess, setIsSuccess ] = useState<boolean | null>(null);
+  const [isSuccess, setIsSuccess] = useState<boolean | null>(null);
 
-    useEffect(() => {
-        if (src === undefined || src === null) {
-            setIsSuccess(null);
-            return;
-        }
+  useEffect(() => {
+    if (src === undefined || src === null) {
+      setIsSuccess(null);
+      return;
+    }
 
-        const img = new Image();
-        img.src = src;
+    const img = new Image();
+    img.src = src;
 
-        img.onload = () => {
-            setIsSuccess(true);
-        }
+    img.onload = () => {
+      setIsSuccess(true);
+    }
 
-        img.onerror = () => {
-            setIsSuccess(false);
-        }
+    img.onerror = () => {
+      setIsSuccess(false);
+    }
 
-        return () => {
-            img.onload = null;
-            img.onerror = null;
-        }
-    }, [src]);
+    return () => {
+      img.onload = null;
+      img.onerror = null;
+    }
+  }, [src]);
 
-    if (isSuccess === true)
-        return (
-            <img src={src} {...rest} />
-        );
-    else if (isSuccess === false)
-        return (<>{fallback ?? null}</>);
-    else
-        return (<>{loadingComponent ?? null}</>);
+  if (isSuccess === true && src)
+    return (
+      <img src={src} {...rest} />
+    );
+  else if (isSuccess === false || !src)
+    return (<>{fallback ?? null}</>);
+  else
+    return (<>{loadingComponent ?? null}</>);
 }

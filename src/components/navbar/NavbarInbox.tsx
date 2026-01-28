@@ -4,10 +4,11 @@ import { PreventLayoutFlash } from "@/lib/utils";
 import { GetUserInboxPreview } from "@/lib/actions/userAction";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKeys } from "@/lib/queryKeys";
-import { queryClient } from "@/lib/serverRequest";
+import { queryClient, ServerImagePath } from "@/lib/serverRequest";
 import type { paths } from "@/api/schema";
 import type { Flatten } from "@/types/utilities";
 import Button from "../button";
+import ImagePromise from "../common/ImagePromise";
 
 type TInboxItemPreview = Required<Flatten<paths['/api/Mail/inbox/preview']['get']['responses']['200']['content']['application/json']>>;
 
@@ -114,17 +115,29 @@ function NavbarInboxItem({
   const mailTitle = data.title ?? "Untitled";
   const mailSender = data.senderName;
   const mailSenderId = data.senderId;
+  const mailSenderAvatarUrl = data.senderAvatarUrl;
 
   return (
     <div
-      className="flex flex-col gap-2 items-baseline group"
+      className="flex gap-2 items-center group cursor-pointer"
     >
-      <h1>
-        {mailSender}
-      </h1>
-      <h2>
-        {mailTitle}
-      </h2>
+      <div className="size-8 grow-0 shrink-0 overflow-hidden rounded-full ring-2 ring-base-500">
+        <ImagePromise
+          src={mailSenderAvatarUrl ? ServerImagePath("/files/avatar/{FileName}", { path: { FileName: mailSenderAvatarUrl } }) : null}
+          fallback={<img src="/images/default-avatar.webp" alt="Default user avatar" />}
+          loadingComponent={<div className="size-full shimmer" />}
+          alt="User avatar"
+        />
+      </div>
+
+      <div className="flex flex-col items-baseline grow-1 shrink-1">
+        <h1 className="text-sm font-bold group-hover:text-primary-300 select-none">
+          {mailSender}
+        </h1>
+        <h2 className="w-full px-2 py-1 truncate italic text-base-500/75 bg-base-300/25 rounded-box group-hover:bg-primary-500/50 transition-colors">
+          "{mailTitle}"
+        </h2>
+      </div>
     </div>
   )
 }

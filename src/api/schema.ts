@@ -1674,6 +1674,7 @@ export interface components {
             /** Format: uuid */
             senderId?: string;
             senderName?: string;
+            senderAvatarUrl?: string | null;
         };
         Operation: {
             value?: unknown;
@@ -1871,8 +1872,7 @@ export interface components {
             signupDate?: string;
             comments?: components["schemas"]["CommentDTO"][] | null;
             products?: components["schemas"]["ProductDTO2"][] | null;
-            /** Format: uuid */
-            avatarId?: string | null;
+            avatarUrl?: string | null;
         } | null;
         UserPublicDTO2: {
             /** Format: uuid */
@@ -1883,8 +1883,7 @@ export interface components {
             signupDate?: string;
             comments?: components["schemas"]["CommentDTO"][] | null;
             products?: components["schemas"]["ProductDTO2"][] | null;
-            /** Format: uuid */
-            avatarId?: string | null;
+            avatarUrl?: string | null;
         };
         UserRole: number;
         UserUpdateSchemaRequest: {

@@ -1,6 +1,6 @@
 import type z from "zod";
 import { serverCachedRequest, serverRequest } from "@/lib/serverRequest";
-import { UserAccountForm } from "@/models/schemas";
+import { ComposeMessageSchema, UserAccountForm } from "@/models/schemas";
 // import { QueryKeys } from "../queryKeys";
 
 export async function GetUserPageById(uid: string) {
@@ -16,7 +16,7 @@ export async function GetUserPageById(uid: string) {
 }
 
 export async function GetMinimalUserData(uid: string) {
-  const data = await serverRequest("get", "/api/User/{Id}", {
+  const data = await serverCachedRequest("get", "/api/User/{Id}", {
     path: { Id: uid }
   });
   return data;
@@ -85,6 +85,17 @@ export async function GetUserInboxPage(opts?: {
     query: {
       Offset: opts?.offset,
     }
+  }, { useAuth: true });
+  return data;
+}
+
+export async function SendPrivateMessage(payload: z.output<typeof ComposeMessageSchema>) {
+  const targetId = payload.userId;
+  const filteredPayload = payload;
+
+  const data = await serverRequest("post", "/api/Mail/send/{Id}", {
+    path: { Id: targetId },
+    body: filteredPayload,
   }, { useAuth: true });
   return data;
 }

@@ -59,3 +59,6 @@ it appears on neovim.
   - [ ] Buyer + seller communication
   - [ ] Mod to user communication
   - [ ] Specific system messages
+
+# Bugs
+- [ ] Users are not being redirected after a successful sign-up
