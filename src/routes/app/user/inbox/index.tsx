@@ -48,15 +48,15 @@ function RouteComponent() {
     })
   }, [search.page]);
 
-  if (loadedData !== null && inboxSize < 1) {
-    return (
-      <SectionCard>
-        <p>
-          Your inbox is empty.
-        </p>
-      </SectionCard>
-    )
-  }
+  // if (loadedData !== null && inboxSize < 1) {
+  //   return (
+  //     <SectionCard>
+  //       <p>
+  //         Your inbox is empty.
+  //       </p>
+  //     </SectionCard>
+  //   )
+  // }
 
   return (
     <div>
@@ -91,6 +91,23 @@ function InboxComponent({
   data: TMailList
 }) {
   return (
-    <div></div>
+    <>
+      <h1 className="text-lg font-bold pl-2 mb-1">
+        Your inbox
+      </h1>
+      <SectionCard>
+        {data.map((mail) => (
+          <div>
+            <div>
+              <p>Sent by:</p>
+              <p>
+                {mail.senderName}
+              </p>
+            </div>
+            <h2>{mail.title}</h2>
+          </div>
+        ))}
+      </SectionCard>
+    </>
   )
 }

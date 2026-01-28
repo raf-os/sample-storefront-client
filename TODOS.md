@@ -62,3 +62,4 @@ it appears on neovim.
 
 # Bugs
 - [ ] Users are not being redirected after a successful sign-up
+- [ ] Auth wrapper login check method does not trigger an update on its children if the logged in status changes, as it's not tied to a react state

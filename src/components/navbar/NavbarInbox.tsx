@@ -1,6 +1,6 @@
 import * as Popover from "@radix-ui/react-popover";
 import { useState } from "react";
-import { PreventLayoutFlash } from "@/lib/utils";
+import { cn, PreventLayoutFlash } from "@/lib/utils";
 import { GetUserInboxPreview } from "@/lib/actions/userAction";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKeys } from "@/lib/queryKeys";
@@ -9,6 +9,7 @@ import type { paths } from "@/api/schema";
 import type { Flatten } from "@/types/utilities";
 import Button from "../button";
 import ImagePromise from "../common/ImagePromise";
+import { Link } from "@tanstack/react-router";
 
 type TInboxItemPreview = Required<Flatten<paths['/api/Mail/inbox/preview']['get']['responses']['200']['content']['application/json']>>;
 
@@ -92,9 +93,13 @@ export default function NavbarInbox({
                 )
             )}
 
-          <Button className="btn-primary rounded-box-inner">
+          <Link
+            to="/app/user/inbox"
+            className="btn btn-primary rounded-box-inner"
+            onClick={handlePopoverClose}
+          >
             Go to inbox
-          </Button>
+          </Link>
 
           <Popover.Arrow
             className="fill-base-500"
@@ -121,7 +126,7 @@ function NavbarInboxItem({
     <div
       className="flex gap-2 items-center group cursor-pointer"
     >
-      <div className="size-8 grow-0 shrink-0 overflow-hidden rounded-full ring-2 ring-base-500">
+      <div className="size-6 grow-0 shrink-0 overflow-hidden rounded-full ring-2 ring-base-500">
         <ImagePromise
           src={mailSenderAvatarUrl ? ServerImagePath("/files/avatar/{FileName}", { path: { FileName: mailSenderAvatarUrl } }) : null}
           fallback={<img src="/images/default-avatar.webp" alt="Default user avatar" />}
@@ -130,11 +135,14 @@ function NavbarInboxItem({
         />
       </div>
 
-      <div className="flex flex-col items-baseline grow-1 shrink-1">
-        <h1 className="text-sm font-bold group-hover:text-primary-300 select-none">
+      <div className={cn(
+        "flex px-2 py-1 items-center gap-2 grow-1 shrink-1 bg-base-100 rounded-box shadow-xs overflow-hidden",
+        "group-hover:bg-primary-500 group-focus:bg-primary-500"
+      )}>
+        <h1 className="grow-0 shrink-0 w-32 text-sm font-bold select-none truncate border-r border-r-base-500/30 pr-1">
           {mailSender}
         </h1>
-        <h2 className="w-full px-2 py-1 truncate italic text-base-500/75 bg-base-300/25 rounded-box group-hover:bg-primary-500/50 transition-colors">
+        <h2 className="italic grow-1 shrink-1 truncate text-base-500/75">
           "{mailTitle}"
         </h2>
       </div>
