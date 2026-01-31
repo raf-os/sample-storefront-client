@@ -89,6 +89,15 @@ export async function GetUserInboxPage(opts?: {
   return data;
 }
 
+export async function GetUserInboxMessage(messageId: string) {
+  const data = await serverRequest("get", "/api/Mail/inbox/{Id}", {
+    path: {
+      Id: messageId
+    }
+  }, { useAuth: true });
+  return data;
+}
+
 export async function SendPrivateMessage(payload: z.output<typeof ComposeMessageSchema>) {
   const targetId = payload.userId;
   const filteredPayload = payload;

@@ -21,6 +21,7 @@ import { Route as AppUserIndexRouteImport } from './routes/app/user/index'
 import { Route as AppUserProductsIndexRouteImport } from './routes/app/user/products/index'
 import { Route as AppUserInboxIndexRouteImport } from './routes/app/user/inbox/index'
 import { Route as AppUserInboxComposeRouteImport } from './routes/app/user/inbox/compose'
+import { Route as AppUserInboxMessageIdRouteImport } from './routes/app/user/inbox/$messageId'
 import { Route as AppUserProductsNewIndexRouteImport } from './routes/app/user/products/new/index'
 import { Route as AppUserProductsEditItemIdRouteImport } from './routes/app/user/products/edit/$itemId'
 
@@ -84,6 +85,11 @@ const AppUserInboxComposeRoute = AppUserInboxComposeRouteImport.update({
   path: '/inbox/compose',
   getParentRoute: () => AppUserRouteRoute,
 } as any)
+const AppUserInboxMessageIdRoute = AppUserInboxMessageIdRouteImport.update({
+  id: '/inbox/$messageId',
+  path: '/inbox/$messageId',
+  getParentRoute: () => AppUserRouteRoute,
+} as any)
 const AppUserProductsNewIndexRoute = AppUserProductsNewIndexRouteImport.update({
   id: '/products/new/',
   path: '/products/new/',
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/cart': typeof CartIndexRoute
   '/listings': typeof ListingsIndexRoute
   '/app/user/': typeof AppUserIndexRoute
+  '/app/user/inbox/$messageId': typeof AppUserInboxMessageIdRoute
   '/app/user/inbox/compose': typeof AppUserInboxComposeRoute
   '/app/user/inbox': typeof AppUserInboxIndexRoute
   '/app/user/products': typeof AppUserProductsIndexRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/cart': typeof CartIndexRoute
   '/listings': typeof ListingsIndexRoute
   '/app/user': typeof AppUserIndexRoute
+  '/app/user/inbox/$messageId': typeof AppUserInboxMessageIdRoute
   '/app/user/inbox/compose': typeof AppUserInboxComposeRoute
   '/app/user/inbox': typeof AppUserInboxIndexRoute
   '/app/user/products': typeof AppUserProductsIndexRoute
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   '/cart/': typeof CartIndexRoute
   '/listings/': typeof ListingsIndexRoute
   '/app/user/': typeof AppUserIndexRoute
+  '/app/user/inbox/$messageId': typeof AppUserInboxMessageIdRoute
   '/app/user/inbox/compose': typeof AppUserInboxComposeRoute
   '/app/user/inbox/': typeof AppUserInboxIndexRoute
   '/app/user/products/': typeof AppUserProductsIndexRoute
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/listings'
     | '/app/user/'
+    | '/app/user/inbox/$messageId'
     | '/app/user/inbox/compose'
     | '/app/user/inbox'
     | '/app/user/products'
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/listings'
     | '/app/user'
+    | '/app/user/inbox/$messageId'
     | '/app/user/inbox/compose'
     | '/app/user/inbox'
     | '/app/user/products'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/cart/'
     | '/listings/'
     | '/app/user/'
+    | '/app/user/inbox/$messageId'
     | '/app/user/inbox/compose'
     | '/app/user/inbox/'
     | '/app/user/products/'
@@ -291,6 +303,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppUserInboxComposeRouteImport
       parentRoute: typeof AppUserRouteRoute
     }
+    '/app/user/inbox/$messageId': {
+      id: '/app/user/inbox/$messageId'
+      path: '/inbox/$messageId'
+      fullPath: '/app/user/inbox/$messageId'
+      preLoaderRoute: typeof AppUserInboxMessageIdRouteImport
+      parentRoute: typeof AppUserRouteRoute
+    }
     '/app/user/products/new/': {
       id: '/app/user/products/new/'
       path: '/products/new'
@@ -310,6 +329,7 @@ declare module '@tanstack/react-router' {
 
 interface AppUserRouteRouteChildren {
   AppUserIndexRoute: typeof AppUserIndexRoute
+  AppUserInboxMessageIdRoute: typeof AppUserInboxMessageIdRoute
   AppUserInboxComposeRoute: typeof AppUserInboxComposeRoute
   AppUserInboxIndexRoute: typeof AppUserInboxIndexRoute
   AppUserProductsIndexRoute: typeof AppUserProductsIndexRoute
@@ -319,6 +339,7 @@ interface AppUserRouteRouteChildren {
 
 const AppUserRouteRouteChildren: AppUserRouteRouteChildren = {
   AppUserIndexRoute: AppUserIndexRoute,
+  AppUserInboxMessageIdRoute: AppUserInboxMessageIdRoute,
   AppUserInboxComposeRoute: AppUserInboxComposeRoute,
   AppUserInboxIndexRoute: AppUserInboxIndexRoute,
   AppUserProductsIndexRoute: AppUserProductsIndexRoute,
