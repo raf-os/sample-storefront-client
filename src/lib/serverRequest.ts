@@ -16,100 +16,100 @@ export const queryClient = new QueryClient({
 });
 
 function replacePath(path: string, params?: Record<string, string | number>): string {
-    if (!params) return path;
+  if (!params) return path;
 
-    let result = path;
-    for (const [key, value] of Object.entries(params)) {
-        result = result.replace(`{${key}}`, encodeURIComponent(String(value)));
-    }
-    return result;
+  let result = path;
+  for (const [key, value] of Object.entries(params)) {
+    result = result.replace(`{${key}}`, encodeURIComponent(String(value)));
+  }
+  return result;
 }
 
 function serializeQuery(params?: Record<string, any>): string {
-    if (!params) return '';
+  if (!params) return '';
 
-    const searchParams = new URLSearchParams();
+  const searchParams = new URLSearchParams();
 
-    for (const [key, value] of Object.entries(params)) {
-        if (value === undefined || value === null) continue;
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === null) continue;
 
-        if (Array.isArray(value)) {
-            value.forEach(v => searchParams.append(key, String(v)));
-        } else if (typeof value === 'object') {
-            searchParams.append(key, JSON.stringify(value));
-        } else {
-            searchParams.append(key, String(value));
-        }
+    if (Array.isArray(value)) {
+      value.forEach(v => searchParams.append(key, String(v)));
+    } else if (typeof value === 'object') {
+      searchParams.append(key, JSON.stringify(value));
+    } else {
+      searchParams.append(key, String(value));
     }
+  }
 
-    const query = searchParams.toString();
-    return query ? `?${query}` : '';
+  const query = searchParams.toString();
+  return query ? `?${query}` : '';
 }
 
 type PathParams<Path extends keyof paths, Method extends keyof paths[Path]> =
-    paths[Path][Method] extends { parameters: { path: infer P } } ? P : never;
+  paths[Path][Method] extends { parameters: { path: infer P } } ? P : never;
 
 type QueryParams<Path extends keyof paths, Method extends keyof paths[Path]> =
-    paths[Path][Method] extends { parameters: { query?: infer Q } } ? Q : never;
+  paths[Path][Method] extends { parameters: { query?: infer Q } } ? Q : never;
 
 type RequestBody<Path extends keyof paths, Method extends keyof paths[Path]> =
-    paths[Path][Method] extends { requestBody: { content: infer Q } }
-    ? Q extends { "application/json": infer R }
-    ? R
-    : Q extends { "application/x-www-form-urlencoded": any }
-    ? FormData
-    : never
-    : never;
+  paths[Path][Method] extends { requestBody: { content: infer Q } }
+  ? Q extends { "application/json": infer R }
+  ? R
+  : Q extends { "application/x-www-form-urlencoded": any }
+  ? FormData
+  : never
+  : never;
 
 export class CustomResponse<
-    Method extends HttpMethod,
-    Path extends PathsWithMethod<paths, Method>,
+  Method extends HttpMethod,
+  Path extends PathsWithMethod<paths, Method>,
 > {
-    resObj: Response;
+  resObj: Response;
 
-    constructor(res: Response) {
-        this.resObj = res;
+  constructor(res: Response) {
+    this.resObj = res;
+  }
+
+  async Parse(): Promise<SuccessResponseJSON<paths[Path][Method] & Record<string | number, any>>> {
+    const res = this.resObj;
+
+    if (res.status === 204 || res.headers.get("Content-Length") === "0") {
+      // Handle no-content or empty responses
+      if (res.ok) {
+        return {} as any;
+      } else {
+        throw new CustomResponseError(res.status);
+      }
     }
 
-    async Parse(): Promise<SuccessResponseJSON<paths[Path][Method] & Record<string | number, any>>> {
-        const res = this.resObj;
-
-        if (res.status === 204 || res.headers.get("Content-Length") === "0") {
-            // Handle no-content or empty responses
-            if (res.ok) {
-                return {} as any;
-            } else {
-                throw new CustomResponseError(res.status);
-            }
-        }
-
-        let data;
-        const text = await res.text();
-        if (!text || text.trim() === "") {
-            data = undefined;
-        } else {
-            try {
-                data = JSON.parse(text);
-            } catch {
-                data = text;
-            }
-        }
-
-        if (res.ok) {
-            return data;
-        } else {
-            throw new CustomResponseError<ErrorResponseJSON<paths[Path][Method] & Record<string | number, any>>>(res.status, "Fetch error:", data);
-        }
+    let data;
+    const text = await res.text();
+    if (!text || text.trim() === "") {
+      data = undefined;
+    } else {
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = text;
+      }
     }
+
+    if (res.ok) {
+      return data;
+    } else {
+      throw new CustomResponseError<ErrorResponseJSON<paths[Path][Method] & Record<string | number, any>>>(res.status, "Fetch error:", data);
+    }
+  }
 }
 
 export interface IRequestMetadata {
-    useAuth?: boolean
+  useAuth?: boolean
 }
 
 export interface ICachedRequestMetadata extends IRequestMetadata {
-    staleTime?: number,
-    customKey?: any[] // TODO: Type this out correctly
+  staleTime?: number,
+  customKey?: any[] // TODO: Type this out correctly
 }
 
 // type TServerRequestOptions<Method extends HttpMethod, Path extends PathsWithMethod<paths, Method>> = {
@@ -122,122 +122,133 @@ export interface ICachedRequestMetadata extends IRequestMetadata {
 // };
 
 type TServerRequestOptions<Method extends HttpMethod, Path extends PathsWithMethod<paths, Method>> =
-    & (RequiredKeysOf<PathParams<Path, Method>> extends never
-        ? { path?: PathParams<Path, Method> }
-        : { path: PathParams<Path, Method> })
-    & (RequiredKeysOf<QueryParams<Path, Method>> extends never
-        ? { query?: QueryParams<Path, Method> }
-        : { query: QueryParams<Path, Method> })
-    & (RequiredKeysOf<RequestBody<Path, Method>> extends never
-        ? { body?: RequestBody<Path, Method> }
-        : { body: RequestBody<Path, Method> })
-    & {
-        headers?: HeadersInit
-    }
+  & (RequiredKeysOf<PathParams<Path, Method>> extends never
+    ? { path?: PathParams<Path, Method> }
+    : { path: PathParams<Path, Method> })
+  & (RequiredKeysOf<QueryParams<Path, Method>> extends never
+    ? { query?: QueryParams<Path, Method> }
+    : { query: QueryParams<Path, Method> })
+  & (RequiredKeysOf<RequestBody<Path, Method>> extends never
+    ? { body?: RequestBody<Path, Method> }
+    : { body: RequestBody<Path, Method> })
+  & {
+    headers?: HeadersInit
+  }
+
+export function buildQueryKey<
+  Method extends HttpMethod,
+  Path extends PathsWithMethod<paths, Method>
+>(
+  method: Method,
+  path: Path,
+  options?: TServerRequestOptions<Method, Path>
+) {
+  return [method, path, options?.query, options?.path]
+}
 
 export async function serverCachedRequest<
-    Method extends HttpMethod,
-    Path extends PathsWithMethod<paths, Method>
+  Method extends HttpMethod,
+  Path extends PathsWithMethod<paths, Method>
 >(
-    method: Method,
-    path: Path,
-    options?: TServerRequestOptions<Method, Path>,
-    metadata?: ICachedRequestMetadata
+  method: Method,
+  path: Path,
+  options?: TServerRequestOptions<Method, Path>,
+  metadata?: ICachedRequestMetadata
 ) {
-    const cachedResponse = await queryClient.fetchQuery({
-        queryKey: metadata?.customKey ? metadata.customKey : [method, path, options?.query, options?.path],
-        queryFn: () => serverRequest(method, path, options, metadata),
-        staleTime: metadata?.staleTime
-    });
+  const cachedResponse = await queryClient.fetchQuery({
+    queryKey: metadata?.customKey ? metadata.customKey : buildQueryKey(method, path, options),
+    queryFn: () => serverRequest(method, path, options, metadata),
+    staleTime: metadata?.staleTime
+  });
 
-    return cachedResponse;
+  return cachedResponse;
 }
 
 export async function serverRequest<
-    Method extends HttpMethod,
-    Path extends PathsWithMethod<paths, Method>
+  Method extends HttpMethod,
+  Path extends PathsWithMethod<paths, Method>
 >(
-    method: Method,
-    path: Path,
-    options?: TServerRequestOptions<Method, Path>,
-    metadata?: IRequestMetadata
+  method: Method,
+  path: Path,
+  options?: TServerRequestOptions<Method, Path>,
+  metadata?: IRequestMetadata
 ): Promise<SuccessResponseJSON<paths[Path][Method] & Record<string | number, any>>> {
-    const baseUrl = GlobalConfig.ServerAddr;
+  const baseUrl = GlobalConfig.ServerAddr;
 
-    let url = replacePath(String(path), options?.path as any);
-    url += serializeQuery(options?.query as any);
+  let url = replacePath(String(path), options?.path as any);
+  url += serializeQuery(options?.query as any);
 
-    const headers = { ...options?.headers };
+  const headers = { ...options?.headers };
 
-    const fetchOptions: RequestInit = {
-        method: String(method).toUpperCase(),
-        headers
+  const fetchOptions: RequestInit = {
+    method: String(method).toUpperCase(),
+    headers
+  }
+
+  if (options?.body && ['POST', 'PUT', 'PATCH'].includes(String(method).toUpperCase())) {
+    if (options.body && (options.body as unknown) instanceof FormData) fetchOptions.body = options.body as any;
+    else {
+      fetchOptions.body = JSON.stringify(options.body);
+      fetchOptions.headers = { ...fetchOptions.headers, "Content-Type": "application/json" }
     }
+  }
 
-    if (options?.body && ['POST', 'PUT', 'PATCH'].includes(String(method).toUpperCase())) {
-        if (options.body && (options.body as unknown) instanceof FormData) fetchOptions.body = options.body as any;
-        else {
-            fetchOptions.body = JSON.stringify(options.body);
-            fetchOptions.headers = { ...fetchOptions.headers, "Content-Type": "application/json" }
-        }
-    }
+  const req = new Request(`${baseUrl}${url}`, fetchOptions);
 
-    const req = new Request(`${baseUrl}${url}`, fetchOptions);
+  if (metadata?.useAuth === true) {
+    await TokenRefreshHandler.validateToken();
+    const token = await AuthSingleton.getJwtToken();
 
-    if (metadata?.useAuth === true) {
-        await TokenRefreshHandler.validateToken();
-        const token = await AuthSingleton.getJwtToken();
+    req.headers.set("Authorization", `Bearer ${token}`);
+  }
 
-        req.headers.set("Authorization", `Bearer ${token}`);
-    }
+  // const response = await queryClient.fetchQuery({
+  //     queryKey: [ method, path, options?.params ],
+  //     queryFn: async () => {
+  //         const res = await fetch(req);
+  //         const custom = new CustomResponse<Method, Path>(res);
+  //         const data = await custom.Parse();
+  //         return data;
+  //     }
+  // });
 
-    // const response = await queryClient.fetchQuery({
-    //     queryKey: [ method, path, options?.params ],
-    //     queryFn: async () => {
-    //         const res = await fetch(req);
-    //         const custom = new CustomResponse<Method, Path>(res);
-    //         const data = await custom.Parse();
-    //         return data;
-    //     }
-    // });
+  const res = await fetch(req);
+  const customResponse = new CustomResponse<Method, Path>(res);
+  const response = await customResponse.Parse();
 
-    const res = await fetch(req);
-    const customResponse = new CustomResponse<Method, Path>(res);
-    const response = await customResponse.Parse();
-
-    return response;
+  return response;
 }
 
 export type TServerImageEndpoints = {
-    [K in keyof paths]: paths[K] extends { get: { responses: { 200: { content: { "image/webp": any } } } } }
-    ? K
-    : never;
+  [K in keyof paths]: paths[K] extends { get: { responses: { 200: { content: { "image/webp": any } } } } }
+  ? K
+  : never;
 }[keyof paths];
 
 export function ServerImagePath<Path extends TServerImageEndpoints>(
-    path: Path,
-    params?: {
-        path?: PathParams<Path, 'get'>,
-        query?: QueryParams<Path, 'get'>
-    }
+  path: Path,
+  params?: {
+    path?: PathParams<Path, 'get'>,
+    query?: QueryParams<Path, 'get'>
+  }
 ) {
-    let url = replacePath(String(path), params?.path as any);
-    url += serializeQuery(params?.query as any);
+  let url = replacePath(String(path), params?.path as any);
+  url += serializeQuery(params?.query as any);
 
-    return `${GlobalConfig.ServerAddr}${url}`;
+  return `${GlobalConfig.ServerAddr}${url}`;
 }
 
 export function createQueryObserver<
-    Method extends HttpMethod,
-    Path extends PathsWithMethod<paths, Method>
+  Method extends HttpMethod,
+  Path extends PathsWithMethod<paths, Method>
 >(
-    method: Method,
-    path: Path,
-    params?: {
-        path?: PathParams<Path, Method>,
-        query?: QueryParams<Path, Method>
-    }
+  method: Method,
+  path: Path,
+  params?: {
+    path?: PathParams<Path, Method>,
+    query?: QueryParams<Path, Method>
+  }
 ) {
-    const observer = new QueryObserver(queryClient, { queryKey: [method, path, params], enabled: false });
-    return observer;
+  const observer = new QueryObserver(queryClient, { queryKey: [method, path, params], enabled: false });
+  return observer;
 }

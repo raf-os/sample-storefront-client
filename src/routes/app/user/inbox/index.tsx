@@ -1,20 +1,20 @@
 import { z } from "zod";
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { useServerAction } from "@/hooks";
 import { GetUserInboxPage, GetUserInboxSize } from '@/lib/actions/userAction';
 import type { paths } from "@/api/schema";
 import type { Flatten } from "@/types/utilities";
-import { useEffect, useState } from "react";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { QueryKeys } from "@/lib/queryKeys";
-import { queryClient } from "@/lib/serverRequest";
-import { cn, PreventLayoutFlash } from "@/lib/utils";
+import { buildQueryKey, queryClient } from "@/lib/serverRequest";
 import SectionCard from "@/components/common/SectionCard";
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { Checkbox } from "@/components/forms";
+import ErrorComponent from "@/components/common/ErrorComponent";
+import PaginationComponent from "@/components/common/PaginationComponent";
+import { useEffect, useState } from "react";
 
 const mailSearchSchema = z.object({
-  page: z.int().min(1).optional()
+  offset: z.int().min(1).optional()
 });
 
 type TMailItem = Required<Flatten<paths['/api/Mail/inbox']['get']['responses']['200']['content']['application/json']>>;
@@ -23,7 +23,7 @@ type TMailList = TMailItem[];
 
 export const Route = createFileRoute('/app/user/inbox/')({
   component: RouteComponent,
-  validateSearch: mailSearchSchema
+  validateSearch: mailSearchSchema,
 });
 
 function useInboxSize() {
@@ -143,51 +143,38 @@ const tableColumns = [
 ];
 
 function RouteComponent() {
-  const [loadedData, setLoadedData] = useState<TMailList | null>(null);
-  const [isPending, startTransition, errorMessage] = useServerAction();
+  const refetchInterval = 1000 * 60; // 1 minute
   const search = Route.useSearch();
-  const { data: inboxSize } = useInboxSize();
 
-  useEffect(() => {
-    startTransition(async () => {
-      const data = await PreventLayoutFlash(GetUserInboxPage({ offset: search.page })) as any; // TODO: Try to somehow correctly type this
-
-      setLoadedData(data);
-    })
-  }, [search.page]);
-
-  // if (loadedData !== null && inboxSize < 1) {
-  //   return (
-  //     <SectionCard>
-  //       <p>
-  //         Your inbox is empty.
-  //       </p>
-  //     </SectionCard>
-  //   )
-  // }
+  const { data, isPending, isError, error } = useQuery({
+    queryKey: buildQueryKey("get", "/api/Mail/inbox", { query: { offset: search.offset } }),
+    queryFn: async () => {
+      const data = await GetUserInboxPage({ offset: search.offset });
+      queryClient.invalidateQueries({ queryKey: QueryKeys.User.InboxPreview });
+      return data as TMailList;
+    },
+    placeholderData: keepPreviousData,
+    staleTime: refetchInterval,
+    refetchInterval: refetchInterval,
+  }, queryClient);
 
   return (
     <div>
       {
-        (isPending && loadedData == null)
+        (isPending && data === undefined)
           ? (
             <SectionCard>
               Loading...
             </SectionCard>
-          ) : errorMessage
+          ) : isError
             ? (
               <div
                 className="bg-error text-error-content border border-error-content/25 px-3 py-2 rounded-box"
               >
-                <h1 className="font-bold">
-                  Error fetching cart:
-                </h1>
-
-                <p>
-                  {errorMessage}
-                </p>
+                <ErrorComponent errorMessage={error.message} />
               </div>
-            ) : loadedData && <InboxComponent data={loadedData}></InboxComponent>
+            ) : data
+            && <InboxComponent data={data} />
       }
     </div>
   )
@@ -199,43 +186,61 @@ function InboxComponent({
   data: TMailList
 }) {
   const table = useReactTable({ columns: tableColumns, data: data, getCoreRowModel: getCoreRowModel() });
+  const search = Route.useSearch();
+  const { data: inboxSize } = useInboxSize();
+  const totalPages = Math.ceil(inboxSize / 10);
   return (
     <>
       <h1 className="text-lg font-bold pl-2 mb-1">
         Your inbox
       </h1>
       <SectionCard>
-        <table className="tbl">
-          <thead>
-            {table.getHeaderGroups().map(headerGroup => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
-                  <th key={header.id} style={{ width: header.column.columnDef.meta?.size ?? "auto" }}>
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </th>
+        {data.length > 0 ? (
+          <>
+            <table className="tbl">
+              <thead>
+                {table.getHeaderGroups().map(headerGroup => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map(header => (
+                      <th key={header.id} style={{ width: header.column.columnDef.meta?.size ?? "auto" }}>
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                      </th>
+                    ))}
+                  </tr>
                 ))}
-              </tr>
-            ))}
-          </thead>
+              </thead>
 
-          <tbody>
-            {table.getRowModel().rows.map(row => (
-              <tr
-                key={row.id}
-                className="group"
-              >
-                {row.getVisibleCells().map(cell => (
-                  <td
-                    key={cell.id}
-                    className="truncate"
+              <tbody>
+                {table.getRowModel().rows.map(row => (
+                  <tr
+                    key={row.id}
+                    className="group"
                   >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
+                    {row.getVisibleCells().map(cell => (
+                      <td
+                        key={cell.id}
+                        className="truncate"
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
                 ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+              </tbody>
+            </table>
+          </>
+        ) : (
+          <p>Inbox is empty</p>
+        )}
+
+        <div className="mt-4">
+          <PaginationComponent
+            currentOffset={search.offset}
+            totalPages={totalPages}
+          >
+            <PaginationComponent.Label />
+          </PaginationComponent>
+        </div>
       </SectionCard>
     </>
   )
