@@ -75,12 +75,15 @@ function PageContent() {
   const data = Route.useLoaderData();
   const product = data;
 
+  const productDiscount = product.discount !== null ? Number(product.discount) : 0;
+  const productPrice = product.price !== null ? Number(product.price) : 0;
+  const productRatingValue = product.rating.value !== null ? Number(product.rating.value) : 0;
+  const productStockAmount = product.stockAmount !== null ? Number(product.stockAmount) : 0;
+
   const { authData } = useContext(AuthContext);
   const [isPending, startTransition, errorMessage] = useServerAction();
 
   const customSelectorRef = useRef<HTMLDivElement>(null);
-
-  if (product.discount === undefined) product.discount = 0;
 
   const formatter = Intl.NumberFormat('en-us', {
     style: 'currency',
@@ -93,20 +96,19 @@ function PageContent() {
       : new Intl.NumberFormat('en-US', {
         maximumFractionDigits: 2,
         minimumFractionDigits: 0
-      }).format(product.rating.value as number || 0);
+      }).format(productRatingValue);
 
   const finalPrice = product
-    ? (product.discount && product.discount as number > 0)
-      ? ((product.price as number || 0) * (100 - (product.discount as number)) / 100)
-      : (product.price || 0)
+    ? (productDiscount > 0)
+      ? ((productPrice) * (100 - (productDiscount)) / 100)
+      : (productPrice)
     : 0;
 
   const isProductInStock =
     product.isInStock === true
-    || (product.stockAmount && (product.stockAmount as number) > 0);
+    || (productStockAmount);
 
   const handleAddToCard = () => {
-    console.log("call")
     if (isPending) return;
     const amt = customSelectorRef.current?.dataset.value;
     const pId = data.id;
@@ -157,17 +159,17 @@ function PageContent() {
               <div
                 className="flex items-end gap-2 py-2"
               >
-                {(product.discount && (product.discount as number) > 0) && (
+                {(productDiscount > 0) && (
                   <span
                     className="text-muted line-through leading-none"
                   >
-                    {formatter.format(product.price as number || 0)}
+                    {formatter.format(productPrice)}
                   </span>
                 )}
                 <span
                   className="font-bold text-primary-300 text-xl leading-none"
                 >
-                  {formatter.format(finalPrice as number)}
+                  {formatter.format(finalPrice)}
                 </span>
 
                 <span>
@@ -198,9 +200,7 @@ function PageContent() {
           <div className="text-sm">
             {isProductInStock ? (<>
               <span className="text-success-content">Product is currently in stock!</span>
-              {product.stockAmount !== undefined && (
-                <span className="text-base-500/75">{product.stockAmount} remaining.</span>
-              )}
+              <span className="text-base-500/75">{product.stockAmount} remaining.</span>
             </>) : (
               <span className="text-error-content">Product is not in stock at the moment.</span>
             )}
@@ -432,7 +432,6 @@ function ProductCommentSection() {
       const data = await PreventLayoutFlash(
         GetProductComments(productId, paginationData?.lastIndex, paginationData?.lastDate)
       );
-      console.log(data)
 
       const comments = data.comments;
       if (comments && comments.length > 0) {
