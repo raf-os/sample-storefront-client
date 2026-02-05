@@ -440,6 +440,8 @@ function ProductCommentSection() {
           if (prev === null) return comments as any; // TODO: Type this correctly
           else return [...prev, ...comments];
         });
+      } else {
+        setLoadedComments([]);
       }
 
       if (data.hasCommented === true) setUserHasCommented(true);
