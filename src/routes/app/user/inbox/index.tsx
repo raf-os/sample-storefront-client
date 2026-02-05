@@ -230,17 +230,21 @@ function InboxComponent({
             </table>
           </>
         ) : (
-          <p>Inbox is empty</p>
+          <p className="text-base-500/75">
+            Your inbox is currently empty.
+          </p>
         )}
 
-        <div className="mt-4">
-          <PaginationComponent
-            currentOffset={search.offset}
-            totalPages={totalPages}
-          >
-            <PaginationComponent.Label />
-          </PaginationComponent>
-        </div>
+        {data.length > 0 && (
+          <div className="mt-4">
+            <PaginationComponent
+              currentOffset={search.offset}
+              totalPages={totalPages}
+            >
+              <PaginationComponent.Label />
+            </PaginationComponent>
+          </div>
+        )}
       </SectionCard>
     </>
   )

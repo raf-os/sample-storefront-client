@@ -183,7 +183,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/Comment/{id}": {
+    "/api/Comment/{Id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -209,10 +209,41 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "text/plain": components["schemas"]["FetchCommentsResponse"];
+                        "application/json": components["schemas"]["FetchCommentsResponse"];
+                        "text/json": components["schemas"]["FetchCommentsResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
                 };
             };
         };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/Comment/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
         put: {
             parameters: {
                 query?: never;
@@ -368,7 +399,7 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    Offset?: number;
+                    Offset?: number | string;
                     Source?: string;
                 };
                 header?: never;
@@ -606,9 +637,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": number;
-                        "application/json": number;
-                        "text/json": number;
+                        "text/plain": number | string;
+                        "application/json": number | string;
+                        "text/json": number | string;
                     };
                 };
                 /** @description Unauthorized */
@@ -642,8 +673,8 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    Category?: number;
-                    Offset?: number;
+                    Category?: number | string;
+                    Offset?: number | string;
                     UserId?: string;
                 };
                 header?: never;
@@ -697,9 +728,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["ProductDTO2"];
-                        "application/json": components["schemas"]["ProductDTO2"];
-                        "text/json": components["schemas"]["ProductDTO2"];
+                        "text/plain": components["schemas"]["ProductDTO"];
+                        "application/json": components["schemas"]["ProductDTO"];
+                        "text/json": components["schemas"]["ProductDTO"];
                     };
                 };
                 /** @description Not Found */
@@ -744,9 +775,9 @@ export interface paths {
                     "application/x-www-form-urlencoded": {
                         Name?: string;
                         /** Format: float */
-                        Price?: number;
+                        Price?: number | string;
                         Description?: string;
-                        Categories?: number[];
+                        Categories?: (number | string)[];
                         Files?: components["schemas"]["IFormFile"][];
                     };
                 };
@@ -1005,9 +1036,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["UserPublicDTO2"];
-                        "application/json": components["schemas"]["UserPublicDTO2"];
-                        "text/json": components["schemas"]["UserPublicDTO2"];
+                        "text/plain": components["schemas"]["UserPublicDTO"];
+                        "application/json": components["schemas"]["UserPublicDTO"];
+                        "text/json": components["schemas"]["UserPublicDTO"];
                     };
                 };
                 /** @description Not Found */
@@ -1286,7 +1317,7 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    offset?: number;
+                    offset?: number | string;
                     isPreview?: boolean;
                 };
                 header?: never;
@@ -1399,9 +1430,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": number;
-                        "application/json": number;
-                        "text/json": number;
+                        "text/plain": number | string;
+                        "application/json": number | string;
+                        "text/json": number | string;
                     };
                 };
                 /** @description Unauthorized */
@@ -1554,9 +1585,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["UserPublicDTO2"][];
-                        "application/json": components["schemas"]["UserPublicDTO2"][];
-                        "text/json": components["schemas"]["UserPublicDTO2"][];
+                        "text/plain": components["schemas"]["UserPublicDTO"][];
+                        "application/json": components["schemas"]["UserPublicDTO"][];
+                        "text/json": components["schemas"]["UserPublicDTO"][];
                     };
                 };
             };
@@ -1577,66 +1608,71 @@ export interface components {
             /** Format: uuid */
             productId: string;
             /** Format: int32 */
-            amount?: number;
+            amount?: number | string;
         };
         CartDataReturn: {
             items?: components["schemas"]["CartItemDTO"][];
             /** Format: float */
-            totalCost?: number;
+            totalCost?: number | string;
             /** Format: float */
-            discountedCost?: number;
+            discountedCost?: number | string;
         };
         CartItemDTO: {
             /** Format: uuid */
             id?: string;
             /** Format: uuid */
             userId?: string;
-            user?: components["schemas"]["UserDTO2"];
+            user?: null | components["schemas"]["UserDTO"];
             /** Format: uuid */
             productId?: string;
-            product?: components["schemas"]["ProductListItemDTO2"];
+            product?: null | components["schemas"]["ProductListItemDTO"];
             /** Format: int32 */
-            quantity?: number;
+            quantity?: number | string;
             /** Format: date-time */
             addedAt?: string;
         };
         CategoryDTO: {
             /** Format: int32 */
-            id?: number;
+            id?: number | string;
             name?: string;
         };
         ClearUserCartResult: {
             /** Format: int32 */
-            deletedItems?: number;
+            deletedItems?: number | string;
         };
         CommentDTO: {
             /** Format: uuid */
             id?: string;
             /** Format: date-time */
             postDate?: string;
-            content?: string | null;
+            content?: null | string;
             /** Format: float */
-            score?: number;
+            score?: number | string;
             /** Format: uuid */
-            productId?: string | null;
-            product?: components["schemas"]["ProductDTO"];
-            productName?: string | null;
+            productId?: null | string;
+            product?: null | components["schemas"]["ProductDTO"];
+            productName?: null | string;
             /** Format: uuid */
             userId?: string;
-            user?: components["schemas"]["UserPublicDTO"];
+            user?: null | components["schemas"]["UserPublicDTO"];
         };
         EntityTagHeaderValue: {
             tag?: components["schemas"]["StringSegment"];
             isWeak?: boolean;
-        } | null;
+        };
+        FetchCommentsResponse: {
+            comments?: components["schemas"]["CommentDTO"][];
+            hasCommented?: boolean;
+            isEndOfList?: boolean;
+        };
         FileContentResult: {
             /** Format: byte */
             fileContents?: string;
-            contentType?: string | null;
-            fileDownloadName?: string | null;
+            contentType?: null | string;
+            fileDownloadName?: null | string;
             /** Format: date-time */
-            lastModified?: string | null;
-            entityTag?: components["schemas"]["EntityTagHeaderValue"];
+            lastModified?: null | string;
+            entityTag?: null | components["schemas"]["EntityTagHeaderValue"];
             enableRangeProcessing?: boolean;
         };
         /** Format: binary */
@@ -1644,7 +1680,7 @@ export interface components {
         ItemsResult: {
             product?: components["schemas"]["ProductListItemDTO"];
             /** Format: int32 */
-            commentCount?: number;
+            commentCount?: number | string;
         };
         LoginRequest: {
             username: string;
@@ -1653,103 +1689,78 @@ export interface components {
         MailDTO: {
             /** Format: uuid */
             id?: string;
-            title?: string | null;
+            title?: null | string;
             content?: string;
             /** Format: date-time */
             sendDate?: string;
             isRead?: boolean;
             /** Format: uuid */
             senderId?: string;
-            sender?: components["schemas"]["UserPublicDTO"];
+            sender?: null | components["schemas"]["UserPublicDTO"];
             /** Format: uuid */
             recipientId?: string;
-            recipient?: components["schemas"]["UserPublicDTO"];
+            recipient?: null | components["schemas"]["UserPublicDTO"];
         };
         MailPreviewDTO: {
             /** Format: uuid */
             id?: string;
-            title?: string | null;
+            title?: null | string;
             /** Format: date-time */
             sendDate?: string;
             /** Format: uuid */
             senderId?: string;
             senderName?: string;
-            senderAvatarUrl?: string | null;
+            senderAvatarUrl?: null | string;
         };
         Operation: {
             value?: unknown;
             operationType?: components["schemas"]["OperationType"];
-            path?: string | null;
-            op?: string | null;
-            from?: string | null;
+            path?: null | string;
+            op?: null | string;
+            from?: null | string;
         };
         OperationType: number;
         PageFetchResult: {
             items?: components["schemas"]["ItemsResult"][];
             /** Format: int32 */
-            totalPages?: number;
+            totalPages?: number | string;
         };
         PostCommentRequest: {
             /** Format: float */
-            rating: number;
+            rating: number | string;
             content: string;
         };
         ProblemDetails: {
-            type?: string | null;
-            title?: string | null;
+            type?: null | string;
+            title?: null | string;
             /** Format: int32 */
-            status?: number | null;
-            detail?: string | null;
-            instance?: string | null;
+            status?: null | number | string;
+            detail?: null | string;
+            instance?: null | string;
         };
         ProductDTO: {
             /** Format: uuid */
             id?: string;
             /** Format: date-time */
             creationDate?: string;
-            name?: string;
+            name: string;
             /** Format: float */
-            price?: number;
+            price: number | string;
             /** Format: float */
-            discount?: number | null;
-            description?: string | null;
+            discount?: null | number | string;
+            description?: null | string;
             rating?: components["schemas"]["ProductRating"];
             tags?: string[];
             metadata?: components["schemas"]["ProductMetadata"];
-            isInCart?: boolean | null;
+            isInCart?: null | boolean;
             isInStock?: boolean;
             /** Format: int32 */
-            stockAmount?: number | null;
+            stockAmount?: null | number | string;
             imageIds?: string[];
             /** Format: uuid */
             userId?: string;
-            user?: components["schemas"]["UserPublicDTO"];
-            comments?: unknown[] | null;
-            categories?: components["schemas"]["CategoryDTO"][];
-        } | null;
-        ProductDTO2: {
-            /** Format: uuid */
-            id?: string;
-            /** Format: date-time */
-            creationDate?: string;
-            name?: string;
-            /** Format: float */
-            price?: number;
-            /** Format: float */
-            discount?: number | null;
-            description?: string | null;
-            rating?: unknown;
-            tags?: unknown;
-            metadata?: unknown;
-            isInCart?: boolean | null;
-            isInStock?: boolean;
-            /** Format: int32 */
-            stockAmount?: number | null;
-            imageIds?: unknown;
-            /** Format: uuid */
-            userId?: string;
-            user?: unknown;
-            comments?: unknown[] | null;
+            user?: null | components["schemas"]["UserPublicDTO"];
+            comments?: null | components["schemas"]["CommentDTO"][];
             categories?: components["schemas"]["CategoryDTO"][];
         };
         ProductListItemDTO: {
@@ -1759,40 +1770,24 @@ export interface components {
             creationDate?: string;
             name?: string;
             /** Format: float */
-            price?: number;
+            price?: number | string;
             /** Format: float */
-            discount?: number | null;
+            discount?: null | number | string;
             categories?: components["schemas"]["CategoryDTO"][];
             imageIds?: string[];
-            thumbnailUrl?: string | null;
-            isInCart?: boolean | null;
+            thumbnailUrl?: null | string;
+            isInCart?: null | boolean;
             isInStock?: boolean;
         };
-        ProductListItemDTO2: {
-            /** Format: uuid */
-            id?: string;
-            /** Format: date-time */
-            creationDate?: string;
-            name?: string;
-            /** Format: float */
-            price?: number;
-            /** Format: float */
-            discount?: number | null;
-            categories?: unknown[];
-            imageIds?: string[];
-            thumbnailUrl?: string | null;
-            isInCart?: boolean | null;
-            isInStock?: boolean;
-        } | null;
         ProductMetadata: {
             /** Format: int32 */
-            sales?: number;
+            sales?: number | string;
         };
         ProductRating: {
             /** Format: float */
-            value?: number | null;
+            value?: null | number | string;
             /** Format: int32 */
-            amount?: number;
+            amount?: number | string;
         };
         RegisterRequest: {
             username?: string;
@@ -1800,16 +1795,16 @@ export interface components {
             email?: string;
         };
         SendMailRequest: {
-            title?: string | null;
+            title?: null | string;
             content: string;
         };
         StringSegment: {
-            buffer?: string | null;
+            buffer?: null | string;
             /** Format: int32 */
-            offset?: number;
+            offset?: number | string;
             /** Format: int32 */
-            length?: number;
-            value?: string | null;
+            length?: number | string;
+            value?: null | string;
             hasValue?: boolean;
         };
         User: {
@@ -1832,7 +1827,7 @@ export interface components {
             /** Format: uuid */
             userId?: string;
             user?: components["schemas"]["User"];
-        } | null;
+        };
         UserDTO: {
             /** Format: uuid */
             id?: string;
@@ -1843,26 +1838,11 @@ export interface components {
             signupDate?: string;
             isVerified?: boolean;
             /** Format: int32 */
-            cartItemAmount?: number;
-            comments?: components["schemas"]["CommentDTO"][] | null;
-            products?: unknown[] | null;
-            avatar?: components["schemas"]["UserAvatar"];
+            cartItemAmount?: number | string;
+            comments?: null | components["schemas"]["CommentDTO"][];
+            products?: null | components["schemas"]["ProductDTO"][];
+            avatar?: null | components["schemas"]["UserAvatar"];
         };
-        UserDTO2: {
-            /** Format: uuid */
-            id?: string;
-            name?: string;
-            email?: string;
-            role?: components["schemas"]["UserRole"];
-            /** Format: date-time */
-            signupDate?: string;
-            isVerified?: boolean;
-            /** Format: int32 */
-            cartItemAmount?: number;
-            comments?: components["schemas"]["CommentDTO"][] | null;
-            products?: unknown[] | null;
-            avatar?: components["schemas"]["UserAvatar"];
-        } | null;
         UserPublicDTO: {
             /** Format: uuid */
             id?: string;
@@ -1870,27 +1850,16 @@ export interface components {
             role?: components["schemas"]["UserRole"];
             /** Format: date-time */
             signupDate?: string;
-            comments?: components["schemas"]["CommentDTO"][] | null;
-            products?: components["schemas"]["ProductDTO2"][] | null;
-            avatarUrl?: string | null;
-        } | null;
-        UserPublicDTO2: {
-            /** Format: uuid */
-            id?: string;
-            name?: string;
-            role?: components["schemas"]["UserRole"];
-            /** Format: date-time */
-            signupDate?: string;
-            comments?: components["schemas"]["CommentDTO"][] | null;
-            products?: components["schemas"]["ProductDTO2"][] | null;
-            avatarUrl?: string | null;
+            comments?: null | components["schemas"]["CommentDTO"][];
+            products?: null | components["schemas"]["ProductDTO"][];
+            avatarUrl?: null | string;
         };
         UserRole: number;
         UserUpdateSchemaRequest: {
             password: string;
-            newPassword?: string | null;
-            newPasswordConfirm?: string | null;
-            email?: string | null;
+            newPassword?: null | string;
+            newPasswordConfirm?: null | string;
+            email?: null | string;
         };
     };
     responses: never;

@@ -178,6 +178,8 @@ export function UserMailControls() {
       return await GetUserInboxSize({ unreadOnly: true });
     },
     enabled: () => { return token !== undefined && token !== null },
+    refetchInterval: 1000 * 60,
+
   }, queryClient);
 
   return (

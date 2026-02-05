@@ -117,9 +117,10 @@ function NavbarInboxItem({
   data: TInboxItemPreview,
   popoverCloseFn: () => void,
 }) {
+  const mailId = data.id;
   const mailTitle = data.title ?? "Untitled";
   const mailSender = data.senderName;
-  const mailSenderId = data.senderId;
+  // const mailSenderId = data.senderId;
   const mailSenderAvatarUrl = data.senderAvatarUrl;
 
   return (
@@ -135,17 +136,22 @@ function NavbarInboxItem({
         />
       </div>
 
-      <div className={cn(
-        "flex px-2 py-1 items-center gap-2 grow-1 shrink-1 bg-base-100 rounded-box shadow-xs overflow-hidden",
-        "group-hover:bg-primary-500 group-focus:bg-primary-500"
-      )}>
+      <Link
+        to="/app/user/inbox/$messageId"
+        params={{ messageId: mailId }}
+        className={cn(
+          "flex px-2 py-1 items-center gap-2 grow-1 shrink-1 bg-base-100 rounded-box shadow-xs overflow-hidden",
+          "group-hover:bg-primary-500 group-focus:bg-primary-500"
+        )}
+        onClick={() => popoverCloseFn()}
+      >
         <h1 className="grow-0 shrink-0 w-32 text-sm font-bold select-none truncate border-r border-r-base-500/30 pr-1">
           {mailSender}
         </h1>
         <h2 className="italic grow-1 shrink-1 truncate text-base-500/75">
           "{mailTitle}"
         </h2>
-      </div>
+      </Link>
     </div>
   )
 }

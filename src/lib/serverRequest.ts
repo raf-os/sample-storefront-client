@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 import GlobalConfig from "@/lib/globalConfig";
-import type { HttpMethod, PathsWithMethod, SuccessResponseJSON, ErrorResponseJSON, RequiredKeysOf } from "openapi-typescript-helpers";
+import type { HttpMethod, PathsWithMethod, ResponseObjectMap, MediaType, OkStatus, SuccessResponse, SuccessResponseJSON, ErrorResponseJSON, RequiredKeysOf, GetResponseContent } from "openapi-typescript-helpers";
 import type { paths } from "@/api/schema";
 import { QueryClient, QueryObserver } from "@tanstack/react-query";
 
@@ -172,7 +172,7 @@ export async function serverRequest<
   path: Path,
   options?: TServerRequestOptions<Method, Path>,
   metadata?: IRequestMetadata
-): Promise<SuccessResponseJSON<paths[Path][Method] & Record<string | number, any>>> {
+): Promise<Required<SuccessResponseJSON<Exclude<paths[Path][Method], undefined>>>> {
   const baseUrl = GlobalConfig.ServerAddr;
 
   let url = replacePath(String(path), options?.path as any);
