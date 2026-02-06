@@ -57,27 +57,6 @@ export async function AddProductAction(request: z.input<typeof NewProductSchema>
 export async function GetProductById(id: string) {
   const data = await serverCachedRequest("get", "/api/Product/item/{id}", { path: { id } }, { useAuth: true });
   return data;
-  // try {
-  //   await TokenRefreshHandler.validateToken();
-  //   const token = AuthSingleton.getJwtToken();
-  //
-  //   const res = await fetch(GlobalConfig.ServerProductEndpoint + `/item/${id}`, {
-  //     headers: token ? { 'Authorization': `Bearer ${token}` } : undefined
-  //   });
-  //
-  //   if (!res.ok) {
-  //     return new RESPONSES.NotFound();
-  //   }
-  //
-  //   const data = await requestToJson<paths['/api/Product/item/{id}']['get']['responses']['200']['content']['application/json']>(res);
-  //
-  //   if (!data) return new RESPONSES.NotFound();
-  //
-  //   return new RESPONSES.Ok<typeof data>({ data });
-  // } catch (err) {
-  //   console.error(err);
-  //   return new RESPONSES.ServerFetchError();
-  // }
 }
 
 export type TProductListPageResponse = paths['/api/Product/page']['get']['responses']['200']['content']['application/json'];

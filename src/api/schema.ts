@@ -55,7 +55,6 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json-patch+json": components["schemas"]["LoginRequest"];
                     "application/json": components["schemas"]["LoginRequest"];
                     "text/json": components["schemas"]["LoginRequest"];
                     "application/*+json": components["schemas"]["LoginRequest"];
@@ -128,7 +127,6 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json-patch+json": components["schemas"]["RegisterRequest"];
                     "application/json": components["schemas"]["RegisterRequest"];
                     "text/json": components["schemas"]["RegisterRequest"];
                     "application/*+json": components["schemas"]["RegisterRequest"];
@@ -255,7 +253,6 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json-patch+json": components["schemas"]["PostCommentRequest"];
                     "application/json": components["schemas"]["PostCommentRequest"];
                     "text/json": components["schemas"]["PostCommentRequest"];
                     "application/*+json": components["schemas"]["PostCommentRequest"];
@@ -399,7 +396,7 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    Offset?: number | string;
+                    Offset?: number;
                     Source?: string;
                 };
                 header?: never;
@@ -569,7 +566,6 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json-patch+json": components["schemas"]["SendMailRequest"];
                     "application/json": components["schemas"]["SendMailRequest"];
                     "text/json": components["schemas"]["SendMailRequest"];
                     "application/*+json": components["schemas"]["SendMailRequest"];
@@ -637,9 +633,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": number | string;
-                        "application/json": number | string;
-                        "text/json": number | string;
+                        "text/plain": number;
+                        "application/json": number;
+                        "text/json": number;
                     };
                 };
                 /** @description Unauthorized */
@@ -673,8 +669,8 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    Category?: number | string;
-                    Offset?: number | string;
+                    Category?: number;
+                    Offset?: number;
                     UserId?: string;
                 };
                 header?: never;
@@ -775,9 +771,9 @@ export interface paths {
                     "application/x-www-form-urlencoded": {
                         Name?: string;
                         /** Format: float */
-                        Price?: number | string;
+                        Price?: number;
                         Description?: string;
-                        Categories?: (number | string)[];
+                        Categories?: number[];
                         Files?: components["schemas"]["IFormFile"][];
                     };
                 };
@@ -857,10 +853,9 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json-patch+json": components["schemas"]["Operation"][];
-                    "application/json": components["schemas"]["Operation"][];
-                    "text/json": components["schemas"]["Operation"][];
-                    "application/*+json": components["schemas"]["Operation"][];
+                    "application/json": components["schemas"]["JsonPatchDocumentOfProductPatchDTO"];
+                    "text/json": components["schemas"]["JsonPatchDocumentOfProductPatchDTO"];
+                    "application/*+json": components["schemas"]["JsonPatchDocumentOfProductPatchDTO"];
                 };
             };
             responses: {
@@ -1174,7 +1169,6 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json-patch+json": components["schemas"]["UserUpdateSchemaRequest"];
                     "application/json": components["schemas"]["UserUpdateSchemaRequest"];
                     "text/json": components["schemas"]["UserUpdateSchemaRequest"];
                     "application/*+json": components["schemas"]["UserUpdateSchemaRequest"];
@@ -1317,7 +1311,7 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    offset?: number | string;
+                    offset?: number;
                     isPreview?: boolean;
                 };
                 header?: never;
@@ -1359,7 +1353,6 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json-patch+json": components["schemas"]["AddProductToCartRequest"];
                     "application/json": components["schemas"]["AddProductToCartRequest"];
                     "text/json": components["schemas"]["AddProductToCartRequest"];
                     "application/*+json": components["schemas"]["AddProductToCartRequest"];
@@ -1430,9 +1423,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": number | string;
-                        "application/json": number | string;
-                        "text/json": number | string;
+                        "text/plain": number;
+                        "application/json": number;
+                        "text/json": number;
                     };
                 };
                 /** @description Unauthorized */
@@ -1608,14 +1601,14 @@ export interface components {
             /** Format: uuid */
             productId: string;
             /** Format: int32 */
-            amount?: number | string;
+            amount?: number;
         };
         CartDataReturn: {
             items?: components["schemas"]["CartItemDTO"][];
             /** Format: float */
-            totalCost?: number | string;
+            totalCost?: number;
             /** Format: float */
-            discountedCost?: number | string;
+            discountedCost?: number;
         };
         CartItemDTO: {
             /** Format: uuid */
@@ -1627,18 +1620,18 @@ export interface components {
             productId?: string;
             product?: null | components["schemas"]["ProductListItemDTO"];
             /** Format: int32 */
-            quantity?: number | string;
+            quantity?: number;
             /** Format: date-time */
             addedAt?: string;
         };
         CategoryDTO: {
             /** Format: int32 */
-            id?: number | string;
+            id?: number;
             name?: string;
         };
         ClearUserCartResult: {
             /** Format: int32 */
-            deletedItems?: number | string;
+            deletedItems?: number;
         };
         CommentDTO: {
             /** Format: uuid */
@@ -1647,7 +1640,7 @@ export interface components {
             postDate?: string;
             content?: null | string;
             /** Format: float */
-            score?: number | string;
+            score?: number;
             /** Format: uuid */
             productId?: null | string;
             product?: null | components["schemas"]["ProductDTO"];
@@ -1680,8 +1673,9 @@ export interface components {
         ItemsResult: {
             product?: components["schemas"]["ProductListItemDTO"];
             /** Format: int32 */
-            commentCount?: number | string;
+            commentCount?: number;
         };
+        JsonPatchDocumentOfProductPatchDTO: unknown;
         LoginRequest: {
             username: string;
             password: string;
@@ -1712,42 +1706,34 @@ export interface components {
             senderName?: string;
             senderAvatarUrl?: null | string;
         };
-        Operation: {
-            value?: unknown;
-            operationType?: components["schemas"]["OperationType"];
-            path?: null | string;
-            op?: null | string;
-            from?: null | string;
-        };
-        OperationType: number;
         PageFetchResult: {
             items?: components["schemas"]["ItemsResult"][];
             /** Format: int32 */
-            totalPages?: number | string;
+            totalPages?: number;
         };
         PostCommentRequest: {
             /** Format: float */
-            rating: number | string;
+            rating: number;
             content: string;
         };
         ProblemDetails: {
             type?: null | string;
             title?: null | string;
             /** Format: int32 */
-            status?: null | number | string;
+            status?: null | number;
             detail?: null | string;
             instance?: null | string;
         };
         ProductDTO: {
             /** Format: uuid */
-            id?: string;
+            id: string;
             /** Format: date-time */
-            creationDate?: string;
+            creationDate: string;
             name: string;
             /** Format: float */
-            price: number | string;
+            price: number;
             /** Format: float */
-            discount?: null | number | string;
+            discount?: null | number;
             description?: null | string;
             rating?: components["schemas"]["ProductRating"];
             tags?: string[];
@@ -1755,7 +1741,7 @@ export interface components {
             isInCart?: null | boolean;
             isInStock?: boolean;
             /** Format: int32 */
-            stockAmount?: null | number | string;
+            stockAmount?: null | number;
             imageIds?: string[];
             /** Format: uuid */
             userId?: string;
@@ -1770,9 +1756,9 @@ export interface components {
             creationDate?: string;
             name?: string;
             /** Format: float */
-            price?: number | string;
+            price?: number;
             /** Format: float */
-            discount?: null | number | string;
+            discount?: null | number;
             categories?: components["schemas"]["CategoryDTO"][];
             imageIds?: string[];
             thumbnailUrl?: null | string;
@@ -1781,13 +1767,13 @@ export interface components {
         };
         ProductMetadata: {
             /** Format: int32 */
-            sales?: number | string;
+            sales?: number;
         };
         ProductRating: {
             /** Format: float */
-            value?: null | number | string;
+            value?: null | number;
             /** Format: int32 */
-            amount?: number | string;
+            amount?: number;
         };
         RegisterRequest: {
             username?: string;
@@ -1801,9 +1787,9 @@ export interface components {
         StringSegment: {
             buffer?: null | string;
             /** Format: int32 */
-            offset?: number | string;
+            offset?: number;
             /** Format: int32 */
-            length?: number | string;
+            length?: number;
             value?: null | string;
             hasValue?: boolean;
         };
@@ -1838,7 +1824,7 @@ export interface components {
             signupDate?: string;
             isVerified?: boolean;
             /** Format: int32 */
-            cartItemAmount?: number | string;
+            cartItemAmount?: number;
             comments?: null | components["schemas"]["CommentDTO"][];
             products?: null | components["schemas"]["ProductDTO"][];
             avatar?: null | components["schemas"]["UserAvatar"];
